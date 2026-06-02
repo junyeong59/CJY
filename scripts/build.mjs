@@ -9,7 +9,6 @@ const dist = path.join(root, "dist");
 await rm(dist, { force: true, recursive: true });
 await mkdir(dist, { recursive: true });
 await copyFile(path.join(root, "index.html"), path.join(dist, "index.html"));
-await copyFile(path.join(root, "index.html"), path.join(dist, "404.html"));
 await cp(path.join(root, "src"), path.join(dist, "src"), { recursive: true });
 await cp(path.join(root, "component"), path.join(dist, "component"), { recursive: true });
 await cp(path.join(root, "public"), dist, { recursive: true });
