@@ -209,7 +209,7 @@ function renderMusicNow() {
   return `
     <main class="site-shell">
       <section class="screen list-screen musicnow-screen" aria-labelledby="musicnow-title">
-        <header class="page-header page-header--left">
+        <header class="page-header">
           ${renderMusicNowLogo("musicnow-title", "musicnow-logo--large")}
         </header>
         <div class="list-menu" role="list">
