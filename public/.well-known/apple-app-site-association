@@ -1,9 +1,17 @@
 {
   "applinks": {
     "apps": [],
-    "details": []
-  },
-  "webcredentials": {
-    "apps": []
+    "details": [
+      {
+        "appIDs": [
+          "6JPR99HK4K.com.musicnow.app"
+        ],
+        "components": [
+          {
+            "/": "/musicnow/join/*"
+          }
+        ]
+      }
+    ]
   }
 }
