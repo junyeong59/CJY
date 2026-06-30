@@ -114,6 +114,33 @@ const legalPages = {
   }
 };
 
+const inviteCopies = {
+  ko: {
+    htmlLang: "ko",
+    title: "그룹 초대가 도착했어요",
+    description: "Music Now에서 함께 들을 친구들을 만나보세요.",
+    metaDescription: "Music Now 그룹 코드",
+    eyebrow: "Group Invite",
+    codeLabel: "그룹 코드",
+    copyIdle: "탭해서 복사",
+    copyDone: "복사 완료",
+    copyLabel: "그룹 코드 복사",
+    copiedLabel: "그룹 코드 복사 완료"
+  },
+  en: {
+    htmlLang: "en",
+    title: "You're invited to a group",
+    description: "Join your friends on Music Now.",
+    metaDescription: "Music Now group code",
+    eyebrow: "Group Invite",
+    codeLabel: "Group code",
+    copyIdle: "Tap to copy",
+    copyDone: "Copied",
+    copyLabel: "Copy group code",
+    copiedLabel: "Copied group code"
+  }
+};
+
 function normalizePath(pathname) {
   if (!pathname || pathname === "/") return "/";
   return pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
@@ -125,10 +152,13 @@ function getCurrentRoute() {
 
   if (inviteMatch) {
     const code = safeDecode(inviteMatch[1]).trim() || "MN-ABC123";
+    const locale = getInviteLocale();
+    const copy = inviteCopies[locale];
     return {
       title: `Music Now Invite | ${code}`,
-      description: `Music Now 그룹 코드 ${code}`,
-      render: () => renderInvitePage(code)
+      description: `${copy.metaDescription} ${code}`,
+      lang: copy.htmlLang,
+      render: () => renderInvitePage(code, locale)
     };
   }
 
@@ -142,6 +172,7 @@ function getCurrentRoute() {
 function renderApp() {
   const route = getCurrentRoute();
   document.title = route.title;
+  document.documentElement.lang = route.lang || "ko";
   updateMeta("description", route.description);
   updateMeta("og:title", route.title, "property");
   updateMeta("og:description", route.description, "property");
@@ -291,25 +322,26 @@ function renderSupportPage() {
   `;
 }
 
-function renderInvitePage(rawCode) {
+function renderInvitePage(rawCode, locale = "ko") {
   const code = sanitizeInviteCode(rawCode);
+  const copy = inviteCopies[locale] || inviteCopies.ko;
 
   return `
     <main class="site-shell">
       <section class="screen invite-screen" aria-labelledby="invite-title">
         ${renderMusicNowLogo("invite-logo", "musicnow-logo--invite")}
         <div class="invite-copy">
-          <p class="invite-eyebrow">Group Invite</p>
-          <h1 id="invite-title" class="invite-title">그룹 초대가 도착했어요</h1>
-          <p class="invite-description">Music Now에서 함께 들을 친구들을 만나보세요.</p>
+          <p class="invite-eyebrow">${escapeHtml(copy.eyebrow)}</p>
+          <h1 id="invite-title" class="invite-title">${escapeHtml(copy.title)}</h1>
+          <p class="invite-description">${escapeHtml(copy.description)}</p>
         </div>
-        <button class="invite-code-card" type="button" data-copy="${escapeHtml(code)}" data-copy-label="Copy group code ${escapeHtml(code)}" data-copied-label="Copied group code" aria-label="Copy group code ${escapeHtml(code)}">
-          <span class="invite-code-label">그룹 코드</span>
+        <button class="invite-code-card" type="button" data-copy="${escapeHtml(code)}" data-copy-label="${escapeHtml(copy.copyLabel)} ${escapeHtml(code)}" data-copied-label="${escapeHtml(copy.copiedLabel)}" aria-label="${escapeHtml(copy.copyLabel)} ${escapeHtml(code)}">
+          <span class="invite-code-label">${escapeHtml(copy.codeLabel)}</span>
           <span class="invite-code-row">
             <span class="invite-code">${escapeHtml(code)}</span>
             <img class="copy-icon" src="/component/Copy.svg" alt="" aria-hidden="true" />
           </span>
-          <span class="invite-copy-state" aria-hidden="true">탭해서 복사</span>
+          <span class="invite-copy-state" data-copied-text="${escapeHtml(copy.copyDone)}" aria-hidden="true">${escapeHtml(copy.copyIdle)}</span>
         </button>
         <a class="app-store-button" href="${SITE_CONFIG.appStoreUrl}" aria-label="Download Music Now on the App Store">
           <span>Download on the</span>
@@ -408,6 +440,22 @@ function sanitizeInviteCode(value) {
     .toUpperCase()
     .replace(/[^A-Z0-9-]/g, "")
     .slice(0, 24) || "MN-ABC123";
+}
+
+function getInviteLocale() {
+  const params = new URLSearchParams(window.location.search);
+  const queryLocale = normalizeInviteLocale(params.get("lang"));
+  if (queryLocale) return queryLocale;
+
+  const browserLocale = normalizeInviteLocale(navigator.language);
+  return browserLocale || "en";
+}
+
+function normalizeInviteLocale(value) {
+  const locale = String(value || "").trim().toLowerCase();
+  if (locale === "ko" || locale.startsWith("ko-")) return "ko";
+  if (locale === "en" || locale.startsWith("en-")) return "en";
+  return "";
 }
 
 function safeDecode(value) {

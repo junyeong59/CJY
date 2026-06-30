@@ -537,7 +537,7 @@ button {
 }
 
 .invite-code-card.is-copied .invite-copy-state::before {
-  content: "복사 완료";
+  content: attr(data-copied-text);
 }
 
 .invite-code-card.is-copied .invite-copy-state {
