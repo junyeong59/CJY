@@ -298,23 +298,19 @@ function renderInvitePage(rawCode) {
     <main class="site-shell">
       <section class="screen invite-screen" aria-labelledby="invite-title">
         ${renderMusicNowLogo("invite-logo", "musicnow-logo--invite")}
-        <h1 id="invite-title" class="invite-title">
-          <span class="invite-title__text">친구가 당신을 초대했어요!</span>
-          <span class="fireworks" aria-hidden="true">
-            <span class="firework firework--one"></span>
-            <span class="firework firework--two"></span>
-            <span class="firework firework--three"></span>
-          </span>
-        </h1>
+        <div class="invite-copy">
+          <p class="invite-eyebrow">Group Invite</p>
+          <h1 id="invite-title" class="invite-title">그룹 초대가 도착했어요</h1>
+          <p class="invite-description">Music Now에서 함께 들을 친구들을 만나보세요.</p>
+        </div>
         <button class="invite-code-card" type="button" data-copy="${escapeHtml(code)}" data-copy-label="Copy group code ${escapeHtml(code)}" data-copied-label="Copied group code" aria-label="Copy group code ${escapeHtml(code)}">
-          <span class="invite-code">${escapeHtml(code)}</span>
-          <img class="copy-icon" src="/component/Copy.svg" alt="" aria-hidden="true" />
+          <span class="invite-code-label">그룹 코드</span>
+          <span class="invite-code-row">
+            <span class="invite-code">${escapeHtml(code)}</span>
+            <img class="copy-icon" src="/component/Copy.svg" alt="" aria-hidden="true" />
+          </span>
+          <span class="invite-copy-state" aria-hidden="true">탭해서 복사</span>
         </button>
-        <p class="invite-instruction">
-          <span class="tone-red">앱을 설치한 뒤</span>
-          <span class="tone-yellow">그룹 코드를 입력해</span>
-          <span class="tone-blue">참여하세요</span>
-        </p>
         <a class="app-store-button" href="${SITE_CONFIG.appStoreUrl}" aria-label="Download Music Now on the App Store">
           <span>Download on the</span>
           <strong>App Store</strong>
