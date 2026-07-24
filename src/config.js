@@ -6,5 +6,5 @@ export const SITE_CONFIG = {
   instagramUrl: "https://www.instagram.com/cjy.app/",
   appStoreUrl: "https://apps.apple.com/app/id0000000000",
   musicNowName: "Music Now",
-  lastUpdated: "2026-07-24"
+  lastUpdated: "2026-07-25"
 };

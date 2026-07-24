@@ -26,21 +26,21 @@ const pages = {
   "/musicnow/privacy": {
     title: "Privacy | Music Now",
     description: "Music Now privacy policy.",
-    render: () => renderLegalPage(legalPages.privacy)
+    render: (locale) => renderLegalPage(getLegalPages(locale).privacy, locale)
   },
   "/musicnow/terms": {
     title: "Terms | Music Now",
     description: "Music Now terms of service.",
-    render: () => renderLegalPage(legalPages.terms)
+    render: (locale) => renderLegalPage(getLegalPages(locale).terms, locale)
   },
   "/musicnow/support": {
     title: "Support | Music Now",
     description: "Music Now support.",
-    render: () => renderSupportPage()
+    render: (locale) => renderSupportPage(locale)
   }
 };
 
-const legalPages = {
+const legalPagesKo = {
   privacy: {
     title: "Privacy",
     sections: [
@@ -190,6 +190,173 @@ const legalPages = {
   }
 };
 
+const legalPagesEn = {
+  privacy: {
+    title: "Privacy",
+    sections: [
+      {
+        heading: "Privacy Policy",
+        body: [
+          `${SITE_CONFIG.developerName} (“we,” “us,” or the “Operator”) respects the privacy of users of ${SITE_CONFIG.musicNowName} (the “Service”) and complies with applicable privacy laws. This policy explains what information we process and why.`,
+          `Effective date: ${SITE_CONFIG.lastUpdated}`
+        ]
+      },
+      {
+        heading: "Information We Process and How We Collect It",
+        body: [
+          "When you use the Service, group codes and invitation-link information may be processed. Diagnostic information, such as your device model, operating system and app version, error timestamps, and crash logs, may also be generated to help maintain app stability.",
+          "If you contact us by email, we process the email address, message, and attachments you choose to provide. Please do not include personal or sensitive information that is not necessary for your request.",
+          "We collect this information when you provide it directly, use app features, or send an email to customer support."
+        ]
+      },
+      {
+        heading: "Purposes of Processing",
+        body: [
+          "We use information to provide group invitations and participation features, diagnose errors and improve quality, protect the Service from abuse and security threats, respond to support requests, and protect users. We do not use information for purposes incompatible with those described in this policy."
+        ]
+      },
+      {
+        heading: "Retention and Deletion",
+        body: [
+          "Information used to provide Service features is retained only for as long as necessary to provide those features. Customer support inquiries and responses may be retained for up to three years after the inquiry is closed, unless a different retention period is required by law.",
+          "When the purpose of processing has been fulfilled or a valid deletion request is confirmed, we delete the information without undue delay using methods designed to prevent recovery. Electronic files are securely deleted, and paper records, if any, are shredded."
+        ]
+      },
+      {
+        heading: "Third-Party Disclosure and Service Providers",
+        body: [
+          "We do not sell personal information. We do not disclose personal information to third parties unless you consent or disclosure is permitted or required by law.",
+          "Service providers supporting hosting, email, error analysis, or similar infrastructure may process information only as necessary to perform their services. We take reasonable steps to require appropriate safeguards and will update this policy if there is a material change to our providers or processing practices."
+        ]
+      },
+      {
+        heading: "Your Rights",
+        body: [
+          `You may request access to, correction or deletion of, or restriction of processing of your personal information, or withdraw consent where applicable. Email ${SITE_CONFIG.supportEmail} with your request and the minimum information necessary to verify your identity.`,
+          "We will respond without undue delay as required by applicable law. A request may be limited where necessary to protect another person's rights or comply with a legal obligation, in which case we will explain the reason."
+        ]
+      },
+      {
+        heading: "Security",
+        body: [
+          "We limit access to personal information and apply reasonable technical and organizational safeguards during transmission and storage. However, no method of transmission or storage can guarantee absolute security."
+        ]
+      },
+      {
+        heading: "Children's Privacy",
+        body: [
+          "The Service is not directed to children under 14, and we do not knowingly collect personal information from children under 14. If we learn that such information has been collected, we will verify the circumstances and delete it without undue delay."
+        ]
+      },
+      {
+        heading: "Changes to This Policy",
+        body: [
+          "We may update this policy to reflect changes in law, the Service, or our processing practices. We will provide notice of material changes through the Service or this page before they take effect and will update the date shown above."
+        ]
+      },
+      {
+        heading: "Privacy Contact",
+        body: [
+          `For privacy questions or to exercise your rights, contact the ${SITE_CONFIG.developerName} privacy representative at ${SITE_CONFIG.supportEmail}.`
+        ]
+      }
+    ]
+  },
+  terms: {
+    title: "Terms",
+    sections: [
+      {
+        heading: "Terms of Service",
+        body: [
+          `These Terms govern your use of ${SITE_CONFIG.musicNowName} (the “Service”), provided by ${SITE_CONFIG.developerName} (the “Operator”). By installing or using the Service, you agree to these Terms and the Privacy Policy.`,
+          `Effective date: ${SITE_CONFIG.lastUpdated}`
+        ]
+      },
+      {
+        heading: "The Service",
+        body: [
+          "The Service provides features for sharing music preferences and joining groups through invitation links and group codes. Some features may require an internet connection, a compatible device, or access to a third-party platform."
+        ]
+      },
+      {
+        heading: "User Responsibilities and Prohibited Conduct",
+        body: [
+          "You are responsible for preventing unauthorized use of your device and invitation codes. Share invitation codes only with people you intend to allow into a group.",
+          "You must not infringe another person's rights or privacy; use the Service for unlawful, fraudulent, or harassing purposes; interfere with or bypass Service or security features; transmit malicious code; copy, modify, or reverse engineer the Service without authorization; or access the Service through automated means in a manner that creates an excessive burden."
+        ]
+      },
+      {
+        heading: "Suspension and Termination",
+        body: [
+          "We may restrict or suspend access where a user violates these Terms or applicable law, or creates a risk to the Service or other users. Except in urgent cases, we will provide the reason and a way to raise an objection where reasonably possible.",
+          `You may stop using the Service at any time by deleting the app. For additional action, including a personal information deletion request, contact ${SITE_CONFIG.supportEmail}.`
+        ]
+      },
+      {
+        heading: "Changes to the Service",
+        body: [
+          "We may change features or availability to improve the Service, maintain security, or respond to changes in law or third-party platform policies. We will give reasonable advance notice through the Service or this page of changes or discontinuation that materially affect users."
+        ]
+      },
+      {
+        heading: "Intellectual Property",
+        body: [
+          "The Service software, design, trademarks, and content supplied by the Operator are owned by the Operator or their respective rights holders. These Terms grant you only a limited right to use the Service for personal, non-commercial purposes.",
+          "You retain ownership of content you provide to the Service. You represent that you have the rights necessary to allow us to process that content to provide the Service."
+        ]
+      },
+      {
+        heading: "Third-Party Services",
+        body: [
+          "If the Service connects to third-party music, links, or platforms, those services may be governed by their own terms and privacy policies. We do not control the operation or content of third-party services."
+        ]
+      },
+      {
+        heading: "Disclaimers and Limitation of Liability",
+        body: [
+          "We take reasonable steps to keep the Service stable and secure. To the extent permitted by law, however, we do not guarantee uninterrupted or error-free operation or compatibility with every device or third-party service.",
+          "Nothing in these Terms limits liability that cannot lawfully be limited, including liability arising from our intentional misconduct or gross negligence. To the extent permitted by law, our liability is limited for loss caused by a user's actions, a device or network, or a third-party service outside our reasonable control."
+        ]
+      },
+      {
+        heading: "Governing Law and Disputes",
+        body: [
+          "These Terms are governed by the laws of the Republic of Korea. The parties will first attempt to resolve disputes through good-faith discussion. Unresolved disputes will be submitted to a court with jurisdiction under applicable law."
+        ]
+      },
+      {
+        heading: "Changes to These Terms",
+        body: [
+          "We may update these Terms to reflect changes in law or the Service. We will notify users through the Service or this page before a material change that adversely affects users takes effect. Continued use after an update constitutes acceptance of the revised Terms."
+        ]
+      },
+      {
+        heading: "Contact",
+        body: [
+          `For questions about the Service or these Terms, contact ${SITE_CONFIG.supportEmail}.`
+        ]
+      }
+    ]
+  }
+};
+
+const supportCopies = {
+  ko: {
+    updated: "최종 업데이트",
+    heading: "Music Now 지원",
+    intro: "앱 사용 중 문제가 있거나 초대 링크, 그룹 코드, 개인정보 및 이용약관 관련 도움이 필요하면 아래 이메일로 문의해 주세요.",
+    detailsHeading: "문의 시 포함하면 좋은 내용",
+    details: "사용 중인 기기, iOS 버전, 앱 버전, 발생한 화면, 가능하다면 그룹 코드를 함께 알려주시면 더 빠르게 확인할 수 있습니다."
+  },
+  en: {
+    updated: "Last updated",
+    heading: "Music Now Support",
+    intro: "If you need help with the app, invitation links, group codes, privacy, or the Terms of Service, contact us at the email address below.",
+    detailsHeading: "Helpful details to include",
+    details: "Please include your device model, iOS version, app version, the screen where the issue occurred, and, if possible, the group code so we can investigate more quickly."
+  }
+};
+
 const inviteCopies = {
   ko: {
     htmlLang: "ko",
@@ -228,7 +395,7 @@ function getCurrentRoute() {
 
   if (inviteMatch) {
     const code = safeDecode(inviteMatch[1]).trim() || "MN-ABC123";
-    const locale = getInviteLocale();
+    const locale = getPreferredLocale();
     const copy = inviteCopies[locale];
     return {
       title: `Music Now Invite | ${code}`,
@@ -238,7 +405,17 @@ function getCurrentRoute() {
     };
   }
 
-  return pages[pathname] ?? {
+  const page = pages[pathname];
+  if (page && ["/musicnow/privacy", "/musicnow/terms", "/musicnow/support"].includes(pathname)) {
+    const locale = getPreferredLocale();
+    return {
+      ...page,
+      lang: locale,
+      render: () => page.render(locale)
+    };
+  }
+
+  return page ?? {
     title: "Not Found | CJY",
     description: "The requested page could not be found.",
     render: renderNotFound
@@ -350,13 +527,14 @@ function renderHeader(title, id) {
   `;
 }
 
-function renderLegalPage(page) {
+function renderLegalPage(page, locale = "ko") {
+  const updatedLabel = locale === "ko" ? "최종 업데이트" : "Last updated";
   return `
     <main class="site-shell">
       <article class="screen legal-screen" aria-labelledby="${slugify(page.title)}-title">
         ${renderHeader(page.title, `${slugify(page.title)}-title`)}
         <div class="legal-content">
-          <p class="updated">Last updated ${SITE_CONFIG.lastUpdated}</p>
+          <p class="updated">${updatedLabel} ${SITE_CONFIG.lastUpdated}</p>
           ${page.sections.map(renderLegalSection).join("")}
         </div>
       </article>
@@ -373,24 +551,25 @@ function renderLegalSection(section) {
   `;
 }
 
-function renderSupportPage() {
+function renderSupportPage(locale = "ko") {
+  const copy = supportCopies[locale] || supportCopies.en;
   return `
     <main class="site-shell">
       <article class="screen legal-screen support-screen" aria-labelledby="support-title">
         ${renderHeader("Support", "support-title")}
         <div class="legal-content">
-          <p class="updated">Last updated ${SITE_CONFIG.lastUpdated}</p>
+          <p class="updated">${escapeHtml(copy.updated)} ${SITE_CONFIG.lastUpdated}</p>
           <section class="policy-section">
-            <h2>Music Now 지원</h2>
-            <p>앱 사용 중 문제가 있거나 초대 링크, 그룹 코드, 개인정보 및 이용약관 관련 도움이 필요하면 아래 이메일로 문의해 주세요.</p>
+            <h2>${escapeHtml(copy.heading)}</h2>
+            <p>${escapeHtml(copy.intro)}</p>
           </section>
           <a class="support-card" href="mailto:${SITE_CONFIG.supportEmail}">
             <span class="support-card__label">Email</span>
             <span class="support-card__value">${SITE_CONFIG.supportEmail}</span>
           </a>
           <section class="policy-section">
-            <h2>문의 시 포함하면 좋은 내용</h2>
-            <p>사용 중인 기기, iOS 버전, 앱 버전, 발생한 화면, 가능하다면 그룹 코드를 함께 알려주시면 더 빠르게 확인할 수 있습니다.</p>
+            <h2>${escapeHtml(copy.detailsHeading)}</h2>
+            <p>${escapeHtml(copy.details)}</p>
           </section>
         </div>
       </article>
@@ -518,13 +697,17 @@ function sanitizeInviteCode(value) {
     .slice(0, 24) || "MN-ABC123";
 }
 
-function getInviteLocale() {
+function getPreferredLocale() {
   const params = new URLSearchParams(window.location.search);
   const queryLocale = normalizeInviteLocale(params.get("lang"));
   if (queryLocale) return queryLocale;
 
   const browserLocale = normalizeInviteLocale(navigator.language);
   return browserLocale || "en";
+}
+
+function getLegalPages(locale) {
+  return locale === "ko" ? legalPagesKo : legalPagesEn;
 }
 
 function normalizeInviteLocale(value) {
