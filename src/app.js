@@ -553,9 +553,9 @@ function renderHome() {
         <section id="pricing" class="landing-pricing" aria-labelledby="pricing-title" tabindex="-1">
           <h2 id="pricing-title">가격표</h2>
           <section class="pricing-group" aria-labelledby="reels-pricing"><h3 id="reels-pricing">매일 릴스 솔루션</h3><div class="pricing-grid">
-            ${renderPriceCard('Standard', ['타이포그래피 위주의 편집', 'TTS 포함', '자막 포함'], '149,000₩')}
-            ${renderPriceCard('Deluxe', ['생성형 이미지 위주의 편집', '적절한 타이포그래피', 'TTS 포함', '자막 포함'], '599,000₩')}
-            ${renderPriceCard('Premium', ['고퀄리티 영상 위주의 편집', '적절한 생성형 이미지 포함', '적절한 타이포그래피', 'TTS 포함', '자막 포함'], '999,000₩')}
+            ${renderPriceCard('Standard', ['매일 컨텐츠 제작 및 리포트 전달', '타이포그래피 위주의 편집', 'TTS 포함', '자막 포함'], '149,000₩')}
+            ${renderPriceCard('Deluxe', ['매일 컨텐츠 제작 및 리포트 전달', '생성형 이미지 위주의 편집', '적절한 타이포그래피', 'TTS 포함', '자막 포함'], '599,000₩')}
+            ${renderPriceCard('Premium', ['매일 컨텐츠 제작 및 리포트 전달', '고퀄리티 영상 위주의 편집', '적절한 생성형 이미지 포함', '적절한 타이포그래피', 'TTS 포함', '자막 포함'], '999,000₩')}
           </div></section>
           <section class="pricing-group" aria-labelledby="assistant-pricing"><h3 id="assistant-pricing">개인 맞춤 비서 솔루션</h3><div class="pricing-grid">
             ${renderPriceCard('Standard', ['고객 맞춤 서비스 제공', 'AI를 이용한 모든 서비스 제공', '콘텐츠 제작', '일정 관리', '클라이언트 관리'], 'Coming Soon', true)}

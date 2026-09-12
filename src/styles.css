@@ -1087,6 +1087,19 @@ html:has(.landing) { scroll-behavior: smooth; }
 }
 
 /* Product introduction artwork follows the same responsive canvas as the existing demos. */
+.application .application-section-title { font-size: clamp(22px, 2vw, 28px); font-weight: 600; line-height: 1.4; margin: 0 0 24px; }
+.application .customer-section { margin-bottom: clamp(36px, 5vw, 64px); }
+.application .customer-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 860px; gap: clamp(20px, 4vw, 60px); }
+.application .customer-field { display: flex; flex-direction: column; gap: clamp(10px, 1.2vw, 16px); font-size: clamp(16px, 1.5vw, 20px); line-height: 1.5; }
+.application .customer-field input { width: 100%; min-width: 0; height: var(--control-height); padding: 10px 24px; border: 1px solid transparent; border-radius: 32px; background: #121212; color: white; font: inherit; font-size: 16px; }
+.application .customer-field input:focus-visible { outline: 2px solid #80ccff; outline-offset: 4px; }
+.application .customer-note { margin: 16px 0 0; color: #929292; font-size: clamp(13px, 1.2vw, 15px); line-height: 1.7; }
+.application .application-notices p { margin: 0 0 16px; font-size: clamp(14px, 1.3vw, 17px); line-height: 1.8; word-break: keep-all; overflow-wrap: anywhere; }
+.application .application-notices { margin-top: clamp(32px, 4vw, 56px); }
+@media (max-width: 600px) {
+  .application .customer-fields { grid-template-columns: 1fr; }
+}
+
 .demo-phone--custom { left: 28.7%; }
 .demo-phone--custom .demo-request { margin-top: 3cqw; margin-bottom: 3.5cqw; padding: 1.8cqw 2cqw; border-radius: 3.5cqw; font-size: 1.94cqw; line-height: 1.2; }
 .demo-phone--custom .demo-message { line-height: 1.2; }

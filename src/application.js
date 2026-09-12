@@ -9,6 +9,15 @@ export function renderApplication() {
   <main class="application-main"><h1>서비스 신청하기</h1>
     <form id="application-form">
       <div class="application-fields">
+        <section class="customer-section" aria-labelledby="customer-heading">
+          <h2 id="customer-heading" class="application-section-title">고객 정보</h2>
+          <div class="customer-fields">
+            <label class="customer-field">성함<input type="text" name="customerName" autocomplete="name" required maxlength="100" aria-describedby="customer-note" /></label>
+            <label class="customer-field">연락 가능한 전화번호<input type="tel" name="customerPhone" autocomplete="tel" inputmode="tel" required maxlength="30" aria-describedby="customer-note" /></label>
+          </div>
+          <p id="customer-note" class="customer-note">*결제 확인 후 솔루션 전달을 위해 반드시 필요한 정보이니 정확하게 작성해주세요.</p>
+        </section>
+        <h2 class="application-section-title">서비스 신청</h2>
         <label class="form-field">서비스 종류<select name="service"><option value="reels">매일 릴스 솔루션</option></select></label>
         <div data-reels>
           <label class="form-field">요금제<select name="plan"><option>Standard</option><option>Deluxe</option><option>Premium</option></select></label>
@@ -31,6 +40,12 @@ export function renderApplication() {
         <fieldset class="consents"><legend>필수 동의 항목</legend>
           <label><input type="checkbox" name="processingConsent" required />계약 범위의 편집 · 외부 AI 처리를 허용합니다</label>
           <label data-posting-consent><input type="checkbox" name="postingConsent" required />자동 게시 신청 시 지정 계정의 계약 범위의 게시를 허용합니다</label>
+          <label><input type="checkbox" name="privacyConsent" required />솔루션 전달을 위한 전화번호 및 성함과 같은 개인정보 수집에 동의합니다</label>
+        </fieldset>
+        <fieldset class="consents application-notices"><legend>주의 사항</legend>
+          <p>결제일 이후 고객 맞춤 파이프라인 확정을 위해 추가적인 협의가 필요하며, 협의는 <strong>메시지로 진행됩니다.</strong></p>
+          <p>콘텐츠 업로드는 파이프라인 확정 이후, <strong>협의된 날짜부터 시작되며 한 달간 진행됩니다.</strong> 이후 추가 이용을 위해서는 추가금을 납부해야 합니다.</p>
+          <label><input type="checkbox" name="noticeConsent" required />네 이해했습니다.</label>
         </fieldset>
       </div>
       <div class="payment-dock"><div class="order-summary" aria-live="polite"><div data-setup><span>파이프라인 설치 비용</span><strong>200,000₩</strong></div><div><span id="order-service"></span><strong id="order-price"></strong></div></div>
