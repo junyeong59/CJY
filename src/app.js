@@ -424,9 +424,7 @@ function renderApp() {
   const route = getCurrentRoute();
   document.title = route.title;
   document.documentElement.lang = route.lang || "ko";
-  updateMeta("description", route.description);
   updateMeta("og:title", route.title, "property");
-  updateMeta("og:description", route.description, "property");
   updateMeta("og:url", `${SITE_CONFIG.siteUrl}${normalizePath(window.location.pathname)}`, "property");
   cleanupApplication?.();
   app.innerHTML = route.render();
