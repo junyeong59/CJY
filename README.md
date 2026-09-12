@@ -34,4 +34,4 @@ npm run og
 
 ## Service application
 
-`/apply` opens the service form. Price links preselect `service=reels|editing` and `plan=Standard|Deluxe|Premium`. Reels adds the Figma setup fee of 200,000 KRW; editing is 99,000 KRW with no setup fee. Payment is disabled and no form data is sent or persisted.
+`/apply` opens the daily reels service form. Price links use `service=reels` and preselect `plan=Standard|Deluxe|Premium`. The service adds a setup fee of 200,000 KRW. Payment is disabled and no form data is sent or persisted.

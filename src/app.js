@@ -8,7 +8,7 @@ let cleanupApplication;
 const pages = {
   "/": {
     title: "CJY",
-    description: "기획부터 업로드까지 매일, 긴 영상 편집부터 개인 맞춤 비서까지. CJY 자비스 솔루션.",
+    description: "기획부터 제작, 업로드까지 매일. 우리 브랜드에 맞는 콘텐츠를 만드는 CJY 매일 릴스 솔루션.",
     render: renderHome
   },
   "/apply": { title: "서비스 신청하기 | CJY", description: "CJY 서비스 신청", render: renderApplication },
@@ -507,7 +507,7 @@ function renderHome() {
       </header>
       <main class="landing-main">
         <section class="landing-hero" aria-labelledby="home-title">
-          <h1 id="home-title">기획부터 업로드까지 매일,<br />긴 영상, 알아서 컷 편집도 척척</h1>
+          <h1 id="home-title">기획부터 업로드까지 매일,<br />우리 브랜드에 맞는 릴스도 척척</h1>
           <a class="hero-orb" href="/apply" data-link aria-label="서비스 신청하기"><img class="hero-orb-flow" src="/assets/home/orb.png" alt="" width="439" height="439" /></a>
         </section>
         <section id="product" class="landing-product" aria-labelledby="product-title" tabindex="-1">
@@ -519,19 +519,28 @@ function renderHome() {
                 <div class="demo-reel"><img src="/assets/home/reel.png" alt="" width="204" height="180" />${play}</div>
               </div></div>
             </div>
-            <div class="feature-copy"><h3>매일 릴스 업로드</h3><p>자비스 솔루션은 매일 정해진 시각에 릴스를 기획, 제작하여 업로드까지 진행하고 고객에게 보고합니다.</p></div>
+            <div class="feature-copy"><h3>매일 릴스 업로드</h3><p>자비스 솔루션은 매일 정해진 시각에 릴스(게시물)를 기획, 제작하여 업로드까지 진행하고 고객에게 보고합니다.</p></div>
           </article>
           <article class="feature feature--reverse">
-            <div class="feature-art" role="img" aria-label="긴 영상의 편집점을 찾고 자막과 화면 비율을 조정하는 예시">
-              <div class="feature-visual"><div class="demo-phone demo-phone--edit" aria-hidden="true">
-                <div class="demo-video">${play}</div>
-                <div class="demo-request">이 영상 편집점 찾아서 숏폼화 해줘</div>
-                <div class="demo-message">숏폼화 완료되었습니다.<br /><br />발견한 편집점: 5개<br /><br />자막을 추가하고 화면 비율 수정</div>
+            <div class="feature-art" role="img" aria-label="고객 요청에 맞춰 AI 드라마를 제작하는 채팅 예시">
+              <div class="feature-visual"><div class="demo-phone demo-phone--custom" aria-hidden="true">
+                <div class="demo-request">매일 AI 드라마 한 편씩 제작하고 업로드해줘. 드라마 내용은 로맨스로.</div>
+                <div class="demo-message">앞으로 매일 AI 드라마 한 편을 제작합니다.<br /><br />제목: 달콤한 회사생활<br /><br />내용: 신입사원으로 들어온 이…</div>
               </div></div>
             </div>
-            <div class="feature-copy"><h3>긴 영상을 숏폼 형태로,</h3><p>편집하지 않은 긴 영상을 전해받으면, 자비스 솔루션은 스스로 편집점을 찾고 자막부터 화면 비율까지 스스로 조정하여 완벽한 결과물을 제공합니다.</p></div>
+            <div class="feature-copy"><h3>고객 맞춤 콘텐츠 제공</h3><p>고객의 니즈에 맞게 콘텐츠의 스타일, 대본, 영상 길이를 참고하여 콘텐츠를 <strong>매일 직접</strong> 제작하여 제공합니다.<br />AI 드라마부터 병원 마케팅까지, 모든 고객의 니즈에 맞게.</p></div>
           </article>
           <article class="feature">
+            <div class="feature-art" role="img" aria-label="디스코드, 텔레그램, 지메일로 전달받는 콘텐츠 리포트">
+              <div class="feature-visual report-visual" aria-hidden="true">
+                <img class="report-icon report-icon--discord" src="/assets/home/report-discord.png" alt="" width="226" height="226" loading="lazy" />
+                <img class="report-icon report-icon--telegram" src="/assets/home/report-telegram.png" alt="" width="226" height="226" loading="lazy" />
+                <img class="report-icon report-icon--gmail" src="/assets/home/report-gmail.png" alt="" width="226" height="226" loading="lazy" />
+              </div>
+            </div>
+            <div class="feature-copy"><h3>매일 받아보는 콘텐츠 리포트</h3><p>원하는 메신저로 콘텐츠의 내용과 관련된 콘텐츠 리포트를 매일 전송받습니다.<br />번거롭게 새로운 앱을 깔 필요 없이 <strong>원하는 메신저</strong>에서 척척.</p></div>
+          </article>
+          <article class="feature feature--reverse">
             <div class="feature-art feature-art--assistant" role="img" aria-label="일정 조율과 콘텐츠 제작을 돕는 개인 비서 예시">
               <div class="feature-visual"><img class="assistant-orb" src="/assets/home/orb.png" alt="" width="251" height="251" loading="lazy" />
               <div class="assistant-message assistant-message--one" aria-hidden="true">일정 조율이 완료되었습니다.<br /><br />다음 일정: 9월 11일 오후 6시</div>
@@ -547,9 +556,6 @@ function renderHome() {
             ${renderPriceCard('Standard', ['타이포그래피 위주의 편집', 'TTS 포함', '자막 포함'], '149,000₩')}
             ${renderPriceCard('Deluxe', ['생성형 이미지 위주의 편집', '적절한 타이포그래피', 'TTS 포함', '자막 포함'], '599,000₩')}
             ${renderPriceCard('Premium', ['고퀄리티 영상 위주의 편집', '적절한 생성형 이미지 포함', '적절한 타이포그래피', 'TTS 포함', '자막 포함'], '999,000₩')}
-          </div></section>
-          <section class="pricing-group" aria-labelledby="editing-pricing"><h3 id="editing-pricing">자동 편집 솔루션</h3><div class="pricing-grid">
-            ${renderPriceCard('Standard', ['전달받은 영상 컷 편집', '자동 자막 생성', '자동 화면 비율 조정'], '99,000₩')}
           </div></section>
           <section class="pricing-group" aria-labelledby="assistant-pricing"><h3 id="assistant-pricing">개인 맞춤 비서 솔루션</h3><div class="pricing-grid">
             ${renderPriceCard('Standard', ['고객 맞춤 서비스 제공', 'AI를 이용한 모든 서비스 제공', '콘텐츠 제작', '일정 관리', '클라이언트 관리'], 'Coming Soon', true)}
@@ -589,7 +595,7 @@ function renderPriceCard(name, features, price, comingSoon = false) {
     <ul>${features.map(feature => `<li>${escapeHtml(feature)}</li>`).join('')}</ul>
     <div class="price-card-footer">
       ${comingSoon ? '' : '<p>초기 파이프라인 설치 비용 미포함</p>'}
-      ${comingSoon ? `<div class="price-label" aria-disabled="true">${escapeHtml(price)}</div>` : `<a class="price-label" data-link href="/apply?service=${price === '99,000₩' ? 'editing' : 'reels'}&plan=${encodeURIComponent(name)}" aria-label="${price === '99,000₩' ? '자동 편집 솔루션' : '매일 릴스 솔루션'} ${escapeHtml(name)} 신청하기">${escapeHtml(price)}</a>`}
+      ${comingSoon ? `<div class="price-label" aria-disabled="true">${escapeHtml(price)}</div>` : `<a class="price-label" data-link href="/apply?service=reels&plan=${encodeURIComponent(name)}" aria-label="매일 릴스 솔루션 ${escapeHtml(name)} 신청하기">${escapeHtml(price)}</a>`}
     </div>
   </article>`;
 }

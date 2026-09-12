@@ -753,7 +753,6 @@ html:has(.landing) { scroll-behavior: smooth; }
 .demo-reel > img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }
 .demo-play { display: grid; place-items: center; width: 9.7cqw; height: 9.7cqw; border-radius: 50%; background: #383939; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
 .demo-play img { width: 3cqw; height: 3.3cqw; transform: rotate(90deg); }
-.demo-phone--edit { left: 28.7%; }
 .demo-video { position: relative; width: 73%; height: 19cqw; margin-left: auto; background: #000; border: .8cqw solid #d9d9d9; border-radius: 3.5cqw; }
 .demo-request { margin: 3cqw 0 3cqw auto; width: 73%; padding: 1.8cqw 1cqw; border-radius: 5cqw; background: #d9d9d9; color: #000; font-size: 1.8cqw; font-weight: 700; }
 .assistant-orb { position: absolute; width: 35%; height: 45.1%; left: 32%; top: 27%; clip-path: circle(49% at 50% 50%); }
@@ -804,7 +803,7 @@ html:has(.landing) { scroll-behavior: smooth; }
     border-radius: 0;
     container-type: inline-size;
   }
-  .demo-phone, .demo-phone--edit { left: 50%; transform: translateX(-50%); }
+  .demo-phone { left: 50%; transform: translateX(-50%); }
   .feature-copy, .feature--reverse .feature-copy { padding: 0 32px; }
   .feature-copy h3, .pricing-group > h3 { font-size: 28px; letter-spacing: -.025em; }
   .feature-copy p { max-width: 420px; margin-top: 32px; font-size: 20px; line-height: 1.45; letter-spacing: -.02em; }
@@ -949,7 +948,6 @@ html:has(.landing) { scroll-behavior: smooth; }
 .application textarea { display: block; width: 100%; min-height: 480px; resize: vertical; border: 1px solid transparent; border-radius: 40px; padding: 32px; background: #121212; color: white; font: inherit; font-size: 24px; line-height: 1.6; }
 .application textarea::placeholder { color: #646464; }
 .brief-field { margin: 48px 0; }
-.is-editing textarea { min-height: 350px; }
 .application fieldset { border: 0; padding: 0; margin: 0 0 48px; }
 .application legend { padding: 0; margin-bottom: 28px; font-size: 20px; }
 .delivery-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
@@ -1051,7 +1049,7 @@ html:has(.landing) { scroll-behavior: smooth; }
 .application .brief-heading { font-size: clamp(16px, 1.5vw, 20px); gap: 12px; margin-bottom: clamp(12px, 1.5vw, 20px); }
 .application .brief-help { font-size: clamp(14px, 1.2vw, 16px); min-height: 44px; text-align: left; }
 .application #brief-guide { font-size: clamp(14px, 1.2vw, 16px); line-height: 1.8; }
-.application textarea, .application.is-editing textarea {
+.application textarea {
   min-height: clamp(220px, 28vw, 360px); padding: clamp(18px, 2.5vw, 28px);
   border-radius: clamp(20px, 2.5vw, 32px); font-size: clamp(16px, 1.5vw, 20px); line-height: 1.65;
 }
@@ -1086,4 +1084,16 @@ html:has(.landing) { scroll-behavior: smooth; }
   .application .application-main > h1,
   .application .application-fields > *,
   .application .payment-dock { animation: none; }
+}
+
+/* Product introduction artwork follows the same responsive canvas as the existing demos. */
+.demo-phone--custom { left: 28.7%; }
+.demo-phone--custom .demo-request { margin-top: 3cqw; margin-bottom: 3.5cqw; padding: 1.8cqw 2cqw; border-radius: 3.5cqw; font-size: 1.94cqw; line-height: 1.2; }
+.demo-phone--custom .demo-message { line-height: 1.2; }
+.report-icon { position: absolute; width: 31.4%; height: auto; aspect-ratio: 1; object-fit: contain; }
+.report-icon--discord { left: 13.75%; top: 28.2%; }
+.report-icon--telegram { left: 34.2%; top: 13.5%; }
+.report-icon--gmail { left: 39.4%; top: 46%; }
+@media (min-width: 1101px) {
+ .demo-phone--custom { left: 50%; transform: translateX(-50%); }
 }

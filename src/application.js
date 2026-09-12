@@ -9,7 +9,7 @@ export function renderApplication() {
   <main class="application-main"><h1>서비스 신청하기</h1>
     <form id="application-form">
       <div class="application-fields">
-        <label class="form-field">서비스 종류<select name="service"><option value="reels">매일 릴스 솔루션</option><option value="editing">자동 편집 솔루션</option></select></label>
+        <label class="form-field">서비스 종류<select name="service"><option value="reels">매일 릴스 솔루션</option></select></label>
         <div data-reels>
           <label class="form-field">요금제<select name="plan"><option>Standard</option><option>Deluxe</option><option>Premium</option></select></label>
           <label class="form-field">자동 게시 여부<select name="autoPost"><option value="yes">사용함</option><option value="no">사용하지 않음</option></select></label>
@@ -46,37 +46,20 @@ export function bindApplication(root) {
   if (!form) return;
   const field = name => form.elements.namedItem(name);
   const params = new URLSearchParams(window.location.search);
-  field('service').value = params.get('service') === 'editing' ? 'editing' : 'reels';
+  field('service').value = 'reels';
   field('plan').value = Object.hasOwn(plans, params.get('plan')) ? params.get('plan') : 'Standard';
-  const briefs = { reels: '', editing: '' };
-  let previousService = field('service').value;
   const sync = () => {
-    const service = field('service').value;
-    if (service !== previousService) {
-      briefs[previousService] = field('brief').value;
-      field('brief').value = briefs[service];
-      previousService = service;
-    }
-    const editing = service === 'editing';
-    form.classList.toggle('is-editing', editing);
-    for (const group of form.querySelectorAll('[data-reels]')) {
-      group.hidden = editing;
-      for (const input of group.querySelectorAll('select, input')) input.disabled = editing;
-    }
-    const autoPost = !editing && field('autoPost').value === 'yes';
+    const autoPost = field('autoPost').value === 'yes';
     form.querySelector('[data-account]').hidden = !autoPost;
     field('existingAccount').disabled = !autoPost;
-    // Editing has no automatic publishing option in the supplied design.
     field('postingConsent').required = autoPost;
     field('postingConsent').disabled = !autoPost;
     if (!autoPost) field('postingConsent').checked = false;
-    form.querySelector('[data-posting-consent]').hidden = !editing && !autoPost;
-    form.querySelector('[data-setup]').hidden = editing;
-    root.querySelector('#brief-label').textContent = editing ? '편집 스타일' : '콘텐츠 스타일 및 내용';
-    const price = editing ? 99000 : plans[field('plan').value];
-    root.querySelector('#order-service').textContent = editing ? '자동 편집 솔루션' : `매일 릴스 솔루션 (${field('plan').value})`;
+    form.querySelector('[data-posting-consent]').hidden = !autoPost;
+    const price = plans[field('plan').value];
+    root.querySelector('#order-service').textContent = `매일 릴스 솔루션 (${field('plan').value})`;
     root.querySelector('#order-price').textContent = money(price);
-    root.querySelector('#order-total').textContent = `총 가격: ${money(price + (editing ? 0 : 200000))}`;
+    root.querySelector('#order-total').textContent = `총 가격: ${money(price + 200000)}`;
     root.querySelector('#checkout-status').textContent = '';
   };
   form.addEventListener('change', sync);
