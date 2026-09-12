@@ -1,23 +1,17 @@
+import { renderApplication, bindApplication } from "./application.js";
 import { SITE_CONFIG } from "./config.js";
 
 const app = document.querySelector("#app");
+let revealObserver;
+let cleanupApplication;
 
 const pages = {
   "/": {
     title: "CJY",
-    description: "CJY developer website.",
+    description: "기획부터 업로드까지 매일, 긴 영상 편집부터 개인 맞춤 비서까지. CJY 자비스 솔루션.",
     render: renderHome
   },
-  "/portfolio": {
-    title: "Portfolio | CJY",
-    description: "CJY portfolio.",
-    render: renderPortfolio
-  },
-  "/contact": {
-    title: "Contact | CJY",
-    description: "Contact CJY.",
-    render: renderContact
-  },
+  "/apply": { title: "서비스 신청하기 | CJY", description: "CJY 서비스 신청", render: renderApplication },
   "/musicnow": {
     title: "Music Now | CJY",
     description: "Music Now privacy, terms, and support.",
@@ -390,7 +384,11 @@ function normalizePath(pathname) {
 }
 
 function getCurrentRoute() {
-  const pathname = normalizePath(window.location.pathname);
+  let pathname = normalizePath(window.location.pathname);
+  if (["/portfolio", "/contact"].includes(pathname)) {
+    window.history.replaceState({}, "", "/");
+    pathname = "/";
+  }
   const inviteMatch = pathname.match(/^\/musicnow\/join\/([^/]+)$/);
 
   if (inviteMatch) {
@@ -430,11 +428,65 @@ function renderApp() {
   updateMeta("og:title", route.title, "property");
   updateMeta("og:description", route.description, "property");
   updateMeta("og:url", `${SITE_CONFIG.siteUrl}${normalizePath(window.location.pathname)}`, "property");
+  cleanupApplication?.();
   app.innerHTML = route.render();
+  cleanupApplication = bindApplication(app);
+  bindHeroGradient();
+  bindScrollReveal();
   document.body.dataset.route = normalizePath(window.location.pathname).startsWith("/musicnow/join/")
     ? "invite"
     : normalizePath(window.location.pathname);
-  window.scrollTo({ top: 0, behavior: "auto" });
+  const section = window.location.pathname === "/" && ["#top", "#product", "#pricing", "#process"].includes(window.location.hash)
+    ? document.getElementById(window.location.hash.slice(1))
+    : null;
+  if (section) section.scrollIntoView({ behavior: "instant" });
+  else window.scrollTo({ top: 0, behavior: "instant" });
+}
+
+function bindScrollReveal() {
+  revealObserver?.disconnect();
+  revealObserver = null;
+  const landing = app.querySelector(".landing");
+  if (!landing || window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) return;
+
+  const elements = landing.querySelectorAll(".landing-product > h2, .feature-art, .feature-copy, .landing-pricing > h2, .pricing-group > h3, .price-card, .landing-process > h2, .process-card");
+  revealObserver = new IntersectionObserver((entries, observer) => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      entry.target.classList.add("is-revealed");
+      observer.unobserve(entry.target);
+    }
+  }, { threshold: 0.08 });
+
+  for (const element of elements) {
+    // Keep elements already on screen visible, including direct section links.
+    if (element.getBoundingClientRect().top < window.innerHeight) continue;
+    element.classList.add("scroll-reveal");
+    revealObserver.observe(element);
+  }
+}
+
+function bindHeroGradient() {
+  const orb = app.querySelector(".hero-orb");
+  if (!orb) return;
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const reset = () => {
+    for (const property of ["--orb-x", "--orb-y", "--orb-angle", "--orb-hue"]) {
+      orb.style.removeProperty(property);
+    }
+  };
+  orb.addEventListener("pointermove", (event) => {
+    if (event.pointerType === "touch" || reducedMotion.matches) return;
+    const bounds = orb.getBoundingClientRect();
+    const x = Math.max(-1, Math.min(1, (event.clientX - bounds.left) / bounds.width * 2 - 1));
+    const y = Math.max(-1, Math.min(1, (event.clientY - bounds.top) / bounds.height * 2 - 1));
+    orb.style.setProperty("--orb-x", `${x * 6}%`);
+    orb.style.setProperty("--orb-y", `${y * 6}%`);
+    orb.style.setProperty("--orb-angle", `${x * 18 - y * 10}deg`);
+    orb.style.setProperty("--orb-hue", `${x * 22 + y * 14}deg`);
+  });
+  orb.addEventListener("pointerleave", reset);
+  orb.addEventListener("pointercancel", reset);
 }
 
 function updateMeta(name, content, attr = "name") {
@@ -443,50 +495,103 @@ function updateMeta(name, content, attr = "name") {
 }
 
 function renderHome() {
+  const play = '<span class="demo-play"><img src="/assets/home/play.svg" alt="" width="22" height="24" /></span>';
   return `
-    <main class="site-shell site-shell--black">
-      <section class="screen home-screen" aria-labelledby="home-title">
-        <h1 id="home-title" class="cjy-mark cjy-mark--home" aria-label="CJY">
-          <img class="cjy-mark__image" src="/component/CJY.svg" alt="" />
-        </h1>
-        <nav class="home-menu" aria-label="Primary">
-          ${renderNavLink("/portfolio", "Portfolio", "light")}
-          ${renderNavLink("/contact", "Contact", "light")}
+    <div class="landing" id="top">
+      <header class="landing-header">
+        <nav class="landing-nav" aria-label="메인 메뉴">
+          <a class="landing-brand" href="#top" aria-label="CJY 처음으로"><img src="/component/CJY.svg" alt="CJY" width="73" height="31" /></a>
+          <a href="#product">Product</a>
+          <a href="#pricing">Pricing</a>
         </nav>
-      </section>
-    </main>
+      </header>
+      <main class="landing-main">
+        <section class="landing-hero" aria-labelledby="home-title">
+          <h1 id="home-title">기획부터 업로드까지 매일,<br />긴 영상, 알아서 컷 편집도 척척</h1>
+          <a class="hero-orb" href="/apply" data-link aria-label="서비스 신청하기"><img class="hero-orb-flow" src="/assets/home/orb.png" alt="" width="439" height="439" /></a>
+        </section>
+        <section id="product" class="landing-product" aria-labelledby="product-title" tabindex="-1">
+          <h2 id="product-title">어떠한 기능을 할 수 있나요?</h2>
+          <article class="feature">
+            <div class="feature-art" role="img" aria-label="릴스 제작 완료 보고와 영상 예시">
+              <div class="feature-visual"><div class="demo-phone demo-phone--reels" aria-hidden="true">
+                <div class="demo-message">기획부터 제작이 완료되었습니다.<br /><br />업로드 결과: 성공<br /><br />컨텐츠 내용: 주식 용어 설명</div>
+                <div class="demo-reel"><img src="/assets/home/reel.png" alt="" width="204" height="180" />${play}</div>
+              </div></div>
+            </div>
+            <div class="feature-copy"><h3>매일 릴스 업로드</h3><p>자비스 솔루션은 매일 정해진 시각에 릴스를 기획, 제작하여 업로드까지 진행하고 고객에게 보고합니다.</p></div>
+          </article>
+          <article class="feature feature--reverse">
+            <div class="feature-art" role="img" aria-label="긴 영상의 편집점을 찾고 자막과 화면 비율을 조정하는 예시">
+              <div class="feature-visual"><div class="demo-phone demo-phone--edit" aria-hidden="true">
+                <div class="demo-video">${play}</div>
+                <div class="demo-request">이 영상 편집점 찾아서 숏폼화 해줘</div>
+                <div class="demo-message">숏폼화 완료되었습니다.<br /><br />발견한 편집점: 5개<br /><br />자막을 추가하고 화면 비율 수정</div>
+              </div></div>
+            </div>
+            <div class="feature-copy"><h3>긴 영상을 숏폼 형태로,</h3><p>편집하지 않은 긴 영상을 전해받으면, 자비스 솔루션은 스스로 편집점을 찾고 자막부터 화면 비율까지 스스로 조정하여 완벽한 결과물을 제공합니다.</p></div>
+          </article>
+          <article class="feature">
+            <div class="feature-art feature-art--assistant" role="img" aria-label="일정 조율과 콘텐츠 제작을 돕는 개인 비서 예시">
+              <div class="feature-visual"><img class="assistant-orb" src="/assets/home/orb.png" alt="" width="251" height="251" loading="lazy" />
+              <div class="assistant-message assistant-message--one" aria-hidden="true">일정 조율이 완료되었습니다.<br /><br />다음 일정: 9월 11일 오후 6시</div>
+              <div class="assistant-message assistant-message--two" aria-hidden="true">고객님께 일정 연기 메시지를 전송합니다.</div>
+              <div class="assistant-message assistant-message--three" aria-hidden="true">병원 마케팅 콘텐츠 제작 완료되었습니다.<br /><br />주제: 임플란트, 아무데서나 하면 안 되는 이유</div></div>
+            </div>
+            <div class="feature-copy"><h3>더 나아가, 개인의 수행비서로</h3><p>고객과 완벽하게 연결되어, 이전 명령에 따라 더욱 발전하여 완전한 고객 맞춤형 수행비서로서 기능합니다.</p></div>
+          </article>
+        </section>
+        <section id="pricing" class="landing-pricing" aria-labelledby="pricing-title" tabindex="-1">
+          <h2 id="pricing-title">가격표</h2>
+          <section class="pricing-group" aria-labelledby="reels-pricing"><h3 id="reels-pricing">매일 릴스 솔루션</h3><div class="pricing-grid">
+            ${renderPriceCard('Standard', ['타이포그래피 위주의 편집', 'TTS 포함', '자막 포함'], '149,000₩')}
+            ${renderPriceCard('Deluxe', ['생성형 이미지 위주의 편집', '적절한 타이포그래피', 'TTS 포함', '자막 포함'], '599,000₩')}
+            ${renderPriceCard('Premium', ['고퀄리티 영상 위주의 편집', '적절한 생성형 이미지 포함', '적절한 타이포그래피', 'TTS 포함', '자막 포함'], '999,000₩')}
+          </div></section>
+          <section class="pricing-group" aria-labelledby="editing-pricing"><h3 id="editing-pricing">자동 편집 솔루션</h3><div class="pricing-grid">
+            ${renderPriceCard('Standard', ['전달받은 영상 컷 편집', '자동 자막 생성', '자동 화면 비율 조정'], '99,000₩')}
+          </div></section>
+          <section class="pricing-group" aria-labelledby="assistant-pricing"><h3 id="assistant-pricing">개인 맞춤 비서 솔루션</h3><div class="pricing-grid">
+            ${renderPriceCard('Standard', ['고객 맞춤 서비스 제공', 'AI를 이용한 모든 서비스 제공', '콘텐츠 제작', '일정 관리', '클라이언트 관리'], 'Coming Soon', true)}
+          </div></section>
+        </section>
+        ${renderProcess()}
+      </main>
+    </div>
   `;
 }
 
-function renderPortfolio() {
-  return `
-    <main class="site-shell">
-      <section class="screen list-screen" aria-labelledby="portfolio-title">
-        ${renderHeader("Portfolio", "portfolio-title")}
-        <div class="list-menu" role="list">
-          ${renderNavLink("/musicnow", renderMusicNowWordmark(), "dark", true)}
-        </div>
-      </section>
-    </main>
-  `;
+function renderProcess() {
+  const steps = [
+    ['brief', '작성한 양식을 통해 원하는 콘텐츠, 스타일 취합'],
+    ['automation', '초기 자동화 파이프라인 생성'],
+    ['approval', '테스트 콘텐츠 전달 및 파이프라인 확정'],
+    ['account', '자동 게시 선택 여부에 따라 계정 전달 또는 적용'],
+    ['upload', '선택 기간에 따라 자동으로 콘텐츠 업로드'],
+    ['renewal', '기간 이후 연장 또는 종료 선택 및 추가금 정산']
+  ];
+  return `<section id="process" class="landing-process" aria-labelledby="process-title" tabindex="-1">
+    <h2 id="process-title">작업 과정</h2>
+    <ol class="process-grid">${steps.map(([icon, description], index) => {
+      const number = String(index + 1).padStart(2, '0');
+      return `<li class="process-card">
+        <span class="process-number" aria-hidden="true">${number}</span>
+        <img src="/assets/process/step-${number}-${icon}.png" alt="" width="274" height="274" loading="lazy" />
+        <p>${escapeHtml(description)}</p>
+      </li>`;
+    }).join('')}</ol>
+  </section>`;
 }
 
-function renderContact() {
-  return `
-    <main class="site-shell">
-      <section class="screen list-screen" aria-labelledby="contact-title">
-        ${renderHeader("Contact", "contact-title")}
-        <div class="list-menu contact-menu" role="list">
-          <a class="row-link contact-link" href="${SITE_CONFIG.instagramUrl}" rel="noreferrer" target="_blank" role="listitem">
-            <span>Instagram</span>
-          </a>
-          <button class="row-link contact-link contact-copy" type="button" data-copy="${SITE_CONFIG.contactEmail}" data-copy-label="Copy email ${SITE_CONFIG.contactEmail}" data-copied-label="Copied email" aria-label="Copy email ${SITE_CONFIG.contactEmail}" role="listitem">
-            <span>Email</span>
-          </button>
-        </div>
-      </section>
-    </main>
-  `;
+function renderPriceCard(name, features, price, comingSoon = false) {
+  return `<article class="price-card${comingSoon ? ' price-card--soon' : ''}">
+    <h4>${escapeHtml(name)}</h4>
+    <ul>${features.map(feature => `<li>${escapeHtml(feature)}</li>`).join('')}</ul>
+    <div class="price-card-footer">
+      ${comingSoon ? '' : '<p>초기 파이프라인 설치 비용 미포함</p>'}
+      ${comingSoon ? `<div class="price-label" aria-disabled="true">${escapeHtml(price)}</div>` : `<a class="price-label" data-link href="/apply?service=${price === '99,000₩' ? 'editing' : 'reels'}&plan=${encodeURIComponent(name)}" aria-label="${price === '99,000₩' ? '자동 편집 솔루션' : '매일 릴스 솔루션'} ${escapeHtml(name)} 신청하기">${escapeHtml(price)}</a>`}
+    </div>
+  </article>`;
 }
 
 function renderMusicNow() {
@@ -611,8 +716,7 @@ function renderNotFound() {
   return renderListPage({
     title: "404",
     links: [
-      { href: "/", label: "Home" },
-      { href: "/musicnow", label: "Music Now" }
+      { href: "/", label: "Home" }
     ]
   });
 }
@@ -645,9 +749,9 @@ function navigateTo(pathname) {
 
 app.addEventListener("click", async (event) => {
   const link = event.target.closest("a[data-link]");
-  if (link && link.origin === window.location.origin) {
+  if (link && link.origin === window.location.origin && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey && event.button === 0) {
     event.preventDefault();
-    navigateTo(link.pathname);
+    navigateTo(link.pathname + link.search + link.hash);
     return;
   }
 
