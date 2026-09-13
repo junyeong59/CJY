@@ -15,7 +15,7 @@ export function renderApplication() {
             <label class="customer-field">성함<input type="text" name="customerName" autocomplete="name" required maxlength="100" aria-describedby="customer-note" /></label>
             <label class="customer-field">연락 가능한 전화번호<input type="tel" name="customerPhone" autocomplete="tel" inputmode="tel" required maxlength="30" aria-describedby="customer-note" /></label>
           </div>
-          <p id="customer-note" class="customer-note">*결제 확인 후 솔루션 전달을 위해 반드시 필요한 정보이니 정확하게 작성해주세요.</p>
+          <p id="customer-note" class="customer-note">*신청 내용 검토 및 연락을 위한 정보입니다. 신청만으로 결제·고객 등록·제작·게시가 시작되지 않습니다.</p>
         </section>
         <h2 class="application-section-title">서비스 신청</h2>
         <label class="form-field">서비스 종류<select name="service"><option value="reels">매일 릴스 솔루션</option></select></label>
@@ -40,9 +40,9 @@ export function renderApplication() {
           </div></fieldset>
         </div>
         <fieldset class="consents"><legend>필수 동의 항목</legend>
-          <label><input type="checkbox" name="processingConsent" required />계약 범위의 편집 · 외부 AI 처리를 허용합니다</label>
-          <label data-posting-consent><input type="checkbox" name="postingConsent" required />자동 게시 신청 시 지정 계정의 계약 범위의 게시를 허용합니다</label>
-          <label><input type="checkbox" name="privacyConsent" required />솔루션 전달을 위한 전화번호 및 성함과 같은 개인정보 수집에 동의합니다</label>
+          <label><input type="checkbox" name="processingConsent" required />편집 · 외부 AI 처리 희망 사항이며 실제 제작은 별도 협의·확정 후 진행됨을 이해합니다</label>
+          <label data-posting-consent><input type="checkbox" name="postingConsent" required />자동 게시 희망 사항이며 실제 게시 권한은 별도 협의·확정이 필요함을 이해합니다</label>
+          <label><input type="checkbox" name="privacyConsent" required />신청 검토 및 연락을 위해 성함·전화번호·신청 내용·선택 및 동의 항목을 서버에 저장하는 데 동의합니다. 동의하지 않으면 신청을 접수할 수 없습니다</label>
         </fieldset>
         <fieldset class="consents application-notices"><legend>주의 사항</legend>
           <p>결제일 이후 고객 맞춤 파이프라인 확정을 위해 추가적인 협의가 필요하며, 협의는 <strong>메시지로 진행됩니다.</strong></p>
@@ -51,8 +51,8 @@ export function renderApplication() {
         </fieldset>
       </div>
       <div class="payment-dock"><div class="order-summary" aria-live="polite"><div data-setup><span>파이프라인 설치 비용</span><strong>200,000₩</strong></div><div><span id="order-service"></span><strong id="order-price"></strong></div></div>
-      <div class="checkout"><strong id="order-total" aria-live="polite"></strong><button type="button" disabled>결제하기</button></div>
-      <p class="checkout-note">결제 연결 준비 중입니다. 현재 신청 내용은 전송되거나 결제되지 않습니다.</p>
+      <div class="checkout"><strong id="order-total" aria-live="polite"></strong><button type="submit">결제하기</button></div>
+      <p class="checkout-note">현재 결제 서비스가 연결되지 않아 결제하기는 검토 대기 접수만 진행합니다. 결제·자동 제작·자동 게시·고객 등록은 실행되지 않습니다. 접수번호를 보관해주세요. Order 화면은 예시이며 실제 접수 조회 기능은 아닙니다.</p>
       <p id="checkout-status" role="status"></p></div>
     </form>
   </main></div>`;
@@ -62,6 +62,11 @@ export function bindApplication(root) {
   const form = root.querySelector('#application-form');
   if (!form) return;
   const field = name => form.elements.namedItem(name);
+  let busy = false, completed = false;
+  let idempotencyKey;
+  try { idempotencyKey = sessionStorage.getItem('cjy-intake-key'); } catch {}
+  if (!/^[a-f0-9-]{36}$/.test(idempotencyKey || '')) idempotencyKey = crypto.randomUUID();
+  try { sessionStorage.setItem('cjy-intake-key', idempotencyKey); } catch {}
   const params = new URLSearchParams(window.location.search);
   field('service').value = 'reels';
   field('plan').value = Object.hasOwn(plans, params.get('plan')) ? params.get('plan') : 'Standard';
@@ -77,17 +82,46 @@ export function bindApplication(root) {
     root.querySelector('#order-service').textContent = `매일 릴스 솔루션 (${field('plan').value})`;
     root.querySelector('#order-price').textContent = money(price);
     root.querySelector('#order-total').textContent = `총 가격: ${money(price + 200000)}`;
-    root.querySelector('#checkout-status').textContent = '';
+    if (!busy && !completed) root.querySelector('#checkout-status').textContent = '';
   };
   form.addEventListener('change', sync);
+  for (const name of ['customerName','customerPhone','brief']) field(name).addEventListener('input',()=>field(name).setCustomValidity(''));
   form.querySelector('.brief-help').addEventListener('click', event => {
     const guide = root.querySelector('#brief-guide');
     guide.hidden = !guide.hidden;
     event.currentTarget.setAttribute('aria-expanded', String(!guide.hidden));
   });
-  form.addEventListener('submit', event => {
+  form.addEventListener('submit', async event => {
     event.preventDefault();
-    root.querySelector('#checkout-status').textContent = '결제 서비스 연결 준비 중입니다. 신청 내용은 전송되지 않았으며 결제도 진행되지 않았습니다.';
+    if (busy || completed) return;
+    const phone = field('customerPhone').value.trim();
+    field('customerPhone').setCustomValidity(/^[+\d][\d ()-]{5,29}$/.test(phone) && phone.replace(/\D/g,'').length >= 7 && phone.replace(/\D/g,'').length <= 15 ? '' : '연락 가능한 전화번호를 확인해주세요.');
+    for (const name of ['customerName','brief']) field(name).setCustomValidity(field(name).value.trim() ? '' : '내용을 입력해주세요.');
+    if (!form.reportValidity()) return;
+    busy = true;
+    const payload = {};
+    for (const name of ['customerName','customerPhone','service','plan','autoPost','existingAccount','brief','channel']) payload[name] = field(name).value.trim();
+    if (payload.autoPost === 'no') payload.existingAccount = 'no';
+    for (const name of ['processingConsent','postingConsent','privacyConsent','noticeConsent']) payload[name] = field(name).checked;
+    const status = root.querySelector('#checkout-status');
+    const submit = form.querySelector('button[type=submit]');
+    submit.disabled = true;
+    status.textContent = '신청 내용을 접수하고 있습니다…';
+    try {
+      const response = await fetch('https://customer-gateway-staging.up.railway.app/api/applications', {
+        method:'POST', credentials:'omit', referrerPolicy:'no-referrer', signal:AbortSignal.timeout(20000), headers:{'Content-Type':'application/json','Idempotency-Key':idempotencyKey}, body:JSON.stringify(payload)
+      });
+      if (!response.ok) throw Object.assign(new Error('submit_failed'), {status:response.status});
+      const result = await response.json();
+      if (result.status !== 'pending-review' || !/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(result.receipt || '')) throw new Error('invalid_receipt');
+      status.textContent = `신청이 검토 대기로 접수되었습니다. 접수번호: ${result.receipt}. 결제·제작·게시는 시작되지 않았습니다.`;
+      submit.textContent = '접수 완료';
+      completed = true;
+    } catch (error) {
+      const messages = {400:'입력 내용과 필수 동의 항목을 확인해주세요.',409:'이전 신청과 내용이 다릅니다. 중복 접수를 막기 위해 전송하지 않았습니다. 이전 신청 내용을 확인해주세요.',429:'접수 요청이 많습니다. 한 시간 후 다시 시도해주세요.'};
+      status.textContent = messages[error.status] || '접수 결과를 확인하지 못했습니다. 내용을 바꾸거나 창을 닫지 말고 잠시 후 다시 시도해주세요. 같은 접수번호로 확인하여 중복 저장을 방지합니다.';
+      submit.disabled = false;
+    } finally { busy = false; }
   });
   sync();
   const dock = form.querySelector('.payment-dock');
