@@ -1094,6 +1094,7 @@ html:has(.landing) { scroll-behavior: smooth; }
 .application .customer-field input { width: 100%; min-width: 0; height: var(--control-height); padding: 10px 24px; border: 1px solid transparent; border-radius: 32px; background: #121212; color: white; font: inherit; font-size: 16px; }
 .application .customer-field input:focus-visible { outline: 2px solid #80ccff; outline-offset: 4px; }
 .application .customer-note { margin: 16px 0 0; color: #929292; font-size: clamp(13px, 1.2vw, 15px); line-height: 1.7; }
+.application [data-account] > .form-field { margin-bottom: 0; }
 .application .application-notices p { margin: 0 0 16px; font-size: clamp(14px, 1.3vw, 17px); line-height: 1.8; word-break: keep-all; overflow-wrap: anywhere; }
 .application .application-notices { margin-top: clamp(32px, 4vw, 56px); }
 @media (max-width: 600px) {
@@ -1109,4 +1110,99 @@ html:has(.landing) { scroll-behavior: smooth; }
 .report-icon--gmail { left: 39.4%; top: 46%; }
 @media (min-width: 1101px) {
  .demo-phone--custom { left: 50%; transform: translateX(-50%); }
+}
+
+/* Order pages share the application page's content width and spacing. */
+.order-page { min-height: 100vh; }
+.order-lookup, .order-status, .order-details {
+ width: 100%; max-width: 1216px; margin: auto;
+ padding: clamp(28px, 4vw, 56px) var(--form-gutter) clamp(48px, 6vw, 80px);
+}
+.order-page h1 { font-size: clamp(26px, 2.5vw, 36px); line-height: 1.3; margin: 0 0 var(--form-gap); word-break: keep-all; }
+.order-lookup { padding-top: clamp(56px, 8vw, 112px); }
+.order-lookup h1 { text-align: center; }
+.order-lookup form { width: min(100%, 400px); margin-inline: auto; }
+.order-lookup .customer-field { margin-bottom: var(--form-gap); }
+.order-button { display: inline-flex; justify-content: center; align-items: center; min-height: var(--control-height); padding: 12px 28px; border: 1px solid transparent; border-radius: 100px; background: white; color: black; font: inherit; font-size: clamp(16px, 1.5vw, 20px); font-weight: 700; text-decoration: none; cursor: pointer; text-align: center; }
+.order-button:hover { background: #e5e5e5; }
+.order-page a:focus-visible, .order-page button:focus-visible { outline: 2px solid #80ccff; outline-offset: 4px; }
+.order-lookup .order-button { width: 100%; margin-top: 24px; }
+.order-heading { text-align: center; padding-top: clamp(8px, 2vw, 24px); margin-bottom: clamp(36px, 5vw, 60px); }
+.order-heading h1 { font-size: clamp(28px, 3.4vw, 44px); margin-bottom: clamp(16px, 1.6vw, 20px); }
+.order-heading .order-number { font-size: clamp(18px, 1.8vw, 24px); }
+.order-number { font-size: clamp(16px, 1.6vw, 20px); font-weight: 600; line-height: 1.5; margin: 0; overflow-wrap: anywhere; }
+.order-hint, .order-demo { color: #929292; font-size: clamp(13px, 1.2vw, 15px); line-height: 1.7; margin: 12px 0 0; }
+.order-status h2 { font-size: clamp(20px, 2vw, 26px); margin: 0 0 24px; }
+.order-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(16px, 2vw, 28px); list-style: none; margin: 0; padding: 0; }
+.order-steps li { text-align: center; min-width: 0; padding: 20px clamp(16px, 2vw, 28px) 24px; background: #121212; border: 1px solid transparent; border-radius: clamp(24px, 3vw, 36px); }
+.order-steps .is-current { border-color: #555; }
+.order-steps img { display: block; width: clamp(130px, 15vw, 180px); height: auto; aspect-ratio: 1; object-fit: contain; margin: 0 auto 4px; }
+.order-steps h3 { margin: 0 0 12px; font-size: clamp(16px, 1.5vw, 20px); line-height: 1.5; word-break: keep-all; }
+.order-steps p { max-width: 260px; margin: auto; font-size: clamp(14px, 1.2vw, 16px); line-height: 1.65; word-break: keep-all; }
+.order-steps .is-pending img { opacity: .4; }
+.order-steps .is-pending h3, .order-steps .is-pending p { color: #929292; }
+.order-step-state { display: inline-block; font-size: 12px; line-height: 1.5; margin-top: 20px; padding: 5px 12px; border-radius: 20px; color: #aaa; background: #242424; }
+.is-current .order-step-state { color: #111; background: #eee; }
+.order-actions { display: flex; align-items: stretch; justify-content: flex-end; gap: 16px; margin-top: 32px; }
+.order-actions > a { display: inline-flex; align-items: center; justify-content: center; font-size: clamp(16px, 1.5vw, 20px); font-weight: 600; min-height: var(--control-height); padding: 12px 28px; border-radius: 100px; text-decoration: none; }
+.order-actions > a:first-child { border: 1px solid #444; }
+.order-actions > a:first-child:hover { background: #121212; }
+.order-actions .order-button { min-width: 180px; }
+.order-details dl { background: #121212; border-radius: clamp(24px, 3vw, 36px); padding: clamp(20px, 3vw, 32px); margin: 28px 0 32px; }
+.order-details dl > div { display: grid; grid-template-columns: minmax(160px, 1fr) 2fr; gap: 24px; padding: 18px 0; border-bottom: 1px solid #292929; font-size: clamp(14px, 1.3vw, 17px); line-height: 1.65; }
+.order-details dl > div:first-child { padding-top: 0; }
+.order-details dl > div:last-child { border: 0; padding-bottom: 0; }
+.order-details dt { color: #aaa; }
+.order-details dd { margin: 0; overflow-wrap: anywhere; }
+@media (max-width: 700px) {
+ .order-steps { grid-template-columns: 1fr; gap: 16px; }
+ .order-steps li { display: grid; grid-template-columns: 88px minmax(0, 1fr); column-gap: 16px; text-align: left; padding: 20px; }
+ .order-steps img { width: 88px; height: 88px; grid-row: 1 / 4; align-self: center; margin: 0; }
+ .order-steps h3 { margin-bottom: 8px; }
+ .order-steps p { max-width: none; margin: 0; }
+ .order-step-state { justify-self: start; margin-top: 12px; }
+ .order-actions { flex-direction: column; }
+ .order-details dl > div { grid-template-columns: 1fr; gap: 6px; }
+}
+@media (max-width: 380px) {
+ .order-page .landing-nav { gap: 18px; }
+ .order-steps li { grid-template-columns: 64px minmax(0, 1fr); padding: 16px; gap: 12px; }
+ .order-steps img { width: 64px; height: 64px; }
+}
+
+/* Match the application entrance motion without moving the shared navigation. */
+.order-lookup > h1,
+.order-lookup form > *,
+.order-heading,
+.order-status section > h2,
+.order-steps > li,
+.order-actions,
+.order-details > * {
+ animation: application-enter 520ms cubic-bezier(.22, 1, .36, 1) both;
+}
+.order-lookup form > :nth-child(1) { animation-delay: 60ms; }
+.order-lookup form > :nth-child(2) { animation-delay: 120ms; }
+.order-lookup form > :nth-child(3) { animation-delay: 180ms; }
+.order-lookup form > :nth-child(4) { animation-delay: 240ms; }
+.order-status section > h2 { animation-delay: 80ms; }
+.order-steps > :nth-child(1) { animation-delay: 140ms; }
+.order-steps > :nth-child(2) { animation-delay: 220ms; }
+.order-steps > :nth-child(3) { animation-delay: 300ms; }
+.order-actions { animation-delay: 360ms; }
+.order-details > :nth-child(2) { animation-delay: 60ms; }
+.order-details > :nth-child(3) { animation-delay: 100ms; }
+.order-details > dl { animation-delay: 160ms; }
+.order-details > .order-button { animation-delay: 240ms; }
+.order-page .order-button, .order-actions > a {
+ transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+.order-page .order-button:hover { box-shadow: 0 4px 20px rgb(255 255 255 / 8%); }
+.order-page .customer-field input { transition: border-color 180ms ease, background-color 180ms ease; }
+.order-page .customer-field input:hover { border-color: #444; }
+.order-lookup form > *:focus-within, .order-page a:focus-visible, .order-page button:focus-visible { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+ .order-lookup > h1, .order-lookup form > *, .order-heading,
+ .order-status section > h2, .order-steps > li, .order-actions,
+ .order-details > * { animation: none; }
+ .order-page .order-button, .order-actions > a, .order-page .customer-field input { transition: none; }
 }

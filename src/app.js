@@ -1,3 +1,4 @@
+import { renderOrderLookup, renderOrderStatus, renderOrderDetails, bindOrder } from "./order.js";
 import { renderApplication, bindApplication } from "./application.js";
 import { SITE_CONFIG } from "./config.js";
 
@@ -6,6 +7,9 @@ let revealObserver;
 let cleanupApplication;
 
 const pages = {
+  "/order": { title: "주문 조회 | CJY", render: renderOrderLookup },
+  "/order/status": { title: "주문 현황 | CJY", render: renderOrderStatus },
+  "/order/details": { title: "신청 내용 | CJY", render: renderOrderDetails },
   "/": {
     title: "CJY",
     description: "기획부터 제작, 업로드까지 매일. 우리 브랜드에 맞는 콘텐츠를 만드는 CJY 매일 릴스 솔루션.",
@@ -429,6 +433,7 @@ function renderApp() {
   cleanupApplication?.();
   app.innerHTML = route.render();
   cleanupApplication = bindApplication(app);
+  bindOrder(app, navigateTo);
   bindHeroGradient();
   bindScrollReveal();
   document.body.dataset.route = normalizePath(window.location.pathname).startsWith("/musicnow/join/")
@@ -501,6 +506,7 @@ function renderHome() {
           <a class="landing-brand" href="#top" aria-label="CJY 처음으로"><img src="/component/CJY.svg" alt="CJY" width="73" height="31" /></a>
           <a href="#product">Product</a>
           <a href="#pricing">Pricing</a>
+          <a href="/order" data-link>Order</a>
         </nav>
       </header>
       <main class="landing-main">
@@ -545,7 +551,7 @@ function renderHome() {
               <div class="assistant-message assistant-message--two" aria-hidden="true">고객님께 일정 연기 메시지를 전송합니다.</div>
               <div class="assistant-message assistant-message--three" aria-hidden="true">병원 마케팅 콘텐츠 제작 완료되었습니다.<br /><br />주제: 임플란트, 아무데서나 하면 안 되는 이유</div></div>
             </div>
-            <div class="feature-copy"><h3>더 나아가, 개인의 수행비서로</h3><p>고객과 완벽하게 연결되어, 이전 명령에 따라 더욱 발전하여 완전한 고객 맞춤형 수행비서로서 기능합니다.</p></div>
+            <div class="feature-copy"><h3>더 나아가, 개인의 수행비서로</h3><p>고객과 완벽하게 연결되어, 이전 명령에 따라 더욱 발전하여 완전한 고객 맞춤형 수행비서로서 기능합니다. (출시 예정)</p></div>
           </article>
         </section>
         <section id="pricing" class="landing-pricing" aria-labelledby="pricing-title" tabindex="-1">

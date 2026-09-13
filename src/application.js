@@ -4,7 +4,7 @@ const money = value => `${value.toLocaleString('ko-KR')}₩`;
 export function renderApplication() {
   return `<div class="landing application"><header class="landing-header"><nav class="landing-nav" aria-label="메인 메뉴">
     <a class="landing-brand" href="/" data-link aria-label="CJY 메인"><img src="/component/CJY.svg" alt="CJY" width="73" height="31" /></a>
-    <a href="/#product" data-link>Product</a><a href="/#pricing" data-link>Pricing</a>
+    <a href="/#product" data-link>Product</a><a href="/#pricing" data-link>Pricing</a><a href="/order" data-link>Order</a>
   </nav></header>
   <main class="application-main"><h1>서비스 신청하기</h1>
     <form id="application-form">
@@ -22,7 +22,10 @@ export function renderApplication() {
         <div data-reels>
           <label class="form-field">요금제<select name="plan"><option>Standard</option><option>Deluxe</option><option>Premium</option></select></label>
           <label class="form-field">자동 게시 여부<select name="autoPost"><option value="yes">사용함</option><option value="no">사용하지 않음</option></select></label>
-          <label class="form-field" data-account>기존 계정 사용 여부 (추가금 발생 가능)<select name="existingAccount"><option value="no">사용하지 않음</option><option value="yes">사용함</option></select></label>
+          <div data-account>
+            <label class="form-field">기존 계정 사용 여부<select name="existingAccount" aria-describedby="existing-account-note"><option value="no">사용하지 않음</option><option value="yes">사용함</option></select></label>
+            <p id="existing-account-note" class="customer-note">*기존 계정을 사용 할 시, 별도의 추가 작업이 필요할 수 있습니다</p>
+          </div>
         </div>
         <div class="brief-field">
           <div class="brief-heading"><label for="application-brief" id="brief-label">콘텐츠 스타일 및 내용</label><button type="button" class="brief-help" aria-expanded="false" aria-controls="brief-guide">꼭 포함되어야 하는 내용</button></div>
@@ -30,7 +33,6 @@ export function renderApplication() {
           <textarea id="application-brief" name="brief" required maxlength="10000" placeholder="꼭 포함되어야 하는 내용을 포함해서 자유롭게 작성해주세요."></textarea>
         </div>
         <div data-reels>
-          <label class="form-field">업로드 형태<select name="format"><option value="reel">릴스</option><option value="post">게시물</option></select></label>
           <fieldset class="delivery"><legend>업로드 결과 전달 채널</legend><div class="delivery-options">
             <label><input type="radio" name="channel" value="discord" /><span>디스코드</span></label>
             <label><input type="radio" name="channel" value="telegram" checked /><span>텔레그램</span></label>
