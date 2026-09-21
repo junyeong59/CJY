@@ -1034,7 +1034,6 @@ html:has(.landing) { scroll-behavior: smooth; }
 .application .application-main { width: 100%; max-width: 1216px; padding-top: clamp(28px, 4vw, 56px); }
 .application .application-main h1 { font-size: clamp(26px, 2.5vw, 36px); line-height: 1.3; margin: 0 var(--form-gutter) var(--form-gap); }
 .application .application-fields { padding: 0 var(--form-gutter); }
-.application .landing-nav { max-width: 1216px; padding-inline: var(--form-gutter); gap: clamp(24px, 4vw, 56px); height: clamp(64px, 6vw, 76px); }
 .application .form-field {
   width: clamp(280px, 32vw, 400px); max-width: 100%;
   gap: clamp(10px, 1.2vw, 16px); margin-bottom: var(--form-gap);
@@ -1165,7 +1164,6 @@ html:has(.landing) { scroll-behavior: smooth; }
  .order-details dl > div { grid-template-columns: 1fr; gap: 6px; }
 }
 @media (max-width: 380px) {
- .order-page .landing-nav { gap: 18px; }
  .order-steps li { grid-template-columns: 64px minmax(0, 1fr); padding: 16px; gap: 12px; }
  .order-steps img { width: 64px; height: 64px; }
 }
@@ -1205,4 +1203,47 @@ html:has(.landing) { scroll-behavior: smooth; }
  .order-status section > h2, .order-steps > li, .order-actions,
  .order-details > * { animation: none; }
  .order-page .order-button, .order-actions > a, .order-page .customer-field input { transition: none; }
+}
+
+/* Replay the existing entrance motion whenever a policy route renders. */
+.policy-main > h1,
+.policy-main > .policy-draft,
+.policy-main article > section {
+  animation: application-enter 520ms cubic-bezier(.22, 1, .36, 1) both;
+}
+.policy-main > .policy-draft { animation-delay: 60ms; }
+.policy-main article > section { animation-delay: 240ms; }
+.policy-main article > section:nth-child(1) { animation-delay: 120ms; }
+.policy-main article > section:nth-child(2) { animation-delay: 180ms; }
+@media (prefers-reduced-motion: reduce) {
+  .policy-main > h1,
+  .policy-main > .policy-draft,
+  .policy-main article > section { animation: none; }
+}
+
+/* Policy pages follow Figma 14:16: a wide black reading surface. */
+.policy-page { min-height: 100dvh; background: #000; color: #fff; }
+.policy-main { max-width: 1440px; margin: 0 auto; padding: 62px 60px 100px; }
+.policy-main h1 { margin: 0 0 24px; font-size: 48px; line-height: 1.2; font-weight: 700; }
+.policy-main .policy-draft { color: #999; font-size: 14px; margin: 0 0 52px; }
+.policy-main article { padding-left: 7px; }
+.policy-main section { margin-bottom: 40px; }
+.policy-main h2 { margin: 0 0 8px; font-size: 32px; line-height: 40px; font-weight: 600; }
+.policy-main section p { margin: 0 0 12px; font-size: 24px; line-height: 40px; font-weight: 300; word-break: keep-all; overflow-wrap: anywhere; }
+.policy-main section .policy-review { color: #aaa; font-size: 18px; line-height: 1.8; }
+.business-footer { border-top: 1px solid #242424; padding: 40px 60px; color: #969696; background: #000; font-size: 13px; line-height: 1.8; }
+.business-footer nav { display: flex; flex-wrap: wrap; gap: 12px 28px; margin-bottom: 20px; }
+.business-footer nav a { color: #ddd; padding: 6px 0; }
+.business-footer p { margin: 8px 0; overflow-wrap: anywhere; }
+.business-footer a:hover { color: #fff; text-decoration: underline; }
+.business-footer a:focus-visible { outline: 2px solid #80ccff; outline-offset: 5px; }
+@media (max-width: 700px) {
+  .policy-main { padding: 44px 24px 48px; }
+  .policy-main h1 { font-size: 36px; }
+  .policy-main .policy-draft { margin-bottom: 36px; font-size: 12px; }
+  .policy-main article { padding-left: 0; }
+  .policy-main h2 { font-size: 23px; line-height: 1.5; }
+  .policy-main section p { font-size: 17px; line-height: 1.9; }
+  .policy-main section .policy-review { font-size: 15px; }
+  .business-footer { padding: 28px 24px; }
 }

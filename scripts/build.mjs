@@ -24,8 +24,9 @@ const configVersion = await assetVersion(configPath);
 const appPath = path.join(dist, "src", "app.js");
 const appSource = await readFile(appPath, "utf8");
 const applicationVersion = await assetVersion(path.join(dist, "src", "application.js"));
+const policiesVersion = await assetVersion(path.join(dist, "src", "policies.js"));
 const orderVersion = await assetVersion(path.join(dist, "src", "order.js"));
-const versionedAppSource = appSource.replace("./order.js", `./order.js?v=${orderVersion}`).replace("./application.js", `./application.js?v=${applicationVersion}`).replace(
+const versionedAppSource = appSource.replace("./policies.js", `./policies.js?v=${policiesVersion}`).replace("./order.js", `./order.js?v=${orderVersion}`).replace("./application.js", `./application.js?v=${applicationVersion}`).replace(
   /\.\/config\.js(?:\?v=[^"]*)?/u,
   `./config.js?v=${configVersion}`
 );

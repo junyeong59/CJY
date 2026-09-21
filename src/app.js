@@ -1,3 +1,4 @@
+import { renderPolicy, renderFooter } from "./policies.js";
 import { renderOrderLookup, renderOrderStatus, renderOrderDetails, bindOrder } from "./order.js";
 import { renderApplication, bindApplication } from "./application.js";
 import { SITE_CONFIG } from "./config.js";
@@ -7,6 +8,9 @@ let revealObserver;
 let cleanupApplication;
 
 const pages = {
+  "/terms": { title: "이용약관 | CJY", render: () => renderPolicy("terms") },
+  "/privacy": { title: "개인정보처리방침 | CJY", render: () => renderPolicy("privacy") },
+  "/refund": { title: "환불 정책 | CJY", render: () => renderPolicy("refund") },
   "/order": { title: "주문 조회 | CJY", render: renderOrderLookup },
   "/order/status": { title: "주문 현황 | CJY", render: renderOrderStatus },
   "/order/details": { title: "신청 내용 | CJY", render: renderOrderDetails },
@@ -432,6 +436,9 @@ function renderApp() {
   updateMeta("og:url", `${SITE_CONFIG.siteUrl}${normalizePath(window.location.pathname)}`, "property");
   cleanupApplication?.();
   app.innerHTML = route.render();
+  if (["/", "/apply", "/order", "/order/status", "/order/details", "/terms", "/privacy", "/refund"].includes(normalizePath(window.location.pathname))) {
+    app.querySelector(".landing")?.insertAdjacentHTML("beforeend", renderFooter());
+  }
   cleanupApplication = bindApplication(app);
   bindOrder(app, navigateTo);
   bindHeroGradient();
@@ -557,9 +564,9 @@ function renderHome() {
         <section id="pricing" class="landing-pricing" aria-labelledby="pricing-title" tabindex="-1">
           <h2 id="pricing-title">가격표</h2>
           <section class="pricing-group" aria-labelledby="reels-pricing"><h3 id="reels-pricing">매일 릴스 솔루션</h3><div class="pricing-grid">
-            ${renderPriceCard('Standard', ['매일 컨텐츠 제작 및 리포트 전달', '타이포그래피 위주의 편집', 'TTS 포함', '자막 포함'], '149,000₩')}
-            ${renderPriceCard('Deluxe', ['매일 컨텐츠 제작 및 리포트 전달', '생성형 이미지 위주의 편집', '적절한 타이포그래피', 'TTS 포함', '자막 포함'], '599,000₩')}
-            ${renderPriceCard('Premium', ['매일 컨텐츠 제작 및 리포트 전달', '고퀄리티 영상 위주의 편집', '적절한 생성형 이미지 포함', '적절한 타이포그래피', 'TTS 포함', '자막 포함'], '999,000₩')}
+            ${renderPriceCard('Standard', ['하루 영상 1개 제작 및 리포트 전달', '타이포그래피 위주의 편집', 'TTS 포함', '자막 포함'], '149,000₩')}
+            ${renderPriceCard('Deluxe', ['하루 영상 1개 제작 및 리포트 전달', '생성형 이미지 위주의 편집', '적절한 타이포그래피', 'TTS 포함', '자막 포함'], '599,000₩')}
+            ${renderPriceCard('Premium', ['하루 영상 1개 제작 및 리포트 전달', '고퀄리티 영상 위주의 편집', '적절한 생성형 이미지 포함', '적절한 타이포그래피', 'TTS 포함', '자막 포함'], '999,000₩')}
           </div></section>
           <section class="pricing-group" aria-labelledby="assistant-pricing"><h3 id="assistant-pricing">개인 맞춤 비서 솔루션</h3><div class="pricing-grid">
             ${renderPriceCard('Standard', ['고객 맞춤 서비스 제공', 'AI를 이용한 모든 서비스 제공', '콘텐츠 제작', '일정 관리', '클라이언트 관리'], 'Coming Soon', true)}
@@ -598,7 +605,7 @@ function renderPriceCard(name, features, price, comingSoon = false) {
     <h4>${escapeHtml(name)}</h4>
     <ul>${features.map(feature => `<li>${escapeHtml(feature)}</li>`).join('')}</ul>
     <div class="price-card-footer">
-      ${comingSoon ? '' : '<p>초기 파이프라인 설치 비용 미포함</p>'}
+      ${comingSoon ? '' : '<p>월 요금 · 부가세 별도 · 초기 설치비 별도</p>'}
       ${comingSoon ? `<div class="price-label" aria-disabled="true">${escapeHtml(price)}</div>` : `<a class="price-label" data-link href="/apply?service=reels&plan=${encodeURIComponent(name)}" aria-label="매일 릴스 솔루션 ${escapeHtml(name)} 신청하기">${escapeHtml(price)}</a>`}
     </div>
   </article>`;

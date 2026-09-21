@@ -42,15 +42,16 @@ export function renderApplication() {
         <fieldset class="consents"><legend>필수 동의 항목</legend>
           <label><input type="checkbox" name="processingConsent" required />편집 · 외부 AI 처리 희망 사항이며 실제 제작은 별도 협의·확정 후 진행됨을 이해합니다</label>
           <label data-posting-consent><input type="checkbox" name="postingConsent" required />자동 게시 희망 사항이며 실제 게시 권한은 별도 협의·확정이 필요함을 이해합니다</label>
-          <label><input type="checkbox" name="privacyConsent" required />신청 검토 및 연락을 위해 성함·전화번호·신청 내용·선택 및 동의 항목을 서버에 저장하는 데 동의합니다. 동의하지 않으면 신청을 접수할 수 없습니다</label>
+          <label><input type="checkbox" name="privacyConsent" required />신청 검토 및 연락을 위해 성함·전화번호·신청 내용·선택 및 동의 항목을 서버에 저장하는 데 동의합니다. 동의하지 않으면 신청을 접수할 수 없습니다</label><p class="customer-note"><a href="/privacy" target="_blank" rel="noopener">개인정보처리방침 보기 (새 창)</a></p>
         </fieldset>
         <fieldset class="consents application-notices"><legend>주의 사항</legend>
           <p>결제일 이후 고객 맞춤 파이프라인 확정을 위해 추가적인 협의가 필요하며, 협의는 <strong>메시지로 진행됩니다.</strong></p>
-          <p>콘텐츠 업로드는 파이프라인 확정 이후, <strong>협의된 날짜부터 시작되며 한 달간 진행됩니다.</strong> 이후 추가 이용을 위해서는 추가금을 납부해야 합니다.</p>
+          <p>콘텐츠 업로드는 파이프라인 확정 이후, <strong>협의된 날짜부터 시작되며 한 달간 하루 영상 1개를 제공합니다.</strong> 연장은 매달 직접 결제하며 자동결제되지 않습니다. 시작일과 종료일은 계약 전에 안내합니다.</p>
           <label><input type="checkbox" name="noticeConsent" required />네 이해했습니다.</label>
         </fieldset>
       </div>
-      <div class="payment-dock"><div class="order-summary" aria-live="polite"><div data-setup><span>파이프라인 설치 비용</span><strong>200,000₩</strong></div><div><span id="order-service"></span><strong id="order-price"></strong></div></div>
+      <div class="payment-dock"><div class="order-summary" aria-live="polite"><div data-setup><span>파이프라인 설치 비용</span><strong>200,000₩</strong></div><div><span id="order-service"></span><strong id="order-price"></strong></div><div><span>부가세 (10%)</span><strong id="order-vat"></strong></div></div>
+      <p class="checkout-note">설치비와 서비스비는 부가세 별도이며, 아래 합계에는 부가세 10%가 포함됩니다.</p>
       <div class="checkout"><strong id="order-total" aria-live="polite"></strong><button type="submit">결제하기</button></div>
       <p class="checkout-note">현재 결제 서비스가 연결되지 않아 결제하기는 검토 대기 접수만 진행합니다. 결제·자동 제작·자동 게시·고객 등록은 실행되지 않습니다. 접수번호를 보관해주세요. Order 화면은 예시이며 실제 접수 조회 기능은 아닙니다.</p>
       <p id="checkout-status" role="status"></p></div>
@@ -81,7 +82,10 @@ export function bindApplication(root) {
     const price = plans[field('plan').value];
     root.querySelector('#order-service').textContent = `매일 릴스 솔루션 (${field('plan').value})`;
     root.querySelector('#order-price').textContent = money(price);
-    root.querySelector('#order-total').textContent = `총 가격: ${money(price + 200000)}`;
+    const subtotal = price + 200000;
+    const vat = Math.round(subtotal * 0.1);
+    root.querySelector('#order-vat').textContent = money(vat);
+    root.querySelector('#order-total').textContent = `총 가격: ${money(subtotal + vat)}`;
     if (!busy && !completed) root.querySelector('#checkout-status').textContent = '';
   };
   form.addEventListener('change', sync);
