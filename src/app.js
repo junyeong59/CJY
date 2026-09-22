@@ -605,7 +605,7 @@ function renderPriceCard(name, features, price, comingSoon = false) {
     <h4>${escapeHtml(name)}</h4>
     <ul>${features.map(feature => `<li>${escapeHtml(feature)}</li>`).join('')}</ul>
     <div class="price-card-footer">
-      ${comingSoon ? '' : '<p>월 요금 · 부가세 별도 · 초기 설치비 별도</p>'}
+      ${comingSoon ? '' : '<p>월 요금 · 부가세 별도 · 초기 설치비 100,000원 별도</p>'}
       ${comingSoon ? `<div class="price-label" aria-disabled="true">${escapeHtml(price)}</div>` : `<a class="price-label" data-link href="/apply?service=reels&plan=${encodeURIComponent(name)}" aria-label="매일 릴스 솔루션 ${escapeHtml(name)} 신청하기">${escapeHtml(price)}</a>`}
     </div>
   </article>`;

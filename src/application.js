@@ -1,4 +1,7 @@
-const plans = { Standard: 149000, Deluxe: 599000, Premium: 999000 };
+import {PRICING, calculateFirstMonthPrice} from './commercial.js';
+import {createPolicyConsentEvidence} from './policy-documents.js';
+
+const plans = PRICING.plans;
 const money = value => `${value.toLocaleString('ko-KR')}₩`;
 
 export function renderApplication() {
@@ -40,18 +43,20 @@ export function renderApplication() {
           </div></fieldset>
         </div>
         <fieldset class="consents"><legend>필수 동의 항목</legend>
+          <label><input type="checkbox" name="termsConsent" required /><span><a href="/terms" target="_blank" rel="noopener">이용약관</a>에 동의합니다</span></label>
+          <label><input type="checkbox" name="refundConsent" required /><span><a href="/refund" target="_blank" rel="noopener">환불 정책</a>에 동의합니다</span></label>
           <label><input type="checkbox" name="processingConsent" required />편집 · 외부 AI 처리 희망 사항이며 실제 제작은 별도 협의·확정 후 진행됨을 이해합니다</label>
           <label data-posting-consent><input type="checkbox" name="postingConsent" required />자동 게시 희망 사항이며 실제 게시 권한은 별도 협의·확정이 필요함을 이해합니다</label>
-          <label><input type="checkbox" name="privacyConsent" required />신청 검토 및 연락을 위해 성함·전화번호·신청 내용·선택 및 동의 항목을 서버에 저장하는 데 동의합니다. 동의하지 않으면 신청을 접수할 수 없습니다</label><p class="customer-note"><a href="/privacy" target="_blank" rel="noopener">개인정보처리방침 보기 (새 창)</a></p>
+          <label><input type="checkbox" name="privacyConsent" required />신청 검토 및 연락을 위해 성함·전화번호·신청 내용·선택 및 동의 항목을 서버에 저장하는 데 동의합니다. 동의하지 않으면 신청을 접수할 수 없습니다</label><p class="customer-note policy-links"><a href="/terms" target="_blank" rel="noopener">이용약관</a> · <a href="/privacy" target="_blank" rel="noopener">개인정보처리방침</a> · <a href="/refund" target="_blank" rel="noopener">환불 정책</a> (새 창)</p>
         </fieldset>
         <fieldset class="consents application-notices"><legend>주의 사항</legend>
-          <p>결제일 이후 고객 맞춤 파이프라인 확정을 위해 추가적인 협의가 필요하며, 협의는 <strong>메시지로 진행됩니다.</strong></p>
-          <p>콘텐츠 업로드는 파이프라인 확정 이후, <strong>협의된 날짜부터 시작되며 한 달간 하루 영상 1개를 제공합니다.</strong> 연장은 매달 직접 결제하며 자동결제되지 않습니다. 시작일과 종료일은 계약 전에 안내합니다.</p>
+          <p>결제일에 설치를 시작합니다. 초기 상담에서 고객은 <strong>파이프라인 가이드라인 수정을 최대 2회</strong> 요청할 수 있습니다. 이는 가이드라인 확정을 위한 횟수이며 <strong>개별 콘텐츠마다 제공되는 수정 권리가 아닙니다.</strong></p>
+          <p>콘텐츠 제공은 가이드라인 확정 후 <strong>고객이 선택한 시작일부터 한 달간 달력일마다 1개</strong> 진행합니다. 계약 시 확정한 약정 콘텐츠 수는 임의로 변경하지 않습니다. 연장은 매달 직접 결제하며 자동 정기결제되지 않습니다.</p>
           <label><input type="checkbox" name="noticeConsent" required />네 이해했습니다.</label>
         </fieldset>
       </div>
-      <div class="payment-dock"><div class="order-summary" aria-live="polite"><div data-setup><span>파이프라인 설치 비용</span><strong>200,000₩</strong></div><div><span id="order-service"></span><strong id="order-price"></strong></div><div><span>부가세 (10%)</span><strong id="order-vat"></strong></div></div>
-      <p class="checkout-note">설치비와 서비스비는 부가세 별도이며, 아래 합계에는 부가세 10%가 포함됩니다.</p>
+      <div class="payment-dock"><div class="order-summary" aria-live="polite"><div data-setup><span>파이프라인 설치 비용</span><strong>${money(PRICING.setupSupplyWon)}</strong></div><div><span id="order-service"></span><strong id="order-price"></strong></div><div><span>부가세 (10%)</span><strong id="order-vat"></strong></div></div>
+      <p class="price-note">설치비와 서비스비는 부가세 별도이며, 아래 합계에는 부가세 10%가 포함됩니다.</p>
       <div class="checkout"><strong id="order-total" aria-live="polite"></strong><button type="submit">결제하기</button></div>
       <p class="checkout-note">현재 결제 서비스가 연결되지 않아 결제하기는 검토 대기 접수만 진행합니다. 결제·자동 제작·자동 게시·고객 등록은 실행되지 않습니다. 접수번호를 보관해주세요. Order 화면은 예시이며 실제 접수 조회 기능은 아닙니다.</p>
       <p id="checkout-status" role="status"></p></div>
@@ -79,13 +84,13 @@ export function bindApplication(root) {
     field('postingConsent').disabled = !autoPost;
     if (!autoPost) field('postingConsent').checked = false;
     form.querySelector('[data-posting-consent]').hidden = !autoPost;
-    const price = plans[field('plan').value];
+    const plan = field('plan').value;
+    const price = plans[plan];
+    const firstMonth = calculateFirstMonthPrice(plan);
     root.querySelector('#order-service').textContent = `매일 릴스 솔루션 (${field('plan').value})`;
     root.querySelector('#order-price').textContent = money(price);
-    const subtotal = price + 200000;
-    const vat = Math.round(subtotal * 0.1);
-    root.querySelector('#order-vat').textContent = money(vat);
-    root.querySelector('#order-total').textContent = `총 가격: ${money(subtotal + vat)}`;
+    root.querySelector('#order-vat').textContent = money(firstMonth.vatWon);
+    root.querySelector('#order-total').textContent = `총 가격: ${money(firstMonth.totalWon)}`;
     if (!busy && !completed) root.querySelector('#checkout-status').textContent = '';
   };
   form.addEventListener('change', sync);
@@ -106,7 +111,8 @@ export function bindApplication(root) {
     const payload = {};
     for (const name of ['customerName','customerPhone','service','plan','autoPost','existingAccount','brief','channel']) payload[name] = field(name).value.trim();
     if (payload.autoPost === 'no') payload.existingAccount = 'no';
-    for (const name of ['processingConsent','postingConsent','privacyConsent','noticeConsent']) payload[name] = field(name).checked;
+    for (const name of ['termsConsent','refundConsent','processingConsent','postingConsent','privacyConsent','noticeConsent']) payload[name] = field(name).checked;
+    payload.policyEvidence = createPolicyConsentEvidence();
     const status = root.querySelector('#checkout-status');
     const submit = form.querySelector('button[type=submit]');
     submit.disabled = true;

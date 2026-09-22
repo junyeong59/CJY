@@ -965,7 +965,7 @@ html:has(.landing) { scroll-behavior: smooth; }
 .checkout { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 48px 32px 24px; border-top: 1px solid #191919; }
 .checkout > strong { font-size: 32px; }
 .checkout button { border: 0; border-radius: 40px; padding: 16px 64px; background: #fff; color: #000; font-size: 24px; font-weight: 700; cursor: pointer; }
-.application .checkout-note, #checkout-status { margin: 0 32px; padding-bottom: 24px; color: #aaa; line-height: 1.5; }
+.application .checkout-note, .application .price-note, #checkout-status { margin: 0 32px; padding-bottom: 24px; color: #aaa; line-height: 1.5; }
 @media (max-width: 700px) {
  .application-main { padding-top: 40px; }
  .application-main h1 { margin-left: 24px; font-size: 28px; }
@@ -1012,7 +1012,7 @@ html:has(.landing) { scroll-behavior: smooth; }
   flex-shrink: 0; min-height: 44px; width: clamp(112px, 17vw, 220px);
   padding: clamp(10px, 1vw, 14px) 16px; font-size: clamp(16px, 1.4vw, 20px);
 }
-.payment-dock .checkout-note {
+.payment-dock .checkout-note, .payment-dock .price-note {
   margin: 0; padding: 0 var(--payment-gutter) clamp(10px, 1vw, 14px);
   font-size: clamp(11px, .9vw, 13px); line-height: 1.5; word-break: keep-all;
 }
