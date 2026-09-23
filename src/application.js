@@ -57,8 +57,8 @@ export function renderApplication() {
       </div>
       <div class="payment-dock"><div class="order-summary" aria-live="polite"><div data-setup><span>파이프라인 설치 비용</span><strong>${money(PRICING.setupSupplyWon)}</strong></div><div><span id="order-service"></span><strong id="order-price"></strong></div><div><span>부가세 (10%)</span><strong id="order-vat"></strong></div></div>
       <p class="price-note">설치비와 서비스비는 부가세 별도이며, 아래 합계에는 부가세 10%가 포함됩니다.</p>
-      <div class="checkout"><strong id="order-total" aria-live="polite"></strong><button type="submit">신청 접수하기</button></div>
-      <p class="checkout-note">2026.09.23 상업·결제·환불 조건은 PG 검토용 최종 기준으로 확정되었습니다. 그러나 실제 결제 처리자의 수령 법인, 처리 국가와 보유 기간이 확인·공개되기 전까지 결제 활성화는 차단되며, 개인정보 처리 공개가 완결되었다고 주장하지 않습니다. 현재는 검토 대기 접수만 진행하고 결제·자동 제작·자동 게시·고객 등록은 실행하지 않습니다. 접수번호를 보관해주세요. Order 화면은 예시이며 실제 접수 조회 기능은 아닙니다.</p>
+      <div class="checkout"><strong id="order-total" aria-live="polite"></strong><button type="submit">결제하기</button></div>
+      <p class="checkout-note">현재 결제 서비스가 연결되지 않아 결제하기는 검토 대기 접수만 진행합니다. 결제·자동 제작·자동 게시·고객 등록은 실행되지 않습니다. 접수번호를 보관해주세요. Order 화면은 예시이며 실제 접수 조회 기능은 아닙니다.</p>
       <p id="checkout-status" role="status"></p></div>
     </form>
   </main></div>`;

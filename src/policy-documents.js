@@ -1,7 +1,7 @@
-export const POLICY_VERSION_DATE = '2026-09-23';
-export const POLICY_EFFECTIVE_STATE = 'effective-current-service-payment-activation-blocked';
+export const POLICY_VERSION_DATE = '2026-09-22';
+export const POLICY_EFFECTIVE_STATE = 'effective-current-service-payment-disabled';
 
-export const HISTORICAL_PAYMENT_DISABLED_POLICY_DOCUMENTS = Object.freeze({
+export const POLICY_DOCUMENTS = Object.freeze({
   terms: Object.freeze({
     title: 'Terms',
     label: '이용약관',
@@ -44,52 +44,6 @@ export const HISTORICAL_PAYMENT_DISABLED_POLICY_DOCUMENTS = Object.freeze({
   })
 });
 
-export const POLICY_DOCUMENTS = Object.freeze({
-  terms: Object.freeze({
-    title: 'Terms',
-    label: '이용약관',
-    sections: Object.freeze([
-      ['서비스 이용약관', '이 약관은 씨제이와이(CJY)(대표 최준영)가 제공하는 매일 릴스 솔루션의 신청, 일회성 결제와 이용 조건을 정합니다. 이 버전의 상업·결제·환불 조건은 최종 기준으로 확정되어 PG 검토에 사용할 수 있습니다. 다만 개인정보 처리방침의 완결을 뜻하지 않으며, 실제 결제 처리자의 수령 법인, 처리 국가와 보유 기간이 확인·공개되기 전까지 결제 활성화는 차단됩니다.'],
-      ['판매자와 문의', '상호는 씨제이와이(CJY), 대표자는 최준영, 사업자등록번호는 626-51-01216이며 사업장 주소는 서울특별시 서대문구 이화여대7길 37, 3층 S125호(대현동)입니다. 문의는 cjy.support@gmail.com 또는 070-8121-2974로 접수합니다.'],
-      ['결제 사업자와 수단', '결제 기능이 활성화되면 CJY는 PortOne V2를 결제 연동 사업자로 사용하고 선택된 결제대행사(PG)인 KG이니시스 또는 NHN KCP의 결제창을 통해 카드와 사전에 검토·활성화된 PG 결제창 간편결제만 제공합니다. 실제 화면에는 주문에 사용되는 PG와 결제수단을 표시합니다.', '카드번호, CVC, 계좌 비밀번호 또는 간편결제 인증정보는 고객이 PG 결제창에 직접 입력하며 CJY가 원문을 수집하거나 저장하지 않습니다. PG 계약·채널 연동 및 라이브 승인이 완료되기 전에는 결제를 실행하지 않습니다.'],
-      ['요금·부가세와 일회성 구매', '초기 파이프라인 설치비 공급가액은 100,000원입니다. 한 달 요금 공급가액은 Standard 149,000원, Deluxe 599,000원, Premium 999,000원이며 부가세 10%가 별도입니다. 첫 달 부가세 포함 총액은 Standard 273,900원, Deluxe 768,900원, Premium 1,208,900원입니다.', '각 구매는 한 달에 대한 일회성 직접 결제이며 자동 정기결제, 자동 갱신 또는 빌링키 결제를 하지 않습니다. 다음 달은 고객이 다시 선택하고 직접 결제한 경우에만 별도 구매로 확정됩니다.'],
-      ['결제·설치와 권한 경계', '결제 확인은 선택한 서비스의 한 달 구매·주문과 적용되는 환불 권리를 확정합니다. 다만 결제만으로 내부 고객 등록·바인딩, 초대, 제작, 전달 또는 게시 권한이 생기지 않으며, 초기 Pilot 준비와 운영자 검토 단계만 열 수 있습니다.', '설치는 결제 확인 후 시작합니다. 제작은 상담, 고객 자료 사용 권한 확인, 파이프라인 가이드라인 확정과 별도의 제작 권한 확인 뒤에만 진행합니다. 전달은 고객이 선택하고 승인한 채널에서만 수행하며, 자동 게시는 고객의 별도 계정 권한과 게시 승인이 있어야 하고 기본값은 비활성입니다.'],
-      ['상담·시작일과 제공 수량', '초기 상담 전체에서 고객은 파이프라인 가이드라인 수정을 최대 2회 요청할 수 있습니다. 이는 항목별 또는 개별 콘텐츠마다 2회의 수정 권리를 뜻하지 않습니다.', '서비스는 가이드라인이 확정된 뒤 고객이 선택한 시작일부터 한 달 동안 달력일마다 콘텐츠 1개를 제공합니다. 계약 시 시작일, 종료일과 약정 콘텐츠 수를 확정하며 이를 임의로 변경하지 않습니다.'],
-      ['고객 자료와 외부 서비스', '고객은 제공 자료와 계정을 사용할 권한을 보유해야 합니다. 실제 제작이 별도로 승인된 경우 고객과 확정한 범위에서 외부 AI·음성 도구를 사용할 수 있고, 전달 또는 게시는 고객이 선택하고 별도로 승인한 채널에서만 수행합니다.'],
-      ['취소·환불과 법정 권리', '취소와 환불은 환불 정책에 따릅니다. 관계 법령이 보장하는 청약철회, 계약 해제·해지, 환급, 손해배상 및 기타 강행규정상 권리는 이 약관보다 우선하며 제한되지 않습니다.'],
-      ['변경', '중요한 약관 변경은 버전일과 적용 상태를 이 페이지에 표시하며 기존 계약에 불리하게 소급하지 않습니다.']
-    ])
-  }),
-  privacy: Object.freeze({
-    title: 'Privacy',
-    label: '개인정보처리방침',
-    sections: Object.freeze([
-      ['개인정보 처리방침', '씨제이와이(CJY)(대표 최준영, 이하 “운영자”)는 매일 릴스 솔루션 신청, 결제 확인, 상담 및 계약 이행에 필요한 개인정보 처리 내용을 안내합니다. 현재 웹 신청은 Railway의 신청 API로 검토 대기 접수되며 결제 기능이 활성화되기 전에는 PortOne 또는 PG로 결제정보를 전송하지 않습니다.'],
-      ['신청 처리 목적과 항목', '신청 검토와 연락을 위해 성함, 전화번호, 서비스·요금제 선택, 자동 게시 희망 여부, 기존 계정 사용 여부, 콘텐츠 스타일·요청 내용, 전달 채널 및 동의 값을 처리합니다. 접수 서버는 접수번호, 접수 시각, 무작위 요청 식별자와 보안·오류 기록을 처리할 수 있습니다.'],
-      ['결제 처리 목적과 항목', '결제 기능이 활성화되면 주문 생성, 결제 확인, 취소·환불, 중복·분쟁 대응을 위해 주문 식별자, 결제 식별자, 거래 식별자, 취소 식별자, PG·채널 구분, 금액·통화, 처리 상태, 관련 시각 및 요청·응답의 최소화한 해시를 처리합니다.', '카드번호, CVC, 계좌 비밀번호, 은행 또는 간편결제 인증정보는 PortOne V2를 통해 연결된 KG이니시스 또는 NHN KCP의 PG 결제창에서 처리되며 CJY 서버는 그 원문을 처리하지 않습니다. 결제 화면에서 실제 선택된 PG와 수단을 확인할 수 있습니다.'],
-      ['현재 처리 흐름과 외부 서비스', 'Railway는 신청 API와 운영 서버 호스팅에 사용합니다. 결제 활성화 후 브라우저는 PortOne V2를 통해 선택된 KG이니시스 또는 NHN KCP 결제창을 호출하고, 운영 서버는 반환값만 신뢰하지 않고 결제 식별자·상태·금액을 대조하며 취소 결과와 웹훅 식별자를 기록합니다.', '실제 제작이 별도로 승인된 경우 Hermes를 통해 OpenAI/Codex를 이용하고 음성 생성에는 ElevenLabs를 이용할 수 있습니다. Telegram은 고객이 해당 전달 채널을 선택한 경우 콘텐츠와 리포트 전달에 사용합니다. 고객 자료와 결과물은 고객 전용 비공개 저장소에서 다른 고객 자료와 구분합니다.'],
-      ['위탁·제3자 제공 및 국외 처리', '외부 서비스가 운영자의 지시에 따라 처리하는지 독립된 목적으로 제공받는지는 실제 계약과 처리 흐름에 따라 구분합니다. 실제 사용 전에 대상 서비스, 목적, 전달 항목과 필요한 동의 또는 권한을 확인합니다.', 'PortOne, PG, 호스팅·제작·전달 서비스의 실제 수령 법인, 처리 국가와 보유 기간은 계약과 배포 위치로 확인된 범위만 공개합니다. 결제 처리자의 이 정보가 확인·공개되기 전까지 결제 활성화는 차단되며, 이 방침은 개인정보 처리 공개가 완결되었다고 주장하지 않습니다.'],
-      ['보유와 파기', '처리 목적을 달성한 개인정보는 법령상 보존 의무나 진행 중인 법적·분쟁 보류가 없으면 지체 없이 파기합니다. 운영자가 로컬로 통제하는 콘텐츠 원본, 제작 중간물과 최종 결과물 등 콘텐츠 아티팩트는 계약 종료일부터 7일 이내 삭제하도록 예정하고 삭제합니다.', '제공자 사본은 제공자의 삭제 기능과 확인 결과에 따라 provider_deletion_pending 또는 held_unknown 상태로 남을 수 있습니다. 이 경우 삭제를 요청하고 결과를 대조·조정하며, 확인 전에는 삭제되었다고 주장하지 않습니다. 계약·청약철회 기록과 대금결제·공급 기록은 5년, 소비자 불만·분쟁 처리 기록은 3년, 표시·광고 기록은 6개월 등 법령상 기간 동안 필요한 범위만 콘텐츠 아티팩트와 분리해 보관합니다. 거래·분쟁 기록 및 무결성·중복 확인을 위한 최소한의 비콘텐츠 감사 해시는 해당 법적·운영상 필요 기간 동안 분리 보관하고 원문 콘텐츠나 결제 인증정보를 복원하는 용도로 사용하지 않습니다.'],
-      ['안전성 및 브라우저 저장', '전송 구간을 보호하고 담당자 접근 권한을 최소화하며 인증정보와 고객 자료를 분리합니다. 신청자의 성명, 전화번호 또는 요청 본문을 localStorage나 URL에 저장하지 않습니다. 안전한 재시도를 위한 무작위 요청 식별자만 sessionStorage에 저장합니다.'],
-      ['정보주체의 권리', '이용자는 개인정보 열람, 정정·삭제, 처리정지 및 동의 철회를 요청할 수 있습니다. 다른 법령의 보존 의무가 있는 경우 그 범위와 사유를 안내합니다.'],
-      ['개인정보 문의', '개인정보 담당자: 최준영 / 이메일: cjy.support@gmail.com / 전화: 070-8121-2974. 권리 행사와 고충 처리는 위 연락처로 요청할 수 있습니다.']
-    ])
-  }),
-  refund: Object.freeze({
-    title: 'Refund',
-    label: '환불 정책',
-    sections: Object.freeze([
-      ['취소 및 환불 정책', '이 정책은 향후 PortOne V2와 선택된 KG이니시스 또는 NHN KCP 결제창을 통한 일회성 한 달 구매에 적용할 최종 상업·환불 기준이며 PG 검토에 사용할 수 있습니다. 실제 결제 처리자의 수령 법인, 처리 국가와 보유 기간이 확인·공개되고 별도 활성화 검토가 완료되기 전까지 결제는 실행되지 않습니다.'],
-      ['환불 단계', '운영자의 설치 시작 표시 전 취소하면 부가세 포함 총 결제액의 100%를 환불합니다.', '설치가 시작된 뒤 초기 상담 중이며 서비스 활성화 전이면 부가세 포함 총 결제액의 50%를 환불합니다.', '서비스 활성화 후 환불액은 max(0, 부가세 포함 총 결제액 × 0.5 − (부가세 포함 월 이용료 ÷ 약정 콘텐츠 수 × 제공 완료 콘텐츠 수))로 계산합니다. 약정 콘텐츠 수는 계약 시 확정한 값을 사용하고 환불 계산을 위해 임의로 변경하지 않습니다.'],
-      ['원 단위 반올림', '중간 단가는 반올림하지 않고 위 식 전체를 계산한 뒤, 최종 계산 결과만 1원 단위에서 0.5원 이상 올림하는 반올림(half-up)을 적용합니다. 계산 결과가 음수이면 0원입니다.'],
-      ['계산 예시', 'Standard 첫 달 결제액 273,900원, 부가세 포함 월 이용료 163,900원, 약정 콘텐츠 30개 중 10개 제공 완료라면 273,900 × 0.5 − (163,900 ÷ 30 × 10) = 82,316.666…원이므로 최종 환불액은 82,317원입니다. 30개를 모두 제공한 경우 식의 결과가 음수이므로 환불액은 0원입니다.'],
-      ['환불 요청과 처리', 'cjy.support@gmail.com으로 주문번호 또는 결제 식별자, 신청자 성함과 취소 사유를 보내주세요. 카드번호 전체, CVC, 비밀번호 또는 간편결제 인증정보는 보내지 마세요.', '운영자는 주문과 제공 단계를 확인해 환불액을 산정하고 PortOne V2를 통해 선택된 PG에 취소를 요청합니다. 환불은 원 결제수단으로 처리하며, 취소 식별자, 처리 상태와 관련 시각을 대조해 결과를 안내합니다. 실제 반영 시점은 카드사·간편결제사 또는 PG 절차에 따라 달라질 수 있습니다.'],
-      ['불명확 상태와 수동 보류', '취소 또는 환불 처리 상태가 불명확(unknown)하거나 식별자·금액·웹훅이 일치하지 않으면 중복 취소를 자동 재시도하지 않고 수동 보류(manual hold)합니다. 운영자는 PortOne V2와 해당 PG의 거래·취소 상태를 대조한 뒤 확인된 결과와 필요한 후속 조치를 고객에게 안내합니다.'],
-      ['법정 권리 우선', '전자상거래법 등 관계 법령이 소비자에게 더 유리한 청약철회, 환급, 계약 해제·해지 또는 손해배상 권리를 보장하면 해당 법령이 이 정책보다 우선합니다. 서비스 개시나 주문 제작이라는 이유만으로 법정 권리를 일률적으로 제한하지 않습니다.']
-    ])
-  })
-});
-
 function sortForCanonicalJson(value) {
   if (Array.isArray(value)) return value.map(sortForCanonicalJson);
   if (value && typeof value === 'object') {
@@ -105,23 +59,12 @@ export function canonicalizePolicyDocument(document) {
 export const POLICY_METADATA = Object.freeze({
   versionDate: POLICY_VERSION_DATE,
   effectiveState: POLICY_EFFECTIVE_STATE,
-  checkoutEligible: false,
   paymentLive: false,
   documents: Object.freeze({
-    terms: Object.freeze({versionDate: POLICY_VERSION_DATE, canonicalSha256: 'e2dfe816ab5d949b5e51a7a5bb984d86128bbd203a96e7f13635a0880cad3adc'}),
-    privacy: Object.freeze({versionDate: POLICY_VERSION_DATE, canonicalSha256: 'b07a0934b795418aa249732b72737c8701331f4f4714aafaaae50218dca2e6b4'}),
-    refund: Object.freeze({versionDate: POLICY_VERSION_DATE, canonicalSha256: 'ab16ecefb34ab6d2949d742e5710a92e91f52f978a2b29d99eb0305db4ff700b'})
+    terms: Object.freeze({versionDate: POLICY_VERSION_DATE, canonicalSha256: '62b6587c8267a0cc108ae58754c1406ee600f8e5a736527fbda313a825c169af'}),
+    privacy: Object.freeze({versionDate: POLICY_VERSION_DATE, canonicalSha256: '21bef12f8afb99e0837f41f9ced44b35d3d8e2853a82379bdea61a7b3055bc45'}),
+    refund: Object.freeze({versionDate: POLICY_VERSION_DATE, canonicalSha256: '337bca0be7f4246fee9e0062a1723cf1df83dc41dd5cc69b9bc2fea6923da49e'})
   })
-});
-
-export const HISTORICAL_PAYMENT_DISABLED_POLICY_EVIDENCE = Object.freeze({
-  schemaVersion: 1,
-  effectiveState: 'effective-current-service-payment-disabled',
-  documents: Object.freeze([
-    Object.freeze({kind:'terms', versionDate:'2026-09-22', canonicalSha256:'62b6587c8267a0cc108ae58754c1406ee600f8e5a736527fbda313a825c169af'}),
-    Object.freeze({kind:'privacy', versionDate:'2026-09-22', canonicalSha256:'21bef12f8afb99e0837f41f9ced44b35d3d8e2853a82379bdea61a7b3055bc45'}),
-    Object.freeze({kind:'refund', versionDate:'2026-09-22', canonicalSha256:'337bca0be7f4246fee9e0062a1723cf1df83dc41dd5cc69b9bc2fea6923da49e'})
-  ])
 });
 
 const CONSENT_DOCUMENT_ORDER = Object.freeze(['terms', 'privacy', 'refund']);

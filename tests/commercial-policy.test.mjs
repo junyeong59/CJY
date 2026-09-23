@@ -5,8 +5,6 @@ import assert from 'node:assert/strict';
 import {renderApplication} from '../src/application.js';
 import {renderFooter, renderPolicy} from '../src/policies.js';
 import {
-  HISTORICAL_PAYMENT_DISABLED_POLICY_DOCUMENTS,
-  HISTORICAL_PAYMENT_DISABLED_POLICY_EVIDENCE,
   POLICY_DOCUMENTS,
   POLICY_METADATA,
   canonicalizePolicyDocument,
@@ -64,10 +62,9 @@ test('refund calculation rejects invalid counts instead of silently changing the
   assert.throws(() => calculateRefund({...input, deliveredItemCount: 0, promisedItemCount: 0}), /promisedItemCount/);
 });
 
-test('policy metadata preserves current consent evidence but blocks checkout and payment activation', () => {
-  assert.equal(POLICY_METADATA.versionDate, '2026-09-23');
-  assert.equal(POLICY_METADATA.effectiveState, 'effective-current-service-payment-activation-blocked');
-  assert.equal(POLICY_METADATA.checkoutEligible, false);
+test('policy metadata is deterministic, hash-verified, and effective with payment disabled', () => {
+  assert.equal(POLICY_METADATA.versionDate, '2026-09-22');
+  assert.equal(POLICY_METADATA.effectiveState, 'effective-current-service-payment-disabled');
   assert.equal(POLICY_METADATA.paymentLive, false);
   assert.deepEqual(Object.keys(POLICY_METADATA.documents).sort(), ['privacy', 'refund', 'terms']);
 
@@ -78,45 +75,33 @@ test('policy metadata preserves current consent evidence but blocks checkout and
   }
 });
 
-test('application consent evidence is an exact bounded snapshot of the current policy registry', () => {
+test('application consent evidence is an exact bounded snapshot of the policy registry', () => {
   assert.deepEqual(createPolicyConsentEvidence(), {
     schemaVersion: 1,
-    effectiveState: 'effective-current-service-payment-activation-blocked',
-    documents: ['terms','privacy','refund'].map(kind => ({kind, ...POLICY_METADATA.documents[kind]}))
+    effectiveState: 'effective-current-service-payment-disabled',
+    documents: [
+      {kind:'terms', versionDate:'2026-09-22', canonicalSha256:'62b6587c8267a0cc108ae58754c1406ee600f8e5a736527fbda313a825c169af'},
+      {kind:'privacy', versionDate:'2026-09-22', canonicalSha256:'21bef12f8afb99e0837f41f9ced44b35d3d8e2853a82379bdea61a7b3055bc45'},
+      {kind:'refund', versionDate:'2026-09-22', canonicalSha256:'337bca0be7f4246fee9e0062a1723cf1df83dc41dd5cc69b9bc2fea6923da49e'}
+    ]
   });
   assert.equal('collectedAt' in createPolicyConsentEvidence(), false);
 });
 
-test('the 2026-09-22 payment-disabled policy remains byte-identical and separately evidenced', () => {
-  const hashes={terms:'62b6587c8267a0cc108ae58754c1406ee600f8e5a736527fbda313a825c169af',privacy:'21bef12f8afb99e0837f41f9ced44b35d3d8e2853a82379bdea61a7b3055bc45',refund:'337bca0be7f4246fee9e0062a1723cf1df83dc41dd5cc69b9bc2fea6923da49e'};
-  for(const [kind,document] of Object.entries(HISTORICAL_PAYMENT_DISABLED_POLICY_DOCUMENTS)) assert.equal(createHash('sha256').update(canonicalizePolicyDocument(document)).digest('hex'),hashes[kind]);
-  assert.deepEqual(HISTORICAL_PAYMENT_DISABLED_POLICY_EVIDENCE,{schemaVersion:1,effectiveState:'effective-current-service-payment-disabled',documents:['terms','privacy','refund'].map(kind=>({kind,versionDate:'2026-09-22',canonicalSha256:hashes[kind]}))});
-});
-
-test('final commercial terms state the bounded PortOne/PG, authority, refund, processor, and legal-right facts', () => {
+test('policies state confirmed commercial, revision, retention, provider, and legal-right facts', () => {
   const terms = canonicalizePolicyDocument(POLICY_DOCUMENTS.terms);
   const privacy = canonicalizePolicyDocument(POLICY_DOCUMENTS.privacy);
   const refund = canonicalizePolicyDocument(POLICY_DOCUMENTS.refund);
 
-  for (const text of ['PortOne V2','KG이니시스','NHN KCP','100,000원', 'Standard 149,000원', 'Deluxe 599,000원', 'Premium 999,000원', '273,900원', '768,900원', '1,208,900원', '자동 정기결제']) assert.match(terms, new RegExp(text));
-  assert.match(terms, /카드.*PG 결제창.*간편결제/);
-  assert.match(terms, /카드번호.*CVC.*수집.*저장하지/);
-  assert.match(terms, /(결제 확인 후.*설치|설치.*결제 확인 후)/);
+  for (const text of ['100,000원', 'Standard 149,000원', 'Deluxe 599,000원', 'Premium 999,000원', '273,900원', '768,900원', '1,208,900원', '자동 정기결제는 하지 않습니다']) assert.match(terms, new RegExp(text));
+  assert.match(terms, /결제일에 설치를 시작/);
   assert.match(terms, /파이프라인 가이드라인.*2회/);
   assert.match(terms, /개별 콘텐츠마다.*수정/);
   assert.match(terms, /고객이 선택한 시작일.*한 달/);
   assert.match(terms, /약정 콘텐츠 수.*변경하지/);
-  assert.match(terms, /결제 확인.*한 달 구매.*주문.*환불 권리.*확정/);
-  assert.match(terms, /결제만으로.*내부 고객 등록.*바인딩.*초대.*제작.*전달.*게시.*권한/);
-  assert.doesNotMatch(terms, /결제만으로[^.]*고객 구속력 있는 계약 확정[^.]*생기지/);
 
-  for (const text of ['Railway','PortOne V2','KG이니시스','NHN KCP','OpenAI/Codex', 'Hermes', 'ElevenLabs', 'Telegram', '고객 전용 비공개 저장소']) assert.match(privacy, new RegExp(text));
-  for (const text of ['주문 식별자','결제 식별자','거래 식별자','취소 식별자','상태','시각','최소화한 해시']) assert.match(privacy,new RegExp(text));
-  assert.match(privacy,/카드번호.*CVC.*계좌.*간편결제 인증정보.*처리하지/);
-  assert.match(privacy, /로컬.*콘텐츠 아티팩트.*7일 이내.*예정.*삭제/);
-  assert.match(privacy, /provider_deletion_pending.*held_unknown/);
-  assert.match(privacy, /삭제를 요청.*대조.*삭제되었다고 주장하지/);
-  assert.match(privacy, /5년.*3년.*6개월/);
+  for (const text of ['Railway', 'OpenAI/Codex', 'Hermes', 'ElevenLabs', 'Telegram', '고객 전용 비공개 저장소']) assert.match(privacy, new RegExp(text));
+  assert.match(privacy, /계약 종료.*7일 이내/);
   assert.match(privacy, /거래·분쟁 기록.*감사 해시/);
   assert.match(privacy, /최준영/);
   assert.match(privacy, /cjy.support@gmail.com/);
@@ -129,10 +114,6 @@ test('final commercial terms state the bounded PortOne/PG, authority, refund, pr
   assert.match(refund, /82,317원/);
   assert.match(refund, /최종 계산 결과.*1원 단위.*반올림/);
   assert.match(refund, /법령.*우선/);
-  assert.match(refund, /원 결제수단/);
-  assert.match(refund, /처리 상태가 불명확|unknown/);
-  assert.match(refund, /수동 보류|manual hold/);
-  assert.match(refund, /취소 식별자.*상태.*시각/);
 });
 
 test('application and footer expose all policies and distinguish guideline revisions from item revisions', () => {
@@ -147,15 +128,12 @@ test('application and footer expose all policies and distinguish guideline revis
   assert.doesNotMatch(application, /200,000₩/);
 });
 
-test('rendered policies identify final commercial terms while checkout and payment stay blocked', () => {
+test('rendered policies carry reusable version and hash metadata without claiming payment is live', () => {
   for (const kind of ['terms', 'privacy', 'refund']) {
     const html = renderPolicy(kind);
-    assert.match(html, /시행일 2026\.09\.23 · 버전 2026\.09\.23 · 상업·결제·환불 조건 확정 · 결제 활성화 차단/);
-    assert.match(html, /수령 법인.*처리 국가.*보유 기간.*확인·공개/);
-    assert.match(html, /개인정보 처리방침.*완결.*아닙니다/);
-    assert.match(html, /data-effective-state="effective-current-service-payment-activation-blocked"/);
-    assert.match(html, /data-checkout-eligible="false"/);
-    assert.match(html, /data-payment-live="false"/);
+    assert.match(html, /시행일 2026\.09\.22 · 버전 2026\.09\.22 · 현재 결제 기능 미연동/);
+    assert.doesNotMatch(html, /결제 도입 전 준비본|검토용|초안|시행일 미정/);
+    assert.match(html, /data-effective-state="effective-current-service-payment-disabled"/);
     assert.match(html, new RegExp(`data-policy-hash="${POLICY_METADATA.documents[kind].canonicalSha256}"`));
   }
 });
@@ -166,11 +144,4 @@ test('tracked display sources contain no stale setup fee or old totals and landi
   const combined = sources.join('\n');
   assert.doesNotMatch(combined, /200,000|383,900|878,900|1,318,900|349,000/);
   assert.match(sources[0], /초기 설치비 100,000원/);
-});
-
-test('release-blocker phrases cannot regress into checkout-ready, no-contract, or unconditional deletion claims', () => {
-  const source=[renderApplication(),...['terms','privacy','refund'].map(renderPolicy)].join('\n');
-  for(const forbidden of [/checkout-eligible="true"/,/결제에 사용할 수 있도록 확정·시행/,/결제만으로[^.]*고객 구속력 있는 계약 확정[^.]*생기지/,/콘텐츠 아티팩트는 계약 종료일부터 7일 이내 삭제합니다/]) assert.doesNotMatch(source,forbidden);
-  assert.match(source,/checkout-eligible="false"/);
-  assert.match(source,/결제 활성화.*차단/);
 });
