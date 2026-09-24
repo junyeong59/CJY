@@ -33,7 +33,7 @@ test('application displays exact first-month totals for every confirmed plan',as
 test('narrow viewport keeps receipt and the single checkout button within the screen',async t=>{
  const {page}=await setup(t);await page.addStyleTag({url:'/src/styles.css'});await page.emulateMedia({reducedMotion:'reduce'});
  await page.waitForFunction(()=>getComputedStyle(document.body).margin==='0px');
- await page.setViewportSize({width:320,height:740});await page.locator('#checkout-status').evaluate(e=>e.textContent='신청이 검토 대기로 접수되었습니다. 접수번호: 10000000-0000-4000-8000-000000000001. 결제·제작·게시는 시작되지 않았습니다.');
+ await page.setViewportSize({width:320,height:740});await page.waitForFunction(()=>innerWidth===320&&getComputedStyle(document.querySelector('.landing-nav')).gap==='18px');await page.locator('#checkout-status').evaluate(e=>e.textContent='신청이 검토 대기로 접수되었습니다. 접수번호: 10000000-0000-4000-8000-000000000001. 결제·제작·게시는 시작되지 않았습니다.');
  const overflow=await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth,mode:document.compatMode,margin:getComputedStyle(document.body).margin,sheets:[...document.styleSheets].map(s=>({href:s.href,rules:[...s.cssRules].slice(0,5).map(r=>r.cssText),disabled:s.disabled})),nodes:[...document.querySelectorAll('*')].map(e=>({tag:e.tagName,cls:e.className,id:e.id,right:e.getBoundingClientRect().right,width:e.getBoundingClientRect().width})).filter(e=>e.right>innerWidth+1).slice(0,12)}));
  assert.equal(overflow.scroll<=overflow.width,true,JSON.stringify(overflow));
  for(const button of await page.locator('.checkout button').all()){const box=await button.boundingBox();assert.ok(box.x>=0&&box.x+box.width<=320);}
@@ -46,8 +46,8 @@ test('invalid local fields never send; server errors and invalid success bodies 
  code=400;await page.locator('button[type=submit]').click();await page.waitForFunction(()=>document.querySelector('#checkout-status').textContent.includes('입력'));
  code=409;await page.locator('button[type=submit]').click();await page.waitForFunction(()=>document.querySelector('#checkout-status').textContent.includes('이전 신청'));
  code=200;await page.locator('button[type=submit]').click();await page.waitForFunction(()=>document.querySelector('#checkout-status').textContent.includes('확인하지 못'));
- assert.equal(await page.getByRole('button',{name:'결제하기',exact:true}).isEnabled(),true);
- assert.match(await page.locator('.checkout-note').textContent(),/결제 서비스가 연결되지 않아/);
+ assert.equal(await page.getByRole('button',{name:'신청 접수하기',exact:true}).isEnabled(),true);
+ assert.match(await page.locator('.checkout-note').textContent(),/수령 법인.*처리 국가.*보유 기간.*확인·공개/);
  assert.equal(await page.locator('#checkout-status img').count(),0);assert.equal(requests,4);
 });
 test('network failure keeps same idempotency key; duplicate events do not submit twice',async t=>{
@@ -58,14 +58,15 @@ test('network failure keeps same idempotency key; duplicate events do not submit
  await page.waitForFunction(()=>!document.querySelector('button[type=submit]').disabled);
  await page.locator('button[type=submit]').click();await page.waitForFunction(()=>document.querySelector('#checkout-status').textContent.includes('10000000-0000-4000-8000-000000000002'));assert.equal(keys[0],keys[1]);
 });
-test('single 결제하기 CTA submits intake once without charging or leaving the review receipt',async t=>{
+test('single 신청 접수하기 CTA submits intake once without charging or leaving the review receipt',async t=>{
  const {page,fill}=await setup(t);let captured;let requests=0;const initialUrl=page.url();
  await page.route('**/api/applications',route=>{requests++;captured=route.request();return route.fulfill({status:201,contentType:'application/json',body:JSON.stringify({status:'pending-review',receipt:'10000000-0000-4000-8000-000000000001'})});});
  assert.equal(await page.locator('.checkout button').count(),1,'checkout has a single CTA');
- const checkout=page.getByRole('button',{name:'결제하기',exact:true});
+ const checkout=page.getByRole('button',{name:'신청 접수하기',exact:true});
  assert.equal(await checkout.isEnabled(),true);assert.equal(await checkout.getAttribute('type'),'submit');
  assert.equal(await page.locator('.checkout-note').isVisible(),true);
- assert.match(await page.locator('.checkout-note').textContent(),/결제 서비스가 연결되지 않아/);
+ assert.match(await page.locator('.checkout-note').textContent(),/상업·결제·환불 조건.*확정/);
+ assert.match(await page.locator('.checkout-note').textContent(),/결제 활성화.*차단/);
  assert.match(await page.locator('.checkout-note').textContent(),/검토 대기 접수만/);
  await checkout.click();assert.equal(requests,0,'required fields block intake');
  await fill();await checkout.click();
@@ -74,10 +75,10 @@ test('single 결제하기 CTA submits intake once without charging or leaving th
  assert.equal(captured.method(),'POST');assert.match(captured.headers()['idempotency-key'],/^[a-f0-9-]{36}$/);
  const payload=captured.postDataJSON();
  assert.equal(payload.autoPost,'no');assert.equal(payload.postingConsent,false);assert.equal(payload.termsConsent,true);assert.equal(payload.refundConsent,true);assert.equal(payload.productionAuthorized,undefined);
- assert.deepEqual(payload.policyEvidence,{schemaVersion:1,effectiveState:'effective-current-service-payment-disabled',documents:[
-  {kind:'terms',versionDate:'2026-09-22',canonicalSha256:'62b6587c8267a0cc108ae58754c1406ee600f8e5a736527fbda313a825c169af'},
-  {kind:'privacy',versionDate:'2026-09-22',canonicalSha256:'21bef12f8afb99e0837f41f9ced44b35d3d8e2853a82379bdea61a7b3055bc45'},
-  {kind:'refund',versionDate:'2026-09-22',canonicalSha256:'337bca0be7f4246fee9e0062a1723cf1df83dc41dd5cc69b9bc2fea6923da49e'}
+ assert.deepEqual(payload.policyEvidence,{schemaVersion:1,effectiveState:'effective-current-service-payment-activation-blocked',documents:[
+  {kind:'terms',versionDate:'2026-09-23',canonicalSha256:'e2dfe816ab5d949b5e51a7a5bb984d86128bbd203a96e7f13635a0880cad3adc'},
+  {kind:'privacy',versionDate:'2026-09-23',canonicalSha256:'b07a0934b795418aa249732b72737c8701331f4f4714aafaaae50218dca2e6b4'},
+  {kind:'refund',versionDate:'2026-09-23',canonicalSha256:'ab16ecefb34ab6d2949d742e5710a92e91f52f978a2b29d99eb0305db4ff700b'}
  ]});
  assert.equal('collectedAt' in payload.policyEvidence,false);
  assert.equal(await page.locator('.checkout button').count(),1);
