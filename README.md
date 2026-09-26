@@ -26,6 +26,10 @@ npm run og
 
 `npm run og` regenerates `public/assets/musicnow-invite-og.png` at 1200x630.
 
+## Local KG이니시스 V2 PG review (not production checkout)
+
+See [`sandbox/review/README.md`](sandbox/review/README.md) for the default-off localhost-only review surface, required TEST-channel provenance, single-button checkout/cancel/redirect behavior, and verification limits. Start the disabled-until-configured preview with `PORTONE_REVIEW_UI=1 node scripts/serve-portone-review.mjs`, then open `http://127.0.0.1:4175/review/apply`. This is excluded from the public build and never submits an intake request. Actual PG-window verification is blocked until a genuine KG이니시스 V2 TEST store/channel is supplied; mock SDK tests and a real CDN load are not PG-window evidence. Do not enter card details or authorize a transaction.
+
 ## Deploy Notes
 
 - Replace `appStoreUrl`, `instagramUrl`, and contact emails in `src/config.js`.
