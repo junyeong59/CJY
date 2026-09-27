@@ -3,7 +3,7 @@ for(const [plan,total] of [['Standard',273900],['Deluxe',768900],['Premium',1208
  let saved=false,opened=false;const trace=[],calls=[];const draftId='a0000000-0000-4000-8000-000000000011';const order={...readyOrder,plan,totalAmount:total,draftId,orderName:'CJY Reels '+plan};
  const {page,fill}=await directPage(t,async(a,r)=>{let json;
  if(a==='status')json={status:'session-ready',draftId};
- if(a==='submit'){trace.push('submit');const b=r.request().postDataJSON();assert.deepEqual(b.consentBundle,{version:'cjy-direct-test-2026-09-27',termsRefund:true,privacy:true});assert.equal(b.draftId,draftId);assert.equal(b.plan,plan);assert.equal(b.processingConsent,undefined);saved=true;json={receipt,status:'pending-review',draftId};}
+ if(a==='submit'){trace.push('submit');const b=r.request().postDataJSON();assert.deepEqual(b.consentBundle,{version:'cjy-direct-test-2026-09-27',termsRefund:true,privacy:true,pilotRights:true,pilotProcessing:true,pilotVersion:'cjy-firstPilot-2026-09-27'});assert.equal(b.draftId,draftId);assert.equal(b.plan,plan);assert.equal(b.processingConsent,undefined);saved=true;json={receipt,status:'pending-review',draftId};}
  if(a==='open'){trace.push('open');assert.equal(r.request().postDataJSON().draftId,draftId);opened=true;json=order;}
  if(a==='verify'){assert.equal(r.request().postDataJSON().draftId,draftId);json={...order,state:'paid'};}
  if(a==='orders')json={draftId,orders:opened?[{...order,state:'paid',createdAt:'2026-09-27T00:00:00Z',paidAt:'2026-09-27T00:01:00Z'}]:[]};
