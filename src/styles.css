@@ -1254,3 +1254,18 @@ html:has(.landing) { scroll-behavior: smooth; }
   .policy-main section .policy-review { font-size: 15px; }
   .business-footer { padding: 28px 24px; }
 }
+
+
+/* Direct checkout stays in document flow: no fixed overlay over inputs or keyboard focus. */
+[data-direct-checkout] .payment-dock { position: static; margin-top: 32px; max-height: none; overflow: visible; }
+/* Focus must not restart a reveal animation and briefly erase completed fields. */
+.application [data-direct-checkout] .application-fields > *,
+.application [data-direct-checkout] .payment-dock { animation: none; }
+[data-existing-order] { margin: 24px 32px 64px; padding: 24px; border: 1px solid #444; border-radius: 20px; }
+[data-new-order], .order-button { cursor: pointer; }
+[data-new-order] { margin: 16px; padding: 12px 24px; border-radius: 24px; }
+.owned-order { padding: 24px; margin: 24px 0; border: 1px solid #444; border-radius: 24px; }
+.owned-order dl > div { display: grid; grid-template-columns: minmax(110px,1fr) minmax(0,2fr); gap: 16px; padding: 10px 0; }
+.owned-order dd { margin: 0; overflow-wrap: anywhere; }
+.order-actions { flex-wrap: wrap; }
+.order-actions button { font: inherit; }

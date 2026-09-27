@@ -439,8 +439,9 @@ function renderApp() {
   if (["/", "/apply", "/order", "/order/status", "/order/details", "/terms", "/privacy", "/refund"].includes(normalizePath(window.location.pathname))) {
     app.querySelector(".landing")?.insertAdjacentHTML("beforeend", renderFooter());
   }
-  cleanupApplication = bindApplication(app);
-  bindOrder(app, navigateTo);
+  const disposeApplication = bindApplication(app);
+  const disposeOrder = bindOrder(app, navigateTo);
+  cleanupApplication = () => { disposeApplication?.(); disposeOrder?.(); };
   bindHeroGradient();
   bindScrollReveal();
   document.body.dataset.route = normalizePath(window.location.pathname).startsWith("/musicnow/join/")
