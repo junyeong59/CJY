@@ -1,3 +1,4 @@
+import {renderDirectApplication,bindDirectApplication} from './direct-application.js';
 import {applyApi,bindApplyCheckout} from './apply-checkout.js';
 import {PRICING, calculateFirstMonthPrice} from './commercial.js';
 import {createPolicyConsentEvidence} from './policy-documents.js';
@@ -8,6 +9,7 @@ const money = value => `${value.toLocaleString('ko-KR')}₩`;
 // Static local PG review callers retain their original render-only markup.
 // The public route explicitly opts into the session-bound TEST controls.
 export function renderApplication({integrated=false}={}) {
+  if(integrated)return renderDirectApplication();
   return `<div class="landing application"><header class="landing-header"><nav class="landing-nav" aria-label="메인 메뉴">
     <a class="landing-brand" href="/" data-link aria-label="CJY 메인"><img src="/component/CJY.svg" alt="CJY" width="73" height="31" /></a>
     <a href="/#product" data-link>Product</a><a href="/#pricing" data-link>Pricing</a><a href="/order" data-link>Order</a>
@@ -72,6 +74,7 @@ export function renderApplication({integrated=false}={}) {
 }
 
 export function bindApplication(root) {
+  if(root.querySelector('[data-direct-checkout]'))return bindDirectApplication(root);
   const form = root.querySelector('#application-form');
   if (!form) return;
   const field = name => form.elements.namedItem(name);

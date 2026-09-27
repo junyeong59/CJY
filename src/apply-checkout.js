@@ -4,7 +4,7 @@ export async function applyApi(action,body={}){
  if(!r.ok)throw Object.assign(Error('apply_unavailable'),{status:r.status});return r.json();
 }
 let sdk;
-function loadSdk(){return sdk??=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://cdn.portone.io/v2/browser-sdk.js';const fail=()=>{clearTimeout(timeout);s.remove();reject(Error('sdk_unavailable'));};const timeout=setTimeout(fail,10000);s.onload=()=>{clearTimeout(timeout);typeof window.PortOne?.requestPayment==='function'?resolve(window.PortOne):fail();};s.onerror=fail;document.head.appendChild(s);}).catch(error=>{sdk=undefined;throw error;});}
+export function loadSdk(){return sdk??=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://cdn.portone.io/v2/browser-sdk.js';const fail=()=>{clearTimeout(timeout);s.remove();reject(Error('sdk_unavailable'));};const timeout=setTimeout(fail,10000);s.onload=()=>{clearTimeout(timeout);typeof window.PortOne?.requestPayment==='function'?resolve(window.PortOne):fail();};s.onerror=fail;document.head.appendChild(s);}).catch(error=>{sdk=undefined;throw error;});}
 export function bindApplyCheckout(form,onReceipt){
  const status=form.querySelector('#checkout-status'),controls=form.querySelector('[data-test-controls]'),pay=form.querySelector('[data-test-pay]'),check=form.querySelector('[data-test-check]');
  let current=null,busy=false,disposed=false,openUnknown=false;

@@ -31,3 +31,5 @@
   Cache-Control: no-store
 /src/application.js
   Cache-Control: no-store
+/src/direct-application.js
+  Cache-Control: no-store
