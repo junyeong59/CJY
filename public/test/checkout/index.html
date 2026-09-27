@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><title>CJY · 초대 전용 TEST 결제</title><link rel="stylesheet" href="/src/test-checkout.css"><script type="module" src="/src/test-checkout.js"></script></head>
+<body><main><a href="/">CJY</a><h1>초대 전용 TEST 결제</h1>
+<p>Standard 첫 달 <strong>273,900원 (VAT 포함)</strong>. 실제 출금될 수 있습니다. 관리자와 확인한 초대 대상만 진행하세요. Deluxe/Premium은 현재 초기 Pilot 연결을 지원하지 않습니다.</p>
+<p>서버가 결제 금액·통화·상점·TEST 채널을 확인한 뒤 사전 승인된 이 접수의 첫 시안 1건만 제작하여 운영자에게 전달합니다. 기존 5,000원 제작비 상한 안에서 처리하며 고객 전송, 정기 운영, 게시·예약 또는 LIVE 전환은 실행하지 않습니다.</p>
+<p>이름·전화번호·이메일은 결제창 요청 시 PortOne 및 KG이니시스로 전달됩니다. 카드정보는 PG 화면에서만 입력하세요. CJY에는 기존 신청과 주문, 동의 버전·시각, 검증 해시, 초기 작업 연결이 저장되며 원문 PG 응답은 저장하지 않습니다. 결제 기록은 관련 보존 정책의 적용을 받습니다.</p>
+<nav><a href="/terms">이용약관</a> · <a href="/privacy">개인정보처리방침</a> · <a href="/refund">환불 정책</a></nav>
+<form id="test-checkout" method="dialog"><fieldset disabled style="border:0;padding:0;margin:0;min-width:0"><legend>초대 전용 TEST 결제 정보</legend><label>관리자가 발급한 단기 초대 코드<input name="capability" type="password" autocomplete="off" required minlength="43" maxlength="128"></label>
+<label>결제자 이름<input name="fullName" required maxlength="30" autocomplete="name"></label><label>전화번호<input name="phoneNumber" type="tel" required maxlength="30" autocomplete="tel"></label><label>이메일<input name="email" type="email" required maxlength="254" autocomplete="email"></label>
+<label class="consent"><input name="consent" type="checkbox" required>위 TEST 처리·결제 안내와 실제 출금 가능성, 첫 시안 1건 제작·운영자 전달 범위를 이해하고 동의합니다. (cjy-test-2026-09-26)</label>
+<button type="submit" disabled>TEST 결제창 열기</button></fieldset></form>
+<noscript><p>안전한 결제를 위해 JavaScript가 필요합니다. 현재 결제 정보 입력과 제출은 차단되어 있습니다.</p></noscript>
+<button id="check-status" type="button">서버 결제 상태 확인</button><p id="checkout-status" role="status" aria-live="polite">관리자 발급 초대가 필요합니다.</p><p id="checkout-diagnostic"></p>
+<p>결제창 닫기는 승인된 결제의 취소·환불이 아닙니다. 결과가 미확인되면 다시 결제하지 말고 관리자에게 확인하세요. <a href="/apply">일반 신청으로 돌아가기</a></p></main></body></html>
