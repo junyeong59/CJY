@@ -1,16 +1,19 @@
+import {applyApi,bindApplyCheckout} from './apply-checkout.js';
 import {PRICING, calculateFirstMonthPrice} from './commercial.js';
 import {createPolicyConsentEvidence} from './policy-documents.js';
 
 const plans = PRICING.plans;
 const money = value => `${value.toLocaleString('ko-KR')}₩`;
 
-export function renderApplication() {
+// Static local PG review callers retain their original render-only markup.
+// The public route explicitly opts into the session-bound TEST controls.
+export function renderApplication({integrated=false}={}) {
   return `<div class="landing application"><header class="landing-header"><nav class="landing-nav" aria-label="메인 메뉴">
     <a class="landing-brand" href="/" data-link aria-label="CJY 메인"><img src="/component/CJY.svg" alt="CJY" width="73" height="31" /></a>
     <a href="/#product" data-link>Product</a><a href="/#pricing" data-link>Pricing</a><a href="/order" data-link>Order</a>
   </nav></header>
   <main class="application-main"><h1>서비스 신청하기</h1>
-    <form id="application-form">
+    <form id="application-form"${integrated ? ' method="dialog"' : ''}>
       <div class="application-fields">
         <section class="customer-section" aria-labelledby="customer-heading">
           <h2 id="customer-heading" class="application-section-title">고객 정보</h2>
@@ -54,11 +57,15 @@ export function renderApplication() {
           <p>콘텐츠 제공은 가이드라인 확정 후 <strong>고객이 선택한 시작일부터 한 달간 달력일마다 1개</strong> 진행합니다. 계약 시 확정한 약정 콘텐츠 수는 임의로 변경하지 않습니다. 연장은 매달 직접 결제하며 자동 정기결제되지 않습니다.</p>
           <label><input type="checkbox" name="noticeConsent" required />네 이해했습니다.</label>
         </fieldset>
+      ${integrated ? `<fieldset class="consents"><legend>사전 승인 TEST 안내</legend><label class="customer-note"><input type="checkbox" name="testConsent" /> (선택) 사전 승인된 Standard 텍스트·음성 첫 시안 1건만 TEST 결제 후 운영자에게 전달됨을 이해합니다. 실제 청구·LIVE·정기 운영·자동 게시가 아닙니다. 결제 시 신청 성함·전화번호와 아래 이메일이 PortOne·PG로 전달됩니다.</label>
+      <label class="customer-note test-email">TEST 결제 이메일 (PG 전달 전용, 신청 서버에는 저장하지 않음)<input type="email" name="testEmail" autocomplete="email" maxlength="254" /></label>
+      <div data-test-controls hidden><button type="button" data-test-pay>승인 확인 후 TEST 결제 계속</button><button type="button" data-test-check>접수·결제 상태 확인</button></div><p class="customer-note">동일 브라우저의 필수 보안 쿠키로 7일간 접수 상태를 확인합니다. 쿠키를 삭제하면 자동 복구할 수 없습니다.</p></fieldset>` : ''}
       </div>
       <div class="payment-dock"><div class="order-summary" aria-live="polite"><div data-setup><span>파이프라인 설치 비용</span><strong>${money(PRICING.setupSupplyWon)}</strong></div><div><span id="order-service"></span><strong id="order-price"></strong></div><div><span>부가세 (10%)</span><strong id="order-vat"></strong></div></div>
       <p class="price-note">설치비와 서비스비는 부가세 별도이며, 아래 합계에는 부가세 10%가 포함됩니다.</p>
-      <div class="checkout"><strong id="order-total" aria-live="polite"></strong><button type="submit">신청 접수하기</button></div>
-      <p class="checkout-note">2026.09.23 상업·결제·환불 조건은 PG 검토용 최종 기준으로 확정되었습니다. 그러나 실제 결제 처리자의 수령 법인, 처리 국가와 보유 기간이 확인·공개되기 전까지 결제 활성화는 차단되며, 개인정보 처리 공개가 완결되었다고 주장하지 않습니다. 현재는 검토 대기 접수만 진행하고 결제·자동 제작·자동 게시·고객 등록은 실행하지 않습니다. 접수번호를 보관해주세요. Order 화면은 예시이며 실제 접수 조회 기능은 아닙니다.</p>
+      <div class="checkout"><strong id="order-total" aria-live="polite"></strong><button type="submit"${integrated ? ' disabled' : ''}>신청 접수하기</button></div>
+      <p class="checkout-note">2026.09.23 상업·결제·환불 조건은 PG 검토용 최종 기준으로 확정되었습니다. 그러나 실제 결제 처리자의 수령 법인, 처리 국가와 보유 기간이 확인·공개되기 전까지 결제 활성화는 차단되며, 개인정보 처리 공개가 완결되었다고 주장하지 않습니다. 공개 신청은 검토 대기로 접수됩니다. 운영자가 해당 접수의 권리·예산·실행 시간을 사전 승인한 경우에만 별도 동의로 TEST 결제를 진행합니다. LIVE 결제·고객 등록·정기 제작·자동 게시는 활성화하지 않습니다. 접수번호를 보관해주세요. Order 화면은 예시이며 실제 접수 조회 기능은 아닙니다.</p>
+
       <p id="checkout-status" role="status"></p></div>
     </form>
   </main></div>`;
@@ -69,10 +76,10 @@ export function bindApplication(root) {
   if (!form) return;
   const field = name => form.elements.namedItem(name);
   let busy = false, completed = false;
-  let idempotencyKey;
-  try { idempotencyKey = sessionStorage.getItem('cjy-intake-key'); } catch {}
-  if (!/^[a-f0-9-]{36}$/.test(idempotencyKey || '')) idempotencyKey = crypto.randomUUID();
-  try { sessionStorage.setItem('cjy-intake-key', idempotencyKey); } catch {}
+  const submitButton=form.querySelector('button[type=submit]');
+  const checkout=bindApplyCheckout(form,()=>{completed=true;submitButton.disabled=true;submitButton.textContent='접수 완료';});
+  let sessionReady=false;
+  checkout.ready.then(()=>{sessionReady=true;if(!completed)submitButton.disabled=false;}).catch(()=>{root.querySelector('#checkout-status').textContent='안전한 접수 세션을 확인하지 못했습니다. 새로고침 후 다시 확인해주세요.';});
   const params = new URLSearchParams(window.location.search);
   field('service').value = 'reels';
   field('plan').value = Object.hasOwn(plans, params.get('plan')) ? params.get('plan') : 'Standard';
@@ -102,7 +109,7 @@ export function bindApplication(root) {
   });
   form.addEventListener('submit', async event => {
     event.preventDefault();
-    if (busy || completed) return;
+    if (busy || completed || !sessionReady) return;
     const phone = field('customerPhone').value.trim();
     field('customerPhone').setCustomValidity(/^[+\d][\d ()-]{5,29}$/.test(phone) && phone.replace(/\D/g,'').length >= 7 && phone.replace(/\D/g,'').length <= 15 ? '' : '연락 가능한 전화번호를 확인해주세요.');
     for (const name of ['customerName','brief']) field(name).setCustomValidity(field(name).value.trim() ? '' : '내용을 입력해주세요.');
@@ -118,15 +125,13 @@ export function bindApplication(root) {
     submit.disabled = true;
     status.textContent = '신청 내용을 접수하고 있습니다…';
     try {
-      const response = await fetch('https://customer-gateway-staging.up.railway.app/api/applications', {
-        method:'POST', credentials:'omit', referrerPolicy:'no-referrer', signal:AbortSignal.timeout(20000), headers:{'Content-Type':'application/json','Idempotency-Key':idempotencyKey}, body:JSON.stringify(payload)
-      });
-      if (!response.ok) throw Object.assign(new Error('submit_failed'), {status:response.status});
-      const result = await response.json();
+      const result = await applyApi('submit',payload);
       if (result.status !== 'pending-review' || !/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(result.receipt || '')) throw new Error('invalid_receipt');
       status.textContent = `신청이 검토 대기로 접수되었습니다. 접수번호: ${result.receipt}. 결제·제작·게시는 시작되지 않았습니다.`;
       submit.textContent = '접수 완료';
       completed = true;
+      checkout.show(result);
+      if(field('testConsent').checked)await checkout.open();
     } catch (error) {
       const messages = {400:'입력 내용과 필수 동의 항목을 확인해주세요.',409:'이전 신청과 내용이 다릅니다. 중복 접수를 막기 위해 전송하지 않았습니다. 이전 신청 내용을 확인해주세요.',429:'접수 요청이 많습니다. 한 시간 후 다시 시도해주세요.'};
       status.textContent = messages[error.status] || '접수 결과를 확인하지 못했습니다. 내용을 바꾸거나 창을 닫지 말고 잠시 후 다시 시도해주세요. 같은 접수번호로 확인하여 중복 저장을 방지합니다.';
@@ -141,5 +146,5 @@ export function bindApplication(root) {
   updateDockSpace();
   const observer = new ResizeObserver(updateDockSpace);
   observer.observe(dock);
-  return () => observer.disconnect();
+  return () => {observer.disconnect();checkout.dispose();};
 }

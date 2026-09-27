@@ -19,7 +19,7 @@ const pages = {
     description: "기획부터 제작, 업로드까지 매일. 우리 브랜드에 맞는 콘텐츠를 만드는 CJY 매일 릴스 솔루션.",
     render: renderHome
   },
-  "/apply": { title: "서비스 신청하기 | CJY", description: "CJY 서비스 신청", render: renderApplication },
+  "/apply": { title: "서비스 신청하기 | CJY", description: "CJY 서비스 신청", render: () => renderApplication({integrated:true}) },
   "/musicnow": {
     title: "Music Now | CJY",
     description: "Music Now privacy, terms, and support.",

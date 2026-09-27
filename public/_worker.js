@@ -4,7 +4,8 @@
 const PINNED_TEST_BACKEND_ORIGIN = 'https://cjy-test-checkout-staging.up.railway.app';
 const SITE_ORIGIN = 'https://cjy.app';
 const LIMIT = 65536;
-const PATHS = new Set(['open','status','verify','webhook'].map(s=>'/api/test/checkout/'+s));
+const APPLY_PATHS = new Set(['session','submit','status','open','verify'].map(s=>'/api/test/apply/'+s));
+const PATHS = new Set([...APPLY_PATHS,...['open','status','verify','webhook'].map(s=>'/api/test/checkout/'+s)]);
 const SAFE_HEADERS = {'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer'};
 const reply=status=>new Response(status===204?null:'{"error":"test_proxy_unavailable"}',{status,headers:SAFE_HEADERS});
 async function readBounded(stream,signal){
@@ -28,6 +29,7 @@ function createTestProxy(backendOrigin,upstreamFetch=fetch){
   const url=new URL(request.url);
   if(!url.pathname.startsWith('/api/test/'))return env.ASSETS.fetch(request);
   if(!PATHS.has(url.pathname)||url.search||url.hash)return reply(404);
+  const apply=APPLY_PATHS.has(url.pathname);
   const webhook=url.pathname.endsWith('/webhook');
   if(request.method!=='POST'&&!(request.method==='OPTIONS'&&!webhook))return reply(405);
   if(!webhook&&request.headers.get('origin')!==SITE_ORIGIN)return reply(403);
@@ -39,11 +41,23 @@ function createTestProxy(backendOrigin,upstreamFetch=fetch){
   let body;try{body=await readBounded(request.body,signal);}catch(error){return reply(error===413?413:408);}
   const headers=new Headers();
   for(const name of ['content-type','authorization','origin','webhook-id','webhook-timestamp','webhook-signature'])if(request.headers.has(name))headers.set(name,request.headers.get(name));
+  if(apply){
+   headers.delete('authorization');
+   const cookies=(request.headers.get('cookie')??'').split(';').map(x=>x.trim()).filter(x=>x.startsWith('__Host-cjy_apply='));
+   if(cookies.length>1||cookies.some(x=>!/^__Host-cjy_apply=[A-Za-z0-9_-]{43}$/.test(x)))return reply(403);
+   if(cookies.length)headers.set('cookie',cookies[0]);
+  }
   try{
    const upstream=await upstreamFetch(backendOrigin+url.pathname,{method:'POST',headers,body,signal,redirect:'manual',cache:'no-store'});
    if(upstream.status>=300&&upstream.status<400){await upstream.body?.cancel();return reply(502);}
    const responseBody=await readBounded(upstream.body,signal);
-   return new Response([204,205].includes(upstream.status)?null:responseBody,{status:upstream.status,headers:SAFE_HEADERS});
+   const responseHeaders=new Headers(SAFE_HEADERS);
+   const cookie=upstream.headers.get('set-cookie');
+   if(url.pathname==='/api/test/apply/session'&&cookie){
+    if(upstream.status!==200||!/^__Host-cjy_apply=[A-Za-z0-9_-]{43}; Path=\/; HttpOnly; Secure; SameSite=Strict; Max-Age=604800$/.test(cookie))return reply(502);
+    responseHeaders.set('Set-Cookie',cookie);
+   }
+   return new Response([204,205].includes(upstream.status)?null:responseBody,{status:upstream.status,headers:responseHeaders});
   }catch{return reply(502);}
  }};
 }
