@@ -1212,6 +1212,32 @@ html:has(.landing) { scroll-behavior: smooth; }
  .order-page .order-button, .order-actions > a, .order-page .customer-field input { transition: none; }
 }
 
+/* Authenticated order journey: completion remains textual, not color-only. */
+.owned-order { margin-block: 32px; padding-block: 28px; border-top: 1px solid #333; overflow-wrap: anywhere; }
+.owned-order p { line-height: 1.75; color: #bbb; }
+.owned-order > [data-order-progress] > h3, .order-telegram h3 { font-size: 22px; margin: 0 0 12px; }
+[data-order-progress] .order-steps { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-block: 24px 32px; gap: 16px; }
+[data-order-progress] .is-complete { border-color: #4d665a; }
+[data-order-progress] .is-complete .order-step-state { color: #d8f2e3; background: #20332b; }
+[data-order-progress] .is-current { border-color: #ddd; }
+[data-order-progress] .order-step-state { color: #ddd; font-size: 13px; }
+[data-order-progress] .is-current .order-step-state { color: #111; }
+.order-telegram { border: 1px solid #404040; border-radius: 24px; background: #141414; padding: clamp(20px, 3vw, 32px); margin-block: 28px; }
+.order-telegram .order-connection-state { font-weight: 700; color: #fff; }
+.owned-order dl { line-height: 1.7; padding: 24px; background: #121212; border-radius: 20px; }
+.owned-order dl > div { display: grid; grid-template-columns: minmax(120px, 1fr) 2fr; gap: 16px; padding-block: 12px; border-bottom: 1px solid #292929; }
+.owned-order dl > div:last-child { border: 0; }
+.owned-order dt { color: #aaa; }
+.owned-order dd { margin: 0; min-width: 0; }
+@media (min-width: 701px) and (max-width: 999px) {
+ [data-order-progress] .order-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 700px) {
+ [data-order-progress] .order-steps { grid-template-columns: 1fr; }
+ .order-page .owned-order dl > div { grid-template-columns: 1fr; gap: 4px; }
+ .order-telegram .order-button { width: 100%; }
+}
+
 /* Replay the existing entrance motion whenever a policy route renders. */
 .policy-main > h1,
 .policy-main > .policy-draft,
