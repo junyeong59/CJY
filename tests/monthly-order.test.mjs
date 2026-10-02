@@ -1,7 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';import * as order from '../src/order.js';
-test('monthly recovery surface is separate read-only capability input without URL secret',()=>{
- const html=order.renderOrderLookup();assert.match(html,/data-monthly-recover/);assert.match(html,/type="password"/);assert.match(html,/\/order/);
- assert.equal(typeof order.monthlyReadOnlyOrders,'function');assert.match(order.monthlyReadOnlyOrders({status:'read-only',orders:[{orderId:'one',plan:'Standard',monthly:{state:'confirmed',provided:1,promised:28,startDate:'2027-01-31',endDateExclusive:'2027-02-28'}}]}),/1 \/ 28/);
+test('monthly readonly recovery surface is retired; no password recovery input',()=>{
+ const html=order.renderOrderLookup();assert.doesNotMatch(html,/data-monthly-recover|읽기 전용 코드|type="password"/);
+ assert.equal(order.monthlyReadOnlyOrders,undefined);
 });
 test('monthly order status displays server counts only and escapes date text',()=>{
  assert.equal(typeof order.monthlyProgress,'function','monthly order renderer missing');
