@@ -4,7 +4,7 @@
 const PINNED_TEST_BACKEND_ORIGIN = 'https://cjy-test-checkout-staging.up.railway.app';
 const SITE_ORIGIN = 'https://cjy.app';
 const LIMIT = 65536;
-const APPLY_PATHS = new Set(['session','submit','status','open','verify','orders','new','application','revise','save','monthly-renew'].map(s=>'/api/test/apply/'+s));
+const APPLY_PATHS = new Set(['session','submit','status','open','verify','orders','new','application','revise','save','retry-edit','reopen','contact-link','monthly-renew'].map(s=>'/api/test/apply/'+s));
 const PATHS = new Set([...APPLY_PATHS,...['open','status','verify','webhook'].map(s=>'/api/test/checkout/'+s)]);
 const SAFE_HEADERS = {'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer'};
 const reply=status=>new Response(status===204?null:'{"error":"test_proxy_unavailable"}',{status,headers:SAFE_HEADERS});

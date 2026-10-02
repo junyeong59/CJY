@@ -21,7 +21,13 @@ function orderJourney(o){
  const steps=[['payment','payment','결제 확인',payment],['consultation','discussion','상담 · 가이드라인',consultation],['monthly','upload','월간 서비스',monthly]].map(s=>[...s,s[0]===current?'is-current':paid&&s[0]==='payment'?'is-complete':'is-pending']);
  return `<section data-order-progress aria-label="서버에서 확인한 주문 진행"><details class="order-explanation"><summary>진행 안내</summary><p>모든 요금제는 하루 1편 · 달력 기준 1개월입니다. 상담·가이드라인 확정 후 월간 시작을 별도로 확인합니다. 상담 준비 상태는 상담 완료나 가이드라인 확정을 의미하지 않습니다.</p></details><ol class="order-steps">${steps.map(([key,icon,title,status,style])=>`<li data-stage="${key}" class="${style}" ${style==='is-current'?'aria-current="step"':''}><img src="/assets/order/${icon}.png" alt="" width="274" height="274"><h3>${title}</h3><span class="order-step-state">${status}</span></li>`).join('')}</ol></section>`;
 }
-function telegramConnection(o){const paid=['paid','pilot_pending','service_scheduled','service_active','completed'].includes(o.state);return `${paid?`<section class="order-telegram" data-telegram-connection aria-label="Telegram 고객 연결"><h3>Telegram 고객 연결</h3><p class="order-connection-state">연결 코드 준비 중</p><details><summary>연결 안내</summary><p>고객 연결용 1회용 /start 초대 코드는 현재 주문 조회 응답에서 제공되지 않습니다. 준비 상태는 새로고침으로 확인하거나 문의해주세요.</p></details><a class="order-button" href="https://t.me/cjysolutionbot" target="_blank" rel="noopener noreferrer">고객 봇 열기 · 연결 전</a><details><summary>고객 연결 확인</summary><p>봇을 여는 것만으로 고객 연결이 완료되지 않습니다. 연결 코드가 제공되면 고객 봇에서 /start 로 연결하세요. 봇 API 비밀키나 월간 조회용 10분 코드를 입력하는 절차가 아닙니다.</p></details></section>`:''}`;}
+function telegramConnection(o){
+ const paid=['paid','pilot_pending','installation_started','consulting','guideline_locked','service_scheduled','service_active','completed'].includes(o.state);if(!paid)return '';
+ const c=o.contact;if(!c)return `<section class="order-telegram" data-telegram-connection><p>연결 코드 준비 중</p><p>봇을 여는 것만으로 고객 연결이 완료되지 않습니다.</p><a class="order-button" href="https://t.me/cjysolutionbot" target="_blank" rel="noopener noreferrer">고객 봇 열기 · 연결 전</a></section>`;
+ if(c.status==='ineligible')return '';
+ const state={available:'Telegram 연결 전',waiting:'연결 대기 · 고객 봇에서 시작해주세요',expired:'연결 코드 만료',connected:'Telegram 연결 완료'}[c.status]??'연결 상태 확인 필요';
+ return `<section class="order-telegram" data-telegram-connection data-contact-order="${esc(o.orderId)}" aria-label="Telegram 고객 연결"><p class="order-connection-state">${state}</p>${c.status==='connected'?'':`${c.expiresAt?`<p>코드 만료: ${esc(date(c.expiresAt))}</p>`:''}${c.status==='available'?'<button class="order-button" type="button" data-contact-issue>고객 연결 코드 받기</button>':c.status==='expired'?'<button class="order-button" type="button" data-contact-regenerate>만료 코드 다시 받기</button>':'<p data-contact-secret></p><button class="order-button" type="button" data-contact-confirm>고객 연결 확인</button>'}<p>이 주문의 연락처 연결 전용입니다. 상담·가이드라인 확정, 월간 제작·자동 게시를 시작하지 않습니다. 코드는 공유하지 말고 고객 본인의 비공개 봇 대화에서 사용하세요.</p>`}</section>`;
+}
 function renewalForm(o){
  if(!/^[a-f0-9-]{36}$/.test(o.periodId??'')||!Number.isSafeInteger(o.renewalAmount)||o.renewalAmount<=0||o.monthly?.state==='hold')return '';
  return `<details data-renew-details><summary>다음 달 결제 준비</summary><form data-monthly-renew data-period="${esc(o.periodId)}" data-amount="${o.renewalAmount}"><p>다음 기간 월 이용료 ${esc(o.renewalAmount.toLocaleString('ko-KR'))}원 (부가세 포함) · 설정비 0원. 최초 주문은 변경되지 않습니다.</p><p>연결된 고객 Telegram 봇에 <code>/renew ${esc(o.periodId)}</code> 를 직접 보내 다음 기간 결제 의사를 확인하고, 받은 10분·1회용 결제 전용 코드를 입력하세요. 조회용 코드는 사용할 수 없습니다.</p><label class="customer-field">결제 전용 코드 <input name="code" type="password" autocomplete="off" minlength="43" maxlength="43" pattern="[A-Za-z0-9_-]{43}" required></label><label class="customer-field">결제 이메일 <input name="email" type="email" autocomplete="email" required></label><label><input name="consent" type="checkbox" required> <a href="/terms" data-link>이용약관</a>·<a href="/privacy" data-link>개인정보 처리방침</a>·<a href="/refund" data-link>환불 안내</a>와 위 금액의 다음 달 TEST 결제에 동의합니다. 결제 후 최준영이 직접 상담하고 별도로 서명 확정해야 다음 기간이 시작됩니다. 자동 갱신·자동 활성화가 아닙니다.</label><button class="order-button" type="submit">다음 달 TEST 결제</button><p data-renew-message role="status"></p></form></details>`;
@@ -36,7 +42,7 @@ export const renderOrderDetails=renderOrderLookup;
 export function bindOrder(root,navigate) {
  const list=root.querySelector('[data-order-list]');if(!list)return;
  const create=root.querySelector('[data-order-new]'),message=root.querySelector('[data-order-message]');
- let busy=false,disposed=false,current={orders:[]};
+ let busy=false,disposed=false,current={orders:[]};const contactSecrets=new Map();
  const selectCurrent=result=>{const meaningful=result.orders.filter(o=>o.state!=='archived'&&(o.receipt||o.orderId));return meaningful.find(o=>o.draftId===result.draftId)??meaningful.find(o=>o.orderId&&o.state!=='saved')??meaningful[0];};
  // The PG query is advisory only. A same-origin JS fetch, not the cross-site
  // navigation request, retrieves the HttpOnly SameSite=Strict owner cookie.
@@ -46,7 +52,26 @@ export function bindOrder(root,navigate) {
   if(!Array.isArray(result.orders)||result.orders.some(o=>o.environment!=='test'))throw Error('invalid_owned_orders');
   const selected=selectCurrent(result);current={...result,orders:selected?[selected]:[]};create.hidden=Boolean(selected);root.querySelector('[data-empty-actions]').hidden=Boolean(selected);if(selected)create.remove();else if(!create.isConnected)root.querySelector('[data-empty-actions]').prepend(create);create.textContent='새 접수';create.disabled=!result.draftId||busy||result.status==='session-expired';
   list.innerHTML=current.orders.length?current.orders.map(o=>`<article class="owned-order">${o.orderId?`<p class="order-number">주문 번호: ${esc(o.orderId)}</p>`:''}<h2>${esc(labels[o.state]??'상태 확인 필요')}</h2>${orderJourney(o)}<div class="order-record-actions">${o.draftId?`<a class="order-button" data-link data-view-draft="${esc(o.draftId)}" href="/apply?draftId=${encodeURIComponent(o.draftId)}">${o.state==='saved'?'저장된 내용 보기':'신청 내용 보기'}</a>`:''}<a class="order-button" href="mailto:cjy.support@gmail.com">문의하기</a></div>${telegramConnection(o)}<details class="order-record"><summary>주문 상세 내역</summary><p class="order-state-note">${o.renewal?'다음 달 결제 주문입니다. 결제 확인 후 최준영이 직접 상담하고 별도로 서명 확정해야 다음 기간이 시작됩니다. 자동 활성화는 없습니다.':['paid','pilot_pending'].includes(o.state)?'상담 준비 상황은 상담·가이드라인 단계에서 확인해주세요. 상담 확정 및 월간 제작·자동 게시 개시는 별도로 확인합니다.':o.state==='saved'?'입력 정보가 저장되었지만 결제는 시작되지 않았습니다. 저장된 내용 보기에서 접수 상태를 확인해주세요.':'결과가 확정되지 않았거나 확인이 필요합니다. 같은 주문을 다시 결제하지 마세요.'}</p><dl><div><dt>상담 준비</dt><dd>${esc(o.renewal?'다음 기간 별도 상담·서명 확정 대기':productionLabel(o.production))}</dd></div>${monthlyProgress(o.monthly)}<div><dt>${o.orderId?'주문 번호':'접수 번호'}</dt><dd>${esc(o.orderId??o.receipt)}</dd></div><div><dt>서비스 · 요금제</dt><dd>매일 릴스 솔루션 · ${esc(o.plan)}</dd></div><div><dt>금액</dt><dd>${Number.isSafeInteger(o.totalAmount)?esc(o.totalAmount.toLocaleString('ko-KR')+' '+o.currency):'결제 주문 생성 전'}</dd></div><div><dt>접수 / 주문 시각</dt><dd>${esc(date(o.createdAt))}</dd></div><div><dt>결제 확인 시각</dt><dd>${esc(date(o.paidAt))}</dd></div><div><dt>갱신 시각</dt><dd>${esc(date(o.updatedAt))}</dd></div></dl></details>${renewalForm(o)}${o.state==='pending_payment'?`<button type="button" class="order-button" data-verify-draft="${esc(o.draftId)}">결제 상태 확인</button>`:''}</article>`).join(''):'<p>이 브라우저에서 확인할 수 있는 접수 내역이 없습니다. 기존 고객은 문의해주세요.</p>';
+  for(const section of list.querySelectorAll('[data-contact-order]')){
+   const o=current.orders.find(o=>o.orderId===section.dataset.contactOrder),secret=contactSecrets.get(o.orderId);
+   if(o.contact?.status!=='waiting'||!secret||Date.parse(secret.expiresAt)<=Date.now()){contactSecrets.delete(o.orderId);continue;}
+   const box=section.querySelector('[data-contact-secret]');if(!box)continue;box.textContent='';
+   const code=document.createElement('code');code.dataset.contactCode='';code.textContent='/start '+secret.code;box.append(code,document.createElement('br'));
+   const link=document.createElement('a');link.className='order-button';link.dataset.contactLink='';link.href=secret.deepLink;link.target='_blank';link.rel='noopener noreferrer';link.textContent='고객 봇에서 연결하기';box.append(link);
+  }
  }
+ list.addEventListener('click',async e=>{
+  const button=e.target.closest('[data-contact-issue],[data-contact-regenerate],[data-contact-confirm]');if(!button||busy||disposed)return;
+  const orderId=button.closest('[data-contact-order]').dataset.contactOrder;busy=true;button.disabled=true;message.textContent='';
+  try{
+   if(!button.hasAttribute('data-contact-confirm')){
+    const r=await applyApi('contact-link',{orderId,...(button.hasAttribute('data-contact-regenerate')?{regenerate:true}:{})});
+    if(r.code){if(!/^link_[A-Za-z0-9_-]{43}$/.test(r.code)||r.deepLink!=='https://t.me/cjysolutionbot?start='+r.code||!Number.isFinite(Date.parse(r.expiresAt)))throw Error('contact held');contactSecrets.set(orderId,{code:r.code,deepLink:r.deepLink,expiresAt:r.expiresAt});}
+   }
+   show(await applyApi('orders'));
+  }catch{contactSecrets.delete(orderId);try{show(await applyApi('orders'));}catch{}if(!disposed)message.textContent='연결 결과를 확인하지 못했습니다. 코드를 자동으로 재발급하지 않습니다. 기존 코드 만료 후 다시 받거나 문의해주세요.';}
+  finally{busy=false;if(!disposed&&button.isConnected)button.disabled=false;}
+ });
  async function load(reconcile=false){
   if(busy||disposed)return;busy=true;create.disabled=true;message.textContent='';
   try{await applyApi('session');if(disposed)return;show(await applyApi('orders'));
@@ -74,5 +99,5 @@ export function bindOrder(root,navigate) {
   finally{busy=false;if(!disposed)button.disabled=attempted;}
  });
 
- load(true);return ()=>{disposed=true;};
+ load(true);return ()=>{disposed=true;contactSecrets.clear();};
 }

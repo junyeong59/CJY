@@ -183,6 +183,7 @@ test('local policy links render unchanged policy metadata; mobile missing-config
   }
   await page.setViewportSize({width:390,height:844});
   await page.waitForFunction(()=>document.querySelector('#checkout-status').textContent.includes('TEST'));
+  await page.evaluate(async()=>{await document.fonts.ready;await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));});
   assert.equal(await page.locator('.checkout button').count(),1);
   const box=await page.locator('.checkout button').boundingBox();assert.ok(box.x>=0&&box.x+box.width<=390&&box.y>=0&&box.y+box.height<=844);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
