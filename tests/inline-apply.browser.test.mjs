@@ -1,0 +1,9 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {directPage} from './fixtures/direct-browser.mjs';
+const draft='11111111-1111-4111-8111-111111111111',application={customerName:'TEST',customerPhone:'01000000000',service:'reels',plan:'Standard',autoPost:'no',existingAccount:'no',brief:'Original',channel:'telegram'};
+for(const editable of [true,false])test(`restored apply is inline without extra saved heading or discard/new path; editable=${editable}`,async t=>{
+ const calls=[];const result={status:'pending-review',receipt:'a0000000-0000-4000-8000-000000000001',draftId:draft,application,editable,environment:'test',...(editable?{}:{orderId:'paid'})};
+ const {page}=await directPage(t,async(a,r)=>{calls.push(a);if(a==='status'||a==='application'){await r.fulfill({json:result});return true;}if(a==='save'){await r.fulfill({json:{...result,application:{...application,brief:'Updated'}}});return true;}},{query:'?draftId='+draft});await page.waitForFunction(()=>document.querySelector('[name=brief]').value==='Original');
+ assert.equal(await page.locator('[data-existing-order] h2').count(),0);assert.equal(await page.locator('[data-new-application]').count(),0);assert.equal(await page.locator('[data-discard-dialog]').count(),0);assert.equal(await page.locator('[name=brief]').isEnabled(),editable);
+ if(editable){await page.locator('[name=brief]').fill('Updated');await page.locator('[name=draftPrivacyConsent]').check();await page.locator('[data-save-application]').click();await page.waitForFunction(()=>document.querySelector('#checkout-status').textContent.includes('저장했습니다'));assert.ok(calls.includes('save'));assert.ok(!calls.includes('new'));}
+ await page.screenshot({path:'/Users/choi/.hermes/cache/cjy-contact-apply-'+(editable?'editable':'readonly')+'.png',fullPage:true});
+});

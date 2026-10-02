@@ -28,33 +28,33 @@ function renewalForm(o){
 }
 
 export function renderOrderLookup() {
- return `<div class="landing application order-page">${header()}<main class="order-status"><div class="order-heading"><h1>주문 현황</h1><p>테스트 결제 · 실제 청구 없음</p><p>이 브라우저에서 접수한 주문과 서버에서 확인한 결제 내역입니다.</p></div><div data-order-list aria-live="polite">주문을 불러오는 중…</div><p data-order-message role="status"></p><div class="order-actions"><button type="button" class="order-button" data-order-refresh>상태 새로고침</button><button type="button" class="order-button" data-order-new disabled>저장된 내용 보기</button><a href="mailto:cjy.support@gmail.com">문의하기</a></div><p class="order-hint">다른 브라우저나 보안 세션이 만료된 경우 기존 주문이 표시되지 않습니다. 결제 기록은 삭제되지 않으며, 재결제하지 말고 문의해주세요.</p></main></div>`;
+ return `<div class="landing application order-page">${header()}<main class="order-status"><div class="order-heading"><h1>주문 현황</h1><p>테스트 결제 · 실제 청구 없음</p><p>이 브라우저에서 접수한 주문과 서버에서 확인한 결제 내역입니다.</p></div><div data-order-list aria-live="polite">주문을 불러오는 중…</div><p data-order-message role="status"></p><div data-empty-actions hidden><button type="button" class="order-button" data-order-new disabled>새 접수</button><a href="mailto:cjy.support@gmail.com">문의하기</a></div></main></div>`;
 }
 // Preserve the existing routes without a fabricated lookup or demonstration receipt.
 export const renderOrderStatus=renderOrderLookup;
 export const renderOrderDetails=renderOrderLookup;
 export function bindOrder(root,navigate) {
  const list=root.querySelector('[data-order-list]');if(!list)return;
- const refresh=root.querySelector('[data-order-refresh]'),create=root.querySelector('[data-order-new]'),message=root.querySelector('[data-order-message]');
+ const create=root.querySelector('[data-order-new]'),message=root.querySelector('[data-order-message]');
  let busy=false,disposed=false,current={orders:[]};
+ const selectCurrent=result=>{const meaningful=result.orders.filter(o=>o.state!=='archived'&&(o.receipt||o.orderId));return meaningful.find(o=>o.draftId===result.draftId)??meaningful.find(o=>o.orderId&&o.state!=='saved')??meaningful[0];};
  // The PG query is advisory only. A same-origin JS fetch, not the cross-site
  // navigation request, retrieves the HttpOnly SameSite=Strict owner cookie.
  if(location.search)history.replaceState(null,'',location.pathname);
  function show(result){
   if(disposed)return;
   if(!Array.isArray(result.orders)||result.orders.some(o=>o.environment!=='test'))throw Error('invalid_owned_orders');
-  current=result;create.textContent=result.orders.length?'저장된 내용 보기':'새 접수';create.disabled=!result.draftId||busy||result.status==='session-expired';
-  list.innerHTML=result.orders.length?result.orders.map(o=>`<article class="owned-order">${o.orderId?`<p class="order-number">주문 번호: ${esc(o.orderId)}</p>`:''}<h2>${esc(labels[o.state]??'상태 확인 필요')}</h2>${orderJourney(o)}<div class="order-record-actions">${o.draftId?`<a class="order-button" data-link data-view-draft="${esc(o.draftId)}" href="/apply?draftId=${encodeURIComponent(o.draftId)}">저장된 내용 보기</a>`:''}${telegramConnection(o)}</div><details class="order-record"><summary>주문 상세 내역</summary><p class="order-state-note">${o.renewal?'다음 달 결제 주문입니다. 결제 확인 후 최준영이 직접 상담하고 별도로 서명 확정해야 다음 기간이 시작됩니다. 자동 활성화는 없습니다.':['paid','pilot_pending'].includes(o.state)?'상담 준비 상황은 상담·가이드라인 단계에서 확인해주세요. 상담 확정 및 월간 제작·자동 게시 개시는 별도로 확인합니다.':o.state==='saved'?'입력 정보가 저장되었지만 결제는 시작되지 않았습니다. 저장된 내용 보기에서 접수 상태를 확인해주세요.':'결과가 확정되지 않았거나 확인이 필요합니다. 같은 주문을 다시 결제하지 마세요.'}</p><dl><div><dt>상담 준비</dt><dd>${esc(o.renewal?'다음 기간 별도 상담·서명 확정 대기':productionLabel(o.production))}</dd></div>${monthlyProgress(o.monthly)}<div><dt>${o.orderId?'주문 번호':'접수 번호'}</dt><dd>${esc(o.orderId??o.receipt)}</dd></div><div><dt>서비스 · 요금제</dt><dd>매일 릴스 솔루션 · ${esc(o.plan)}</dd></div><div><dt>금액</dt><dd>${Number.isSafeInteger(o.totalAmount)?esc(o.totalAmount.toLocaleString('ko-KR')+' '+o.currency):'결제 주문 생성 전'}</dd></div><div><dt>접수 / 주문 시각</dt><dd>${esc(date(o.createdAt))}</dd></div><div><dt>결제 확인 시각</dt><dd>${esc(date(o.paidAt))}</dd></div><div><dt>갱신 시각</dt><dd>${esc(date(o.updatedAt))}</dd></div></dl></details>${renewalForm(o)}${o.state==='pending_payment'?`<button type="button" class="order-button" data-verify-draft="${esc(o.draftId)}">결제 상태 확인</button>`:''}</article>`).join(''):'<p>이 브라우저에서 확인할 수 있는 접수 내역이 없습니다. 기존 고객은 문의해주세요.</p>';
+  const selected=selectCurrent(result);current={...result,orders:selected?[selected]:[]};create.hidden=Boolean(selected);root.querySelector('[data-empty-actions]').hidden=Boolean(selected);if(selected)create.remove();else if(!create.isConnected)root.querySelector('[data-empty-actions]').prepend(create);create.textContent='새 접수';create.disabled=!result.draftId||busy||result.status==='session-expired';
+  list.innerHTML=current.orders.length?current.orders.map(o=>`<article class="owned-order">${o.orderId?`<p class="order-number">주문 번호: ${esc(o.orderId)}</p>`:''}<h2>${esc(labels[o.state]??'상태 확인 필요')}</h2>${orderJourney(o)}<div class="order-record-actions">${o.draftId?`<a class="order-button" data-link data-view-draft="${esc(o.draftId)}" href="/apply?draftId=${encodeURIComponent(o.draftId)}">${o.state==='saved'?'저장된 내용 보기':'신청 내용 보기'}</a>`:''}<a class="order-button" href="mailto:cjy.support@gmail.com">문의하기</a></div>${telegramConnection(o)}<details class="order-record"><summary>주문 상세 내역</summary><p class="order-state-note">${o.renewal?'다음 달 결제 주문입니다. 결제 확인 후 최준영이 직접 상담하고 별도로 서명 확정해야 다음 기간이 시작됩니다. 자동 활성화는 없습니다.':['paid','pilot_pending'].includes(o.state)?'상담 준비 상황은 상담·가이드라인 단계에서 확인해주세요. 상담 확정 및 월간 제작·자동 게시 개시는 별도로 확인합니다.':o.state==='saved'?'입력 정보가 저장되었지만 결제는 시작되지 않았습니다. 저장된 내용 보기에서 접수 상태를 확인해주세요.':'결과가 확정되지 않았거나 확인이 필요합니다. 같은 주문을 다시 결제하지 마세요.'}</p><dl><div><dt>상담 준비</dt><dd>${esc(o.renewal?'다음 기간 별도 상담·서명 확정 대기':productionLabel(o.production))}</dd></div>${monthlyProgress(o.monthly)}<div><dt>${o.orderId?'주문 번호':'접수 번호'}</dt><dd>${esc(o.orderId??o.receipt)}</dd></div><div><dt>서비스 · 요금제</dt><dd>매일 릴스 솔루션 · ${esc(o.plan)}</dd></div><div><dt>금액</dt><dd>${Number.isSafeInteger(o.totalAmount)?esc(o.totalAmount.toLocaleString('ko-KR')+' '+o.currency):'결제 주문 생성 전'}</dd></div><div><dt>접수 / 주문 시각</dt><dd>${esc(date(o.createdAt))}</dd></div><div><dt>결제 확인 시각</dt><dd>${esc(date(o.paidAt))}</dd></div><div><dt>갱신 시각</dt><dd>${esc(date(o.updatedAt))}</dd></div></dl></details>${renewalForm(o)}${o.state==='pending_payment'?`<button type="button" class="order-button" data-verify-draft="${esc(o.draftId)}">결제 상태 확인</button>`:''}</article>`).join(''):'<p>이 브라우저에서 확인할 수 있는 접수 내역이 없습니다. 기존 고객은 문의해주세요.</p>';
  }
  async function load(reconcile=false){
-  if(busy||disposed)return;busy=true;refresh.disabled=true;create.disabled=true;message.textContent='';
+  if(busy||disposed)return;busy=true;create.disabled=true;message.textContent='';
   try{await applyApi('session');if(disposed)return;show(await applyApi('orders'));
    const pending=current.orders.find(o=>o.state==='pending_payment');
    if(reconcile&&pending){await applyApi('verify',{draftId:pending.draftId});if(!disposed)show(await applyApi('orders'));}
   }catch{if(!disposed){message.textContent='상태 확인이 지연되고 있습니다. 재결제하지 말고 잠시 후 새로고침해주세요.';if(!current.orders.length)list.textContent='주문을 확인하지 못했습니다.';}}
-  finally{busy=false;if(!disposed){refresh.disabled=false;create.disabled=!current.draftId||current.status==='session-expired';}}
+  finally{busy=false;if(!disposed){create.disabled=!current.draftId||current.status==='session-expired';}}
  }
- refresh.addEventListener('click',()=>load(true));
  list.addEventListener('click',async e=>{const button=e.target.closest('[data-verify-draft]');if(!button||busy)return;busy=true;button.disabled=true;try{await applyApi('verify',{draftId:button.dataset.verifyDraft});show(await applyApi('orders'));message.textContent='서버 상태를 확인했습니다.';}catch{message.textContent='확인 중입니다. 재결제하지 말고 잠시 후 다시 확인해주세요.';}finally{busy=false;if(!disposed){if(button.isConnected)button.disabled=false;create.disabled=!current.draftId||current.status==='session-expired';}}});
  create.addEventListener('click',()=>{if(busy||disposed||create.disabled)return;navigate('/apply');});
 

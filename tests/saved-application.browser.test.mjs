@@ -28,12 +28,9 @@ for(const state of ['pending_payment','paid','manual_hold','cancelled','refunded
  await page.locator('[data-direct-checkout]').dispatchEvent('submit');assert.equal(calls.some(a=>['new','open','submit','revise','save'].includes(a)),false);
 });
 
-test('new application warns, cancel preserves, failed confirmation preserves, successful atomic discard clears once',async t=>{
- const calls=[];let fail=true;const {page}=await directPage(t,async(a,r)=>{calls.push([a,r.request().postDataJSON()]);if(a==='status')return answer(r,{json:restored()});if(a==='application')return answer(r,{json:restored()});if(a==='new')return answer(r,fail?{status:409,json:{error:'held'}}:{json:{status:'session-ready',draftId:older}});});
- await page.waitForFunction(()=>document.querySelector('[name=brief]').value==='Previously saved exact content');const button=page.locator('[data-new-application]');
- await button.click();const dialog=page.getByRole('dialog');assert.match(await dialog.textContent(),/기존 접수가 있습니다. 기존 접수를 삭제한 후 새 접수를 하시겠습니까/);assert.equal(await page.evaluate(()=>document.activeElement?.dataset.discardCancel!==undefined),true);await dialog.locator('[data-discard-cancel]').click();assert.equal(calls.some(([a])=>a==='new'),false);assert.equal(await page.locator('[name=brief]').inputValue(),fields.brief);
- await button.click();await page.getByRole('dialog').locator('[data-discard-confirm]').click();await page.waitForFunction(()=>document.querySelector('#checkout-status').textContent.includes('기존 접수를 유지'));assert.equal(await page.locator('[name=brief]').inputValue(),fields.brief);fail=false;
- await button.click();await page.getByRole('dialog').locator('[data-discard-confirm]').click();await page.waitForFunction(()=>document.querySelector('[name=brief]').value==='');assert.equal(await page.locator('[name=customerName]').inputValue(),'');assert.equal(calls.filter(([a])=>a==='new').length,2);assert.deepEqual(calls.filter(([a])=>a==='new')[1][1],{draftId,discard:true});assert.equal(page.url(),`https://cjy.app/apply?draftId=${older}`);
+test('saved application edits directly and has no discard/new controls or calls',async t=>{
+ const calls=[];const {page}=await directPage(t,async(a,r)=>{calls.push(a);if(a==='status'||a==='application')return answer(r,{json:restored()});});
+ await page.waitForFunction(()=>document.querySelector('[name=brief]').value==='Previously saved exact content');assert.equal(await page.locator('[data-new-application],[data-discard-dialog]').count(),0);await page.locator('[name=brief]').fill('Direct edit');assert.equal(calls.includes('new'),false);assert.equal(await page.locator('[name=brief]').inputValue(),'Direct edit');
 });
 test('foreign explicit selection fails closed without substituting latest owned form',async t=>{
  const calls=[];const {page}=await directPage(t,async(a,r)=>{calls.push([a,r.request().postDataJSON()]);if(a==='status')return answer(r,{json:restored()});if(a==='application')return answer(r,{status:403,json:{error:'held'}});},{query:`?draftId=${older}`});
@@ -42,7 +39,7 @@ test('foreign explicit selection fails closed without substituting latest owned 
 
 test('historical archived application is labelled read-only and selected by its own id',async t=>{
  const {page}=await directPage(t,async(a,r)=>{if(a==='orders')return answer(r,{json:{status:'owner-ready',draftId:older,orders:[{receipt,draftId,state:'archived',plan:'Premium',environment:'test',editable:false}]}});if(a==='status')return answer(r,{json:{status:'session-ready',draftId:older}});if(a==='application'){assert.equal(r.request().postDataJSON().draftId,draftId);return answer(r,{json:restored('Premium',false)});}});
- await page.goto('https://cjy.app/order');assert.match(await page.locator('.owned-order h2').textContent(),/이전 접수 · 보관/);await page.locator(`[data-view-draft="${draftId}"]`).click();await page.waitForFunction(()=>document.querySelector('[name=brief]').value==='Previously saved exact content');assert.equal(await page.locator('[data-save-application]').isDisabled(),true);
+ await page.goto('https://cjy.app/order');await page.waitForFunction(()=>!document.querySelector('[data-order-list]').textContent.includes('불러오는 중'));assert.equal(await page.locator('.owned-order').count(),0);await page.goto('https://cjy.app/apply?draftId='+draftId);await page.waitForFunction(()=>document.querySelector('[name=brief]').value==='Previously saved exact content');assert.equal(await page.locator('[data-save-application]').isDisabled(),true);
 });
 
 for(const width of [320,390,1440])test(`save and payment stay adjacent and usable at ${width}px`,async t=>{
@@ -55,7 +52,7 @@ test('fresh draft offers only supported Telegram; historical channel is read exa
 
 for(const expired of [false,true])test(`empty owner-cookie lookup ${expired?'expired':'new'} offers contact without claiming historical deletion`,async t=>{
  const calls=[];const {page}=await directPage(t,async(a,r)=>{calls.push([a,r.request().postDataJSON()]);if(a==='orders')return answer(r,{json:{status:expired?'session-expired':'session-ready',draftId,orders:[]}});});
- await page.goto('https://cjy.app/order');await page.waitForFunction(()=>!document.querySelector('[data-order-refresh]').disabled);
+ await page.goto('https://cjy.app/order');await page.waitForFunction(()=>!document.querySelector('[data-order-list]').textContent.includes('불러오는 중'));
  assert.equal(await page.locator('[data-order-list]').textContent(),'이 브라우저에서 확인할 수 있는 접수 내역이 없습니다. 기존 고객은 문의해주세요.');assert.equal(await page.getByRole('link',{name:'문의하기',exact:true}).isVisible(),true);
  const fresh=page.locator('[data-order-new]');assert.equal(await fresh.textContent(),'새 접수');assert.equal(await fresh.isDisabled(),expired);assert.equal(calls.some(([a])=>a==='new'),false);
  if(!expired){await fresh.click();await page.waitForURL('https://cjy.app/apply');assert.equal(await page.locator('[name=brief]').inputValue(),'');assert.equal(calls.some(([a])=>a==='new'),false);}

@@ -18,13 +18,13 @@ for(const outcome of ['success','failure','expired','missing'])test(`/order expl
   if(a==='verify'){verifies++;if(verifies===2){await held;if(outcome==='failure'){await r.fulfill({status:503,json:{error:'unavailable'}});return true;}}await r.fulfill({json:readyOrder});return true;}
   if(a==='new'){news++;assert.deepEqual(r.request().postDataJSON(),{draftId});await r.fulfill({json:{status:'session-ready',draftId:'a0000000-0000-4000-8000-000000000012'}});return true;}
  });
- await page.goto('https://cjy.app/order');await page.waitForFunction(()=>!document.querySelector('[data-order-new]').disabled);
+ await page.goto('https://cjy.app/order');await page.waitForFunction(()=>document.querySelector('[data-verify-draft]')&&!document.querySelector('[data-verify-draft]').disabled);
  await page.locator('[data-verify-draft]').click();await page.waitForFunction(()=>document.querySelector('[data-verify-draft]').disabled);
  // Repeated synthetic events while held exercise the busy guard; navigation below uses a trusted click.
- await page.locator('[data-order-new]').dispatchEvent('click');await page.locator('[data-verify-draft]').dispatchEvent('click');assert.equal(news,0);assert.equal(verifies,2);
+ assert.equal(await page.locator('[data-order-new]').count(),0);await page.locator('[data-verify-draft]').dispatchEvent('click');assert.equal(news,0);assert.equal(verifies,2);
  release();await page.waitForFunction(()=>document.querySelector('[data-order-message]').textContent.length>0);
- assert.equal(await page.locator('[data-order-new]').isDisabled(),['expired','missing'].includes(outcome));
- if(['success','failure'].includes(outcome)){await page.locator('[data-order-new]').click();await page.waitForURL('https://cjy.app/apply');assert.equal(news,0);await page.waitForFunction(()=>document.querySelector('[name=customerName]'));}
+ assert.equal(await page.locator('[data-order-new]').count(),0);
+ if(['success','failure'].includes(outcome)){await page.locator('[data-view-draft]').click();await page.waitForURL('https://cjy.app/apply?draftId='+draftId);assert.equal(news,0);await page.waitForFunction(()=>document.querySelector('[name=customerName]'));}
 });
 
 for(const viewport of [{width:1440,height:1000},{width:390,height:844}])test(`fresh ${viewport.width}: visible controls are not covered by payment overlay`,async t=>{
