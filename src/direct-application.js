@@ -47,13 +47,16 @@ export function bindDirectApplication(root){
  const ensureEditable=async()=>{
   if(!recoverable())return true;
   let r=current.orderId?current:await applyApi('application',{draftId:current.draftId});
-  if(r.orderId&&r.state==='pending_payment')r=await applyApi('retry-edit',{draftId:r.draftId,...(r.windowId?{windowId:r.windowId}:{})});
+  if(r.orderId&&r.state==='pending_payment')r=await applyApi('retry-edit',{draftId:r.draftId,...(r.windowId?{windowId:r.windowId}:{}),...(r.cancelled?{cancelled:true}:{})});
   if(r.state==='paid'){location.assign('/order');return false;}
   if(r.editable!==true||r.orderId)throw Error('draft_unresolved');
   recovering=false;show(r);history.replaceState(null,'','/apply?draftId='+encodeURIComponent(r.draftId));return true;
  };
  const fail=()=>{status.textContent=(unknown||current.orderId)?'결과 미확인 · 재결제하지 말고 결제 상태를 확인해주세요.':'결제 준비에 실패했습니다. 결제하기를 눌러 다시 시도해주세요.';};
  const params=new URLSearchParams(location.search);field('plan').value=Object.hasOwn(PRICING.plans,params.get('plan'))?params.get('plan'):'Standard';
+ // Cancel is only permission to edit, never evidence of nonpayment. Resolve an
+ // immutable child on save/pay; the next checkout retains server verification.
+ const cancelledReturn=(r,restore=false)=>{r={...r,draftId:r.draftId??current.draftId};show({...r,editable:true,cancelled:true},restore);unknown=false;status.textContent='결제창을 닫았습니다. 내용을 수정·저장하거나 다시 결제할 수 있습니다.';history.replaceState(null,'','/apply?draftId='+encodeURIComponent(r.draftId)+(r.windowId?'&windowId='+encodeURIComponent(r.windowId):'')+'&code=FAILURE_TYPE_STOPPED');};
  const update=()=>{for(const label of form.querySelectorAll('[data-legacy-channel]'))label.hidden=!label.querySelector('input').checked;const plan=field('plan').value,p=calculateFirstMonthPrice(plan);form.querySelector('[data-plan-description]').textContent={Standard:'타이포그래피 편집 · TTS · 자막',Deluxe:'생성형 이미지 중심 편집 · TTS · 자막',Premium:'고퀄리티 영상 중심 편집 · 생성형 이미지 · TTS · 자막'}[plan];form.querySelector('#order-service').textContent='매일 릴스 솔루션 ('+plan+')';form.querySelector('#order-price').textContent=money(p.monthlySupplyWon);form.querySelector('#order-vat').textContent=money(p.vatWon);form.querySelector('#order-total').textContent='총 가격: '+money(p.totalWon);form.querySelector('[data-account]').hidden=field('autoPost').value==='no';};form.addEventListener('change',update);update();
  form.querySelector('.brief-help').addEventListener('click',e=>{const g=form.querySelector('#brief-guide');g.hidden=!g.hidden;e.currentTarget.setAttribute('aria-expanded',String(!g.hidden));});
  for(const n of ['customerName','customerPhone','brief'])field(n).addEventListener('input',()=>field(n).setCustomValidity(''));
@@ -71,6 +74,7 @@ export function bindDirectApplication(root){
  if(r.status!=='checkout-ready'||r.state!=='pending_payment')return;
  if(r.environment!=='test'||r.currency!=='KRW'||!Number.isSafeInteger(r.totalAmount)||r.totalAmount<=0)throw Error('checkout_binding');if(disposed)return;
  const result=await portone.requestPayment({storeId:r.storeId,channelKey:r.channelKey,paymentId:r.paymentId,orderName:r.orderName,totalAmount:r.totalAmount,currency:'CURRENCY_KRW',payMethod:r.payMethod,customer:{...r.customer,email:field('testEmail').value.trim()},redirectUrl:location.origin+'/apply?draftId='+encodeURIComponent(current.draftId)+(r.windowId?'&windowId='+encodeURIComponent(r.windowId):'')}).catch(error=>classifyPaymentResult(error).phase==='cancelled'?error:{localUnknown:true});const safe=classifyPaymentResult(result);
+ if(safe.phase==='cancelled'){cancelledReturn(r);return;}
  if(safe.phase!=='cancelled'&&!result?.localUnknown){const verified=await applyApi('verify',{draftId:current.draftId});if(verified.state==='paid'){location.assign('/order');return;}}
  const child=await applyApi('retry-edit',{draftId:current.draftId,...(r.windowId?{windowId:r.windowId}:{})});
  if(child.state==='paid'){location.assign('/order');return;}
@@ -99,7 +103,11 @@ export function bindDirectApplication(root){
    if(latest.draftId===active.draftId&&latest.receipt&&latest.application&&latest.editable===true&&!latest.orderId&&latest.status==='pending-review'){r=latest;if(!disposed)history.replaceState(null,'','/apply?draftId='+encodeURIComponent(r.draftId));}
   }
  }
+ if(r.state==='paid'&&/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(params.get('windowId')??'')){location.assign('/order');return;}
  if(r.orderId&&r.state==='pending_payment'){
+  if(classifyPaymentResult({code:params.get('code')}).phase==='cancelled'){
+   const windowId=params.get('windowId');cancelledReturn({...r,...(/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(windowId??'')?{windowId}:{})},true);ready=true;sync();return;
+  }
   r=await applyApi('retry-edit',{draftId:r.draftId,...(params.has('windowId')&&/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(params.get('windowId'))?{windowId:params.get('windowId')}:{})});
   if(r.state==='paid'){location.assign('/order');return;}
   if(r.editable===true&&!r.orderId&&!disposed)history.replaceState(null,'','/apply?draftId='+encodeURIComponent(r.draftId));
