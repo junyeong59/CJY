@@ -16,12 +16,13 @@ export function createPortOneReviewServer({env={}}={}) {
   const files=new Map([
     ['/src/styles.css',['src/styles.css','text/css']],
     ['/src/commercial.js',['src/commercial.js','text/javascript']],
+    ['/src/payment-result.js',['src/payment-result.js','text/javascript']],
     ['/review/checkout.js',['sandbox/review/checkout.js','text/javascript']],
     ['/component/CJY.svg',['component/CJY.svg','image/svg+xml']]
   ]);
   return createServer(async(req,res)=>{
     const headers={'Cache-Control':'no-store','Referrer-Policy':'no-referrer','X-Content-Type-Options':'nosniff',
-      'Content-Security-Policy':"default-src 'none'; script-src 'self' https://cdn.portone.io/v2/browser-sdk.js https://cdn.portone.io/drivers/ https://*.inicis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.inicis.com; connect-src 'self' https://cdn.portone.io/drivers/ https://checkout-service.prod.iamport.co https://tx-gateway-service.prod.iamport.co https://payment-bridge.prod.iamport.co https://coretelemetry.prod.iamport.co; frame-src https://service.iamport.kr https://*.inicis.com; form-action 'self' https://service.iamport.kr https://*.inicis.com; base-uri 'none'; frame-ancestors 'none'"};
+      'Content-Security-Policy':"default-src 'none'; script-src 'self' https://cdn.portone.io/v2/browser-sdk.js https://cdn.portone.io/drivers/ https://*.inicis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.inicis.com; connect-src 'self' https://cdn.portone.io/drivers/ https://checkout-service.prod.iamport.co https://tx-gateway-service.prod.iamport.co https://payment-bridge.prod.iamport.co https://coretelemetry.prod.iamport.co; frame-src https://service.iamport.kr https://*.inicis.com https://checkout-service.prod.iamport.co; form-action 'self' https://service.iamport.kr https://*.inicis.com; base-uri 'none'; frame-ancestors 'none'"};
     const reply=(status,body='',type='text/plain; charset=utf-8')=>{res.writeHead(status,{...headers,'Content-Type':type});res.end(body);};
     if(!/^(127\.0\.0\.1|localhost|\[::1\])(?::[0-9]+)?$/.test(req.headers.host??'') ||
        (req.headers.origin&&req.headers.origin!==`http://${req.headers.host}`))return reply(403);

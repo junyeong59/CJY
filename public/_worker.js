@@ -4,7 +4,7 @@
 const PINNED_TEST_BACKEND_ORIGIN = 'https://cjy-test-checkout-staging.up.railway.app';
 const SITE_ORIGIN = 'https://cjy.app';
 const LIMIT = 65536;
-const APPLY_PATHS = new Set(['session','submit','status','open','verify','orders','new','monthly-recover','monthly-orders','monthly-renew'].map(s=>'/api/test/apply/'+s));
+const APPLY_PATHS = new Set(['session','submit','status','open','verify','orders','new','application','revise','save','retry-edit','reopen'].map(s=>'/api/test/apply/'+s));
 const PATHS = new Set([...APPLY_PATHS,...['open','status','verify','webhook'].map(s=>'/api/test/checkout/'+s)]);
 const SAFE_HEADERS = {'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer'};
 const reply=status=>new Response(status===204?null:'{"error":"test_proxy_unavailable"}',{status,headers:SAFE_HEADERS});
@@ -44,7 +44,7 @@ function createTestProxy(backendOrigin,upstreamFetch=fetch){
   if(apply){
    headers.delete('authorization');
    const incoming=(request.headers.get('cookie')??'').split(';').map(x=>x.trim()),forward=[];
-   for(const name of ['__Host-cjy_apply',...(url.pathname==='/api/test/apply/monthly-orders'?['__Host-cjy_monthly']:[])]){
+   for(const name of ['__Host-cjy_apply']){
     const cookies=incoming.filter(x=>x.startsWith(name+'='));
     if(cookies.length>1||cookies.some(x=>!new RegExp('^'+name+'=[A-Za-z0-9_-]{43}$').test(x)))return reply(403);
     forward.push(...cookies);
@@ -57,8 +57,8 @@ function createTestProxy(backendOrigin,upstreamFetch=fetch){
    const responseBody=await readBounded(upstream.body,signal);
    const responseHeaders=new Headers(SAFE_HEADERS);
    const cookie=upstream.headers.get('set-cookie');
-   if(['/api/test/apply/session','/api/test/apply/monthly-recover'].includes(url.pathname)&&cookie){
-    const pattern=url.pathname.endsWith('/session')?/^__Host-cjy_apply=[A-Za-z0-9_-]{43}; Path=\/; HttpOnly; Secure; SameSite=Strict; Max-Age=604800$/:/^__Host-cjy_monthly=[A-Za-z0-9_-]{43}; Path=\/; HttpOnly; Secure; SameSite=Strict; Max-Age=3600$/;
+   if(url.pathname==='/api/test/apply/session'&&cookie){
+    const pattern=/^__Host-cjy_apply=[A-Za-z0-9_-]{43}; Path=\/; HttpOnly; Secure; SameSite=Strict; Max-Age=604800$/;
     if(upstream.status!==200||!pattern.test(cookie))return reply(502);
     responseHeaders.set('Set-Cookie',cookie);
    }

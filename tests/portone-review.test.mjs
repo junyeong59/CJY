@@ -81,7 +81,8 @@ test('mock SDK: single local checkout opens KG V2 request with exact price and m
   const request=calls[0];assert.equal(request.storeId,fixture.PORTONE_TEST_STORE_ID);assert.equal(request.channelKey,fixture.PORTONE_TEST_CHANNEL_KEY);
   assert.equal(request.totalAmount,768900);assert.equal(request.currency,'KRW');assert.equal(request.payMethod,'CARD');
   assert.deepEqual(request.customer,{fullName:'Review User',phoneNumber:'01000000000',email:'review@example.invalid'});
-  assert.match(request.paymentId,/^cjy-review-[a-f0-9-]{36}$/);
+  assert.ok(request.paymentId.length>=1&&request.paymentId.length<=40,'KG oid must contain 1–40 characters');
+  assert.match(request.paymentId,/^cjy-[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/,'retain the entire random UUID v4');
   assert.ok(Buffer.byteLength(request.orderName)<=40);
   assert.equal(request.redirectUrl,base+'/review/apply');
   assert.equal(requests.external,0);assert.equal(requests.sdk,1);
@@ -182,7 +183,10 @@ test('local policy links render unchanged policy metadata; mobile missing-config
     assert.match(html,/data-checkout-eligible="false"/);assert.match(html,/data-payment-live="false"/);
   }
   await page.setViewportSize({width:390,height:844});
+  // ResizeObserver/layout can settle after the already-present TEST status.
+  await page.waitForFunction(()=>document.documentElement.scrollWidth<=innerWidth);
   await page.waitForFunction(()=>document.querySelector('#checkout-status').textContent.includes('TEST'));
+  await page.evaluate(async()=>{await document.fonts.ready;await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));});
   assert.equal(await page.locator('.checkout button').count(),1);
   const box=await page.locator('.checkout button').boundingBox();assert.ok(box.x>=0&&box.x+box.width<=390&&box.y>=0&&box.y+box.height<=844);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
@@ -190,6 +194,16 @@ test('local policy links render unchanged policy metadata; mobile missing-config
     const {mkdir}=await import('node:fs/promises');await mkdir(process.env.CJY_REVIEW_EVIDENCE_DIR,{recursive:true});
     await page.screenshot({path:process.env.CJY_REVIEW_EVIDENCE_DIR+'/local-review-blocked-mobile.png',fullPage:true});
   }
+});
+
+test('CSP frame-src permits the exact checkout service origin without widening the review frame allowlist',async t=>{
+  const {base}=await setupServer(t);
+  const csp=(await fetch(base+'/review/apply')).headers.get('content-security-policy');
+  const sources=csp.split(';').map(s=>s.trim()).find(s=>s.startsWith('frame-src ')).split(/\s+/).slice(1);
+  assert.ok(sources.includes('https://checkout-service.prod.iamport.co'),'frame-src permits the observed checkout service origin');
+  assert.deepEqual(sources.toSorted(),[
+    'https://service.iamport.kr','https://*.inicis.com','https://checkout-service.prod.iamport.co'
+  ].toSorted(),'only the exact checkout origin is added to the existing frame allowlist');
 });
 
 test('CSP permits official SDK dynamic driver scripts and definitions without allowing arbitrary hosts',async t=>{

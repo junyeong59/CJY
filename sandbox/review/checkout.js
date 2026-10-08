@@ -1,5 +1,6 @@
 // Local review only. Production's bindApplication is deliberately never loaded.
 import {PRICING,calculateFirstMonthPrice} from '/src/commercial.js';
+import {classifyPaymentResult} from '/src/payment-result.js';
 const form=document.querySelector('#application-form');
 const field=name=>form.elements.namedItem(name);
 const status=document.querySelector('#checkout-status');
@@ -10,8 +11,10 @@ const unverified='결제 결과 미확인 · 서버 검증 전이므로 결제�
 let busy=false,attempt=null,sdkFailed=false,returnMismatch=false;
 try{attempt=JSON.parse(sessionStorage.getItem(attemptKey));}catch{}
 const unresolved=()=>attempt&&['pending','unverified'].includes(attempt.phase);
-function showResult(code){
-  attempt.phase=code==='FAILURE_TYPE_STOPPED'?'cancelled':code?'failed':'unverified';
+function showResult(code,pgCode){
+  const diagnostic=classifyPaymentResult({code,pgCode});
+  attempt.phase=diagnostic.phase;
+  attempt.diagnostic={sdkCode:diagnostic.sdkCode,pgCode:diagnostic.pgCode};
   sessionStorage.setItem(attemptKey,JSON.stringify(attempt));
   status.textContent=attempt.phase==='cancelled'?'결제창이 취소·중단되었습니다. 실 접수·제작·게시 없음.':attempt.phase==='failed'?'결제창 요청이 실패했습니다. 실 접수·제작·게시 없음.':unverified;
 }
@@ -46,7 +49,7 @@ form.addEventListener('change',sync);sync();
 const params=new URLSearchParams(location.search);
 if(params.has('paymentId')||params.has('code')){
   history.replaceState(null,'','/review/apply');
-  if(attempt?.paymentId===params.get('paymentId')&&attempt.phase==='pending')showResult(params.get('code'));
+  if(attempt?.paymentId===params.get('paymentId')&&attempt.phase==='pending')showResult(params.get('code'),params.get('pgCode'));
   else{returnMismatch=true;status.textContent='복귀 정보가 현재 요청과 일치하지 않습니다. '+unverified;}
 }else if(unresolved())status.textContent=unverified;
 const dock=form.querySelector('.payment-dock');
@@ -85,7 +88,7 @@ form.addEventListener('submit',async event=>{
   try{
     const portone=await loadSdk();
     const plan=field('plan').value;
-    attempt={paymentId:`cjy-review-${crypto.randomUUID()}`,plan,phase:'pending'};
+    attempt={paymentId:`cjy-${crypto.randomUUID()}`,plan,phase:'pending'};
     sessionStorage.setItem(attemptKey,JSON.stringify(attempt));
     const result=await portone.requestPayment({
       storeId:config.storeId,channelKey:config.channelKey,
@@ -94,7 +97,7 @@ form.addEventListener('submit',async event=>{
       customer:{fullName:field('customerName').value.trim(),phoneNumber:field('customerPhone').value.trim(),email:field('customerEmail').value.trim()},
       redirectUrl:location.origin+'/review/apply'
     });
-    showResult(result?.code);
+    showResult(result?.code,result?.pgCode);
   }catch{status.textContent=sdkFailed?'SDK 로드 실패. 네트워크를 확인한 뒤 페이지를 새로고침하세요. 결제 요청은 전송하지 않았습니다.':unverified;}
   finally{busy=false;button.disabled=sdkFailed||Boolean(unresolved());}
 });

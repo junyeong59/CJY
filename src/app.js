@@ -519,7 +519,7 @@ function renderHome() {
       </header>
       <main class="landing-main">
         <section class="landing-hero" aria-labelledby="home-title">
-          <h1 id="home-title">기획부터 업로드까지 매일,<br />우리 브랜드에 맞는 릴스도 척척</h1>
+          <h1 id="home-title">기획부터 납품까지 매일,<br />우리 브랜드에 맞는 릴스도 척척</h1>
           <a class="hero-orb" href="/apply" data-link aria-label="서비스 신청하기"><img class="hero-orb-flow" src="/assets/home/orb.png" alt="" width="439" height="439" /></a>
         </section>
         <section id="product" class="landing-product" aria-labelledby="product-title" tabindex="-1">
@@ -531,7 +531,7 @@ function renderHome() {
                 <div class="demo-reel"><img src="/assets/home/reel.png" alt="" width="204" height="180" />${play}</div>
               </div></div>
             </div>
-            <div class="feature-copy"><h3>매일 릴스 업로드</h3><p>자비스 솔루션은 매일 정해진 시각에 릴스(게시물)를 기획, 제작하여 업로드까지 진행하고 고객에게 보고합니다.</p></div>
+            <div class="feature-copy"><h3>매일 릴스 제작·납품</h3><p>운영자가 신청·결제를 직접 검토하고 브랜드에 맞는 가이드라인과 시작일을 확정합니다. 협의한 기준에 따라 릴스를 제작·검수해 납품하며, 게시는 별도 계정 권한과 승인에 따라 진행합니다.</p></div>
           </article>
           <article class="feature feature--reverse">
             <div class="feature-art" role="img" aria-label="고객 요청에 맞춰 AI 드라마를 제작하는 채팅 예시">
@@ -543,14 +543,14 @@ function renderHome() {
             <div class="feature-copy"><h3>고객 맞춤 콘텐츠 제공</h3><p>고객의 니즈에 맞게 콘텐츠의 스타일, 대본, 영상 길이를 참고하여 콘텐츠를 <strong>매일 직접</strong> 제작하여 제공합니다.<br />AI 드라마부터 병원 마케팅까지, 모든 고객의 니즈에 맞게.</p></div>
           </article>
           <article class="feature">
-            <div class="feature-art" role="img" aria-label="디스코드, 텔레그램, 지메일로 전달받는 콘텐츠 리포트">
+            <div class="feature-art" role="img" aria-label="콘텐츠와 리포트의 전달 방법은 개별 협의">
               <div class="feature-visual report-visual" aria-hidden="true">
                 <img class="report-icon report-icon--discord" src="/assets/home/report-discord.png" alt="" width="226" height="226" loading="lazy" />
                 <img class="report-icon report-icon--telegram" src="/assets/home/report-telegram.png" alt="" width="226" height="226" loading="lazy" />
                 <img class="report-icon report-icon--gmail" src="/assets/home/report-gmail.png" alt="" width="226" height="226" loading="lazy" />
               </div>
             </div>
-            <div class="feature-copy"><h3>매일 받아보는 콘텐츠 리포트</h3><p>원하는 메신저로 콘텐츠의 내용과 관련된 콘텐츠 리포트를 매일 전송받습니다.<br />번거롭게 새로운 앱을 깔 필요 없이 <strong>원하는 메신저</strong>에서 척척.</p></div>
+            <div class="feature-copy"><h3>직접 전달받는 콘텐츠와 리포트</h3><p>운영자가 완성 영상을 검수하고 콘텐츠와 리포트를 직접 전달합니다.<br /><strong>납품 방법은 개별 협의</strong>하며 고객 봇 연결이나 자동 전송을 요구하지 않습니다.</p></div>
           </article>
           <article class="feature feature--reverse">
             <div class="feature-art feature-art--assistant" role="img" aria-label="일정 조율과 콘텐츠 제작을 돕는 개인 비서 예시">
@@ -582,10 +582,10 @@ function renderHome() {
 function renderProcess() {
   const steps = [
     ['brief', '작성한 양식을 통해 원하는 콘텐츠, 스타일 취합'],
-    ['automation', '초기 자동화 파이프라인 생성'],
-    ['approval', '테스트 콘텐츠 전달 및 파이프라인 확정'],
-    ['account', '자동 게시 선택 여부에 따라 계정 전달 또는 적용'],
-    ['upload', '선택 기간에 따라 자동으로 콘텐츠 업로드'],
+    ['automation', '운영자가 신청·결제와 제작 가능 여부 직접 검토'],
+    ['approval', '고객과 가이드라인·시작일·납품 방법 개별 협의'],
+    ['account', '운영자가 고객 브랜드와 제작 기준 직접 설정'],
+    ['upload', '제작·검수 후 직접 납품 · 별도 승인 시 게시'],
     ['renewal', '기간 이후 연장 또는 종료 선택 및 추가금 정산']
   ];
   return `<section id="process" class="landing-process" aria-labelledby="process-title" tabindex="-1">
