@@ -1,3 +1,4 @@
+import { build } from "esbuild";
 import { createHash } from "node:crypto";
 import { cp, mkdir, rm, copyFile, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -13,12 +14,26 @@ await copyFile(path.join(root, "index.html"), path.join(dist, "index.html"));
 await cp(path.join(root, "src"), path.join(dist, "src"), { recursive: true });
 await cp(path.join(root, "component"), path.join(dist, "component"), { recursive: true });
 await cp(path.join(root, "public"), dist, { recursive: true });
+await build({
+  entryPoints: [path.join(root, "src", "supabase-client.js")],
+  outfile: path.join(dist, "src", "supabase-client.js"),
+  bundle: true, format: "esm", platform: "browser", target: "es2022", minify: true,
+  define: { __CJY_SUPABASE_PUBLIC_KEY__: JSON.stringify(process.env.CJY_SUPABASE_PUBLIC_KEY) || "undefined" }
+});
 
 const assetVersion = async (filePath) => {
   const contents = await readFile(filePath);
   return createHash("sha256").update(contents).digest("hex").slice(0, 12);
 };
 
+const checkoutPath = path.join(dist, "src", "apply-checkout.js");
+const supabaseVersion = await assetVersion(path.join(dist, "src", "supabase-client.js"));
+await writeFile(checkoutPath, (await readFile(checkoutPath, "utf8")).replace('./supabase-client.js', `./supabase-client.js?v=${supabaseVersion}`));
+const checkoutVersion = await assetVersion(checkoutPath);
+for (const module of ["direct-application.js", "order.js"]) {
+  const filePath = path.join(dist, "src", module);
+  await writeFile(filePath, (await readFile(filePath, "utf8")).replace('./apply-checkout.js', `./apply-checkout.js?v=${checkoutVersion}`));
+}
 const configPath = path.join(dist, "src", "config.js");
 const configVersion = await assetVersion(configPath);
 const appPath = path.join(dist, "src", "app.js");

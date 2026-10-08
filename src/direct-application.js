@@ -1,6 +1,6 @@
 import {PRICING,calculateFirstMonthPrice} from './commercial.js';
 import {createPolicyConsentEvidence} from './policy-documents.js';
-import {applyApi,loadSdk} from './apply-checkout.js';
+import {applyApi,loadSdk,validateTestCheckout} from './apply-checkout.js';
 import {classifyPaymentResult} from './payment-result.js';
 export const DIRECT_CONSENT_VERSION='cjy-direct-test-2026-09-27';
 const money=n=>n.toLocaleString('ko-KR')+'₩';
@@ -63,17 +63,17 @@ export function bindDirectApplication(root){
  form.addEventListener('submit',async event=>{event.preventDefault();if(!ready||busy||unknown||(!recoverable()&&(current.orderId||(current.receipt&&current.editable!==true))))return;
  {const phone=field('customerPhone').value.trim();field('customerPhone').setCustomValidity(/^[+\d][\d ()-]{5,29}$/.test(phone)&&phone.replace(/\D/g,'').length>=7&&phone.replace(/\D/g,'').length<=15?'':'전화번호를 확인해주세요.');field('customerName').setCustomValidity(field('customerName').value.trim()&&new TextEncoder().encode(field('customerName').value.trim()).length<=30?'':'성함은 30바이트 이내로 입력해주세요.');field('brief').setCustomValidity(field('brief').value.trim()?'':'내용을 입력해주세요.');}
  if(!form.reportValidity())return;busy=true;sync();status.textContent='결제 준비 중…';
- try{if(!await ensureEditable())return;const portone=await loadSdk();if(disposed)return;
- const unchanged=current.retryOriginal&&names.every(n=>field(n).value.trim()===current.retryOriginal.application?.[n]);
- const paymentDraft=unchanged?current.retryOriginal.draftId:current.draftId;
+ try{const sameOriginal=current.orderId&&current.state==='pending_payment'&&names.every(n=>field(n).value.trim()===current.application?.[n]);if(!sameOriginal&&!await ensureEditable())return;const portone=await loadSdk();if(disposed)return;
+ const unchanged=sameOriginal||(current.retryOriginal&&names.every(n=>field(n).value.trim()===current.retryOriginal.application?.[n]));
+ const paymentDraft=sameOriginal?current.draftId:unchanged?current.retryOriginal.draftId:current.draftId;
  if(!unchanged){const payload=Object.fromEntries(names.map(n=>[n,field(n).value.trim()]));if(payload.autoPost==='no')payload.existingAccount='no';payload.draftId=current.draftId;payload.policyEvidence=createPolicyConsentEvidence();payload.consentBundle={version:DIRECT_CONSENT_VERSION,termsRefund:field('termsConsent').checked,privacy:field('privacyConsent').checked,pilotRights:field('termsConsent').checked,pilotProcessing:field('privacyConsent').checked,pilotVersion:'cjy-firstPilot-2026-09-27'};unknown=true;const saved=await applyApi(current.receipt?'revise':'submit',payload);if(saved.status!=='pending-review'||!/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(saved.receipt??''))throw Error('missing_receipt');show({...saved,draftId:saved.draftId??current.draftId});unknown=false;}
  unknown=true;const r=await applyApi(unchanged?'reopen':'open',{draftId:unchanged?paymentDraft:current.draftId,consentVersion:DIRECT_CONSENT_VERSION,granted:field('termsConsent').checked&&field('privacyConsent').checked});
  if(r.status==='window-active'){unknown=false;status.textContent='다른 결제창이 열려 있습니다. 그 창을 닫은 뒤 다시 눌러주세요. 내용은 수정·저장할 수 있습니다.';return;}
  show(r);
  if(r.state==='paid'){location.assign('/order');return;}
  if(r.status!=='checkout-ready'||r.state!=='pending_payment')return;
- if(r.environment!=='test'||r.currency!=='KRW'||!Number.isSafeInteger(r.totalAmount)||r.totalAmount<=0)throw Error('checkout_binding');if(disposed)return;
- const result=await portone.requestPayment({storeId:r.storeId,channelKey:r.channelKey,paymentId:r.paymentId,orderName:r.orderName,totalAmount:r.totalAmount,currency:'CURRENCY_KRW',payMethod:r.payMethod,customer:{...r.customer,email:field('testEmail').value.trim()},redirectUrl:location.origin+'/apply?draftId='+encodeURIComponent(current.draftId)+(r.windowId?'&windowId='+encodeURIComponent(r.windowId):'')}).catch(error=>classifyPaymentResult(error).phase==='cancelled'?error:{localUnknown:true});const safe=classifyPaymentResult(result);
+ validateTestCheckout(r);if(disposed)return;
+ const result=await portone.requestPayment({storeId:r.storeId,channelKey:r.channelKey,paymentId:r.paymentId,orderName:r.orderName,totalAmount:r.totalAmount,currency:'CURRENCY_KRW',noticeUrls:['https://tixshhgyvvfzreefbipm.supabase.co/functions/v1/cjy-webhook'],payMethod:r.payMethod,customer:{...r.customer,email:field('testEmail').value.trim()},redirectUrl:location.origin+'/apply?draftId='+encodeURIComponent(current.draftId)+(r.windowId?'&windowId='+encodeURIComponent(r.windowId):'')}).catch(error=>classifyPaymentResult(error).phase==='cancelled'?error:{localUnknown:true});const safe=classifyPaymentResult(result);
  if(safe.phase==='cancelled'){cancelledReturn(r);return;}
  if(safe.phase!=='cancelled'&&!result?.localUnknown){const verified=await applyApi('verify',{draftId:current.draftId});if(verified.state==='paid'){location.assign('/order');return;}}
  const child=await applyApi('retry-edit',{draftId:current.draftId,...(r.windowId?{windowId:r.windowId}:{})});
@@ -93,7 +93,7 @@ export function bindDirectApplication(root){
   unknown=true;const r=await applyApi('save',payload);if(disposed)return;if(!r.receipt||!r.draftId||!r.application)throw Error('invalid_saved_application');show(r,true);unknown=false;history.replaceState(null,'','/apply?draftId='+encodeURIComponent(r.draftId));status.textContent='접수를 저장했습니다. 결제는 시작되지 않았습니다.';
  }catch(e){unknown=false;status.textContent=[400,403,409,429].includes(e.status)?'저장하지 못했습니다. 입력·동의 또는 기존 접수 상태를 확인해주세요.':'저장 결과를 확인 중입니다. 입력을 유지했습니다. 다시 저장하면 서버에서 확인합니다.';}finally{busy=false;sync();}
  });
- applyApi('session').then(()=>applyApi('status')).then(async r=>{if(disposed)return;const active=r,selected=params.get('draftId');if(selected&&!/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(selected))throw Error('invalid_selection');if(selected||r.receipt)r=await applyApi('application',{draftId:selected||r.draftId});
+ applyApi('status').then(async r=>{if(disposed)return;const active=r,selected=params.get('draftId');if(selected&&!/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(selected))throw Error('invalid_selection');if(selected||r.receipt)r=await applyApi('application',{draftId:selected||r.draftId});
  // A stale unpaid revision link is not the editable head. Resolve only after
  // the owner-scoped server confirms both archive and current saved eligibility.
  if(selected&&selected!==active.draftId&&r.receipt&&r.editable===false&&!r.orderId&&active.receipt&&!active.orderId&&active.status==='pending-review'){
@@ -103,12 +103,15 @@ export function bindDirectApplication(root){
    if(latest.draftId===active.draftId&&latest.receipt&&latest.application&&latest.editable===true&&!latest.orderId&&latest.status==='pending-review'){r=latest;if(!disposed)history.replaceState(null,'','/apply?draftId='+encodeURIComponent(r.draftId));}
   }
  }
- if(r.state==='paid'&&/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(params.get('windowId')??'')){location.assign('/order');return;}
+ if(r.state==='paid'&&(params.has('paymentId')||params.has('code')||/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(params.get('windowId')??''))){location.assign('/order');return;}
  if(r.orderId&&r.state==='pending_payment'){
   if(classifyPaymentResult({code:params.get('code')}).phase==='cancelled'){
    const windowId=params.get('windowId');cancelledReturn({...r,...(/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(windowId??'')?{windowId}:{})},true);ready=true;sync();return;
   }
-  r=await applyApi('retry-edit',{draftId:r.draftId,...(params.has('windowId')&&/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(params.get('windowId'))?{windowId:params.get('windowId')}:{})});
+  const original=r;
+  try{r=await applyApi('retry-edit',{draftId:r.draftId,...(params.has('windowId')&&/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(params.get('windowId'))?{windowId:params.get('windowId')}:{})});}
+  catch(error){if(![404,409,503].includes(error.status))throw error;r=original;}
+  if(r.orderId&&r.state==='pending_payment')r={...original,editable:true};
   if(r.state==='paid'){location.assign('/order');return;}
   if(r.editable===true&&!r.orderId&&!disposed)history.replaceState(null,'','/apply?draftId='+encodeURIComponent(r.draftId));
  }

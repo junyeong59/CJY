@@ -1,7 +1,8 @@
 import {classifyPaymentResult} from './payment-result.js';
-export async function applyApi(action,body={}){
- const r=await fetch('/api/test/apply/'+action,{method:'POST',credentials:'same-origin',referrerPolicy:'no-referrer',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(15000)});
- if(!r.ok)throw Object.assign(Error('apply_unavailable'),{status:r.status});return r.json();
+import {applyApi} from './supabase-client.js';
+export {applyApi};
+export function validateTestCheckout(r){
+ if(r.environment!=='test'||r.currency!=='KRW'||!Number.isSafeInteger(r.totalAmount)||r.totalAmount<=0)throw Error('checkout_binding');
 }
 let sdk;
 export function loadSdk(){return sdk??=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://cdn.portone.io/v2/browser-sdk.js';const fail=()=>{clearTimeout(timeout);s.remove();reject(Error('sdk_unavailable'));};const timeout=setTimeout(fail,10000);s.onload=()=>{clearTimeout(timeout);typeof window.PortOne?.requestPayment==='function'?resolve(window.PortOne):fail();};s.onerror=fail;document.head.appendChild(s);}).catch(error=>{sdk=undefined;throw error;});}
@@ -34,10 +35,10 @@ export function bindApplyCheckout(form,onReceipt){
     if(r.status==='pending-review'&&!r.orderId)openUnknown=false;
     return;
    }
-   if(r.currency!=='KRW'||r.totalAmount!==273900)throw Error('invalid_checkout');
+   validateTestCheckout(r);
    if(disposed)return;
    // Server identity and amount only; no browser paid authority or receipt parameter.
-   const result=await portone.requestPayment({storeId:r.storeId,channelKey:r.channelKey,paymentId:r.paymentId,orderName:r.orderName,totalAmount:r.totalAmount,currency:'CURRENCY_KRW',payMethod:r.payMethod,customer:{fullName:r.customer.fullName,phoneNumber:r.customer.phoneNumber,email},redirectUrl:location.origin+'/apply'});
+   const result=await portone.requestPayment({storeId:r.storeId,channelKey:r.channelKey,paymentId:r.paymentId,orderName:r.orderName,totalAmount:r.totalAmount,currency:'CURRENCY_KRW',noticeUrls:['https://tixshhgyvvfzreefbipm.supabase.co/functions/v1/cjy-webhook'],payMethod:r.payMethod,customer:{fullName:r.customer.fullName,phoneNumber:r.customer.phoneNumber,email},redirectUrl:location.origin+'/apply'});
    const safe=classifyPaymentResult(result);
    status.textContent=`결제창 ${safe.phase==='cancelled'?'취소':safe.phase==='failed'?'실패':'종료'} · 서버에서 확인하고 있습니다. 재결제하지 마세요.`;
    show(await applyApi('verify'));
@@ -46,6 +47,6 @@ export function bindApplyCheckout(form,onReceipt){
  pay.addEventListener('click',open);check.addEventListener('click',refresh);
  const query=new URLSearchParams(location.search);
  if(query.has('paymentId')||query.has('code'))history.replaceState(null,'','/apply');
- const ready=applyApi('session').then(()=>applyApi('status')).then(r=>{show(r);return r;});
+ const ready=applyApi('status').then(r=>{show(r);return r;});
  return {ready,show,open,dispose(){disposed=true;}};
 }

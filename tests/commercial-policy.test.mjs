@@ -65,7 +65,7 @@ test('refund calculation rejects invalid counts instead of silently changing the
 });
 
 test('policy metadata preserves current consent evidence but blocks checkout and payment activation', () => {
-  assert.equal(POLICY_METADATA.versionDate, '2026-09-23');
+  assert.equal(POLICY_METADATA.versionDate, '2026-10-09');
   assert.equal(POLICY_METADATA.effectiveState, 'effective-current-service-payment-activation-blocked');
   assert.equal(POLICY_METADATA.checkoutEligible, false);
   assert.equal(POLICY_METADATA.paymentLive, false);
@@ -76,6 +76,27 @@ test('policy metadata preserves current consent evidence but blocks checkout and
     assert.equal(POLICY_METADATA.documents[kind].canonicalSha256, digest);
     assert.equal(POLICY_METADATA.documents[kind].versionDate, POLICY_METADATA.versionDate);
   }
+});
+
+test('current privacy describes TEST Supabase processing and persisted anonymous identity without expanding authority', () => {
+  const section = title => POLICY_DOCUMENTS.privacy.sections.find(([heading]) => heading === title).slice(1).join(' ');
+  assert.match(section('개인정보 처리방침'), /Supabase.*TEST/);
+  assert.doesNotMatch(canonicalizePolicyDocument(POLICY_DOCUMENTS.privacy), /Railway/);
+  assert.match(section('신청 처리 목적과 항목'), /익명 사용자 식별자/);
+  const flow = section('현재 처리 흐름과 외부 서비스');
+  assert.match(flow, /Supabase Auth.*데이터베이스.*Edge Functions/);
+  assert.match(flow, /데이터베이스.*서울/);
+  assert.match(flow, /Edge Functions.*전 세계.*서울.*한정.*않/);
+  assert.match(flow, /my-video.*Mac.*수동/);
+  assert.match(flow, /고객 Telegram.*자동.*않/);
+  assert.match(section('위탁·제3자 제공 및 국외 처리'), /Supabase.*수령 법인.*처리 국가.*보유 기간.*미확정/);
+  const storage = section('안전성 및 브라우저 저장');
+  assert.match(storage, /성명.*전화번호.*요청 본문.*localStorage.*URL.*저장하지/);
+  assert.match(storage, /Supabase.*공식 SDK.*익명 인증 세션.*localStorage.*지속 저장/);
+  assert.match(storage, /브라우저.*삭제.*익명.*접근.*잃/);
+  assert.doesNotMatch(storage, /식별자만 sessionStorage/);
+  assert.equal(POLICY_METADATA.checkoutEligible, false);
+  assert.equal(POLICY_METADATA.paymentLive, false);
 });
 
 test('application consent evidence is an exact bounded snapshot of the current policy registry', () => {
@@ -110,7 +131,7 @@ test('final commercial terms state the bounded PortOne/PG, authority, refund, pr
   assert.match(terms, /결제만으로.*내부 고객 등록.*바인딩.*초대.*제작.*전달.*게시.*권한/);
   assert.doesNotMatch(terms, /결제만으로[^.]*고객 구속력 있는 계약 확정[^.]*생기지/);
 
-  for (const text of ['Railway','PortOne V2','KG이니시스','NHN KCP','OpenAI/Codex', 'Hermes', 'ElevenLabs', 'Telegram', '고객 전용 비공개 저장소']) assert.match(privacy, new RegExp(text));
+  for (const text of ['Supabase','PortOne V2','KG이니시스','NHN KCP','OpenAI/Codex', 'Hermes', 'ElevenLabs', 'Telegram', '고객 전용 비공개 저장소']) assert.match(privacy, new RegExp(text));
   for (const text of ['주문 식별자','결제 식별자','거래 식별자','취소 식별자','상태','시각','최소화한 해시']) assert.match(privacy,new RegExp(text));
   assert.match(privacy,/카드번호.*CVC.*계좌.*간편결제 인증정보.*처리하지/);
   assert.match(privacy, /로컬.*콘텐츠 아티팩트.*7일 이내.*예정.*삭제/);
@@ -150,7 +171,7 @@ test('application and footer expose all policies and distinguish guideline revis
 test('rendered policies identify final commercial terms while checkout and payment stay blocked', () => {
   for (const kind of ['terms', 'privacy', 'refund']) {
     const html = renderPolicy(kind);
-    assert.match(html, /시행일 2026\.09\.23 · 버전 2026\.09\.23 · 상업·결제·환불 조건 확정 · 결제 활성화 차단/);
+    assert.match(html, /시행일 2026\.10\.09 · 버전 2026\.10\.09 · 상업·결제·환불 조건 확정 · 결제 활성화 차단/);
     assert.match(html, /수령 법인.*처리 국가.*보유 기간.*확인·공개/);
     assert.match(html, /개인정보 처리방침.*완결.*아닙니다/);
     assert.match(html, /data-effective-state="effective-current-service-payment-activation-blocked"/);

@@ -12,5 +12,5 @@ test('public build versions direct application so stale automatic-flow copy is n
  const application=await readFile(new URL('dist/src/application.js',root));
  const appHash=createHash('sha256').update(application).digest('hex').slice(0,12);
  assert.ok((await readFile(new URL('dist/src/app.js',root),'utf8')).includes(`./application.js?v=${appHash}`));
- assert.ok(built.equals(await readFile(new URL('src/direct-application.js',root))));
+ assert.equal(built.toString().replace(/apply-checkout\.js\?v=[a-f0-9]{12}/g,'apply-checkout.js'),await readFile(new URL('src/direct-application.js',root),'utf8'));
 });

@@ -32,8 +32,8 @@ export function bindOrder(root,navigate) {
  const create=root.querySelector('[data-order-new]'),message=root.querySelector('[data-order-message]');
  let busy=false,disposed=false,current={orders:[]};
  const selectCurrent=result=>{const meaningful=result.orders.filter(o=>o.state!=='archived'&&(o.receipt||o.orderId));return meaningful.find(o=>o.draftId===result.draftId)??meaningful.find(o=>o.orderId&&o.state!=='saved')??meaningful[0];};
- // The PG query is advisory only. A same-origin JS fetch, not the cross-site
- // navigation request, retrieves the HttpOnly SameSite=Strict owner cookie.
+ // The PG query is advisory only. Official persisted Supabase Auth, not URL
+ // parameters or browser payment results, authorizes owner-scoped API reads.
  if(location.search)history.replaceState(null,'',location.pathname);
  function show(result){
   if(disposed)return;
@@ -43,7 +43,7 @@ export function bindOrder(root,navigate) {
  }
  async function load(reconcile=false){
   if(busy||disposed)return;busy=true;create.disabled=true;message.textContent='';
-  try{await applyApi('session');if(disposed)return;show(await applyApi('orders'));
+  try{if(disposed)return;show(await applyApi('orders'));
    const pending=current.orders.find(o=>o.state==='pending_payment');
    if(reconcile&&pending){await applyApi('verify',{draftId:pending.draftId});if(!disposed)show(await applyApi('orders'));}
   }catch{if(!disposed){message.textContent='상태 확인이 지연되고 있습니다. 재결제하지 말고 잠시 후 새로고침해주세요.';if(!current.orders.length)list.textContent='주문을 확인하지 못했습니다.';}}

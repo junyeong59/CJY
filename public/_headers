@@ -25,7 +25,7 @@
   Referrer-Policy: no-referrer
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
-  Content-Security-Policy: default-src 'none'; script-src 'self' https://cdn.portone.io/v2/browser-sdk.js https://cdn.portone.io/drivers/ https://*.inicis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.inicis.com; connect-src 'self' https://cdn.portone.io/drivers/ https://checkout-service.prod.iamport.co https://tx-gateway-service.prod.iamport.co https://payment-bridge.prod.iamport.co https://coretelemetry.prod.iamport.co; frame-src https://service.iamport.kr https://*.inicis.com https://checkout-service.prod.iamport.co; form-action 'self' https://service.iamport.kr https://*.inicis.com; base-uri 'none'; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'none'; script-src 'self' https://cdn.portone.io/v2/browser-sdk.js https://cdn.portone.io/drivers/ https://*.inicis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.inicis.com; connect-src 'self' https://tixshhgyvvfzreefbipm.supabase.co https://cdn.portone.io/drivers/ https://checkout-service.prod.iamport.co https://tx-gateway-service.prod.iamport.co https://payment-bridge.prod.iamport.co https://coretelemetry.prod.iamport.co; frame-src https://service.iamport.kr https://*.inicis.com https://checkout-service.prod.iamport.co; form-action 'self' https://service.iamport.kr https://*.inicis.com; base-uri 'none'; frame-ancestors 'none'
   Permissions-Policy: camera=(), microphone=(), geolocation=()
 /src/apply-checkout.js
   Cache-Control: no-store
@@ -39,7 +39,7 @@
   Referrer-Policy: no-referrer
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
-  Content-Security-Policy: default-src 'none'; script-src 'self' https://cdn.portone.io/v2/browser-sdk.js https://cdn.portone.io/drivers/ https://*.inicis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.inicis.com; connect-src 'self' https://cdn.portone.io/drivers/ https://checkout-service.prod.iamport.co https://tx-gateway-service.prod.iamport.co https://payment-bridge.prod.iamport.co https://coretelemetry.prod.iamport.co; frame-src https://service.iamport.kr https://*.inicis.com https://checkout-service.prod.iamport.co; form-action 'self' https://service.iamport.kr https://*.inicis.com; base-uri 'none'; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'none'; script-src 'self' https://cdn.portone.io/v2/browser-sdk.js https://cdn.portone.io/drivers/ https://*.inicis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.inicis.com; connect-src 'self' https://tixshhgyvvfzreefbipm.supabase.co https://cdn.portone.io/drivers/ https://checkout-service.prod.iamport.co https://tx-gateway-service.prod.iamport.co https://payment-bridge.prod.iamport.co https://coretelemetry.prod.iamport.co; frame-src https://service.iamport.kr https://*.inicis.com https://checkout-service.prod.iamport.co; form-action 'self' https://service.iamport.kr https://*.inicis.com; base-uri 'none'; frame-ancestors 'none'
   Permissions-Policy: camera=(), microphone=(), geolocation=()
 /src/order.js
   Cache-Control: no-store
