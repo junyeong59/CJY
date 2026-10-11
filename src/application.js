@@ -1,3 +1,4 @@
+import { renderSiteHeader } from './header.js';
 import {renderDirectApplication,bindDirectApplication} from './direct-application.js';
 import {applyApi,bindApplyCheckout} from './apply-checkout.js';
 import {PRICING, calculateFirstMonthPrice} from './commercial.js';
@@ -10,10 +11,7 @@ const money = value => `${value.toLocaleString('ko-KR')}₩`;
 // The public route explicitly opts into the session-bound TEST controls.
 export function renderApplication({integrated=false}={}) {
   if(integrated)return renderDirectApplication();
-  return `<div class="landing application"><header class="landing-header"><nav class="landing-nav" aria-label="메인 메뉴">
-    <a class="landing-brand" href="/" data-link aria-label="CJY 메인"><img src="/component/CJY.svg" alt="CJY" width="73" height="31" /></a>
-    <a href="/#product" data-link>Product</a><a href="/#pricing" data-link>Pricing</a><a href="/order" data-link>Order</a>
-  </nav></header>
+  return `<div class="landing application">${renderSiteHeader()}
   <main class="application-main"><h1>서비스 신청하기</h1>
     <form id="application-form"${integrated ? ' method="dialog"' : ''}>
       <div class="application-fields">

@@ -26,6 +26,12 @@ const assetVersion = async (filePath) => {
   return createHash("sha256").update(contents).digest("hex").slice(0, 12);
 };
 
+const headerVersion = await assetVersion(path.join(dist, "src", "header.js"));
+for (const module of ["app.js", "application.js", "direct-application.js", "order.js", "policies.js"]) {
+  const filePath = path.join(dist, "src", module);
+  await writeFile(filePath, (await readFile(filePath, "utf8")).replace('./header.js', `./header.js?v=${headerVersion}`));
+}
+
 const checkoutPath = path.join(dist, "src", "apply-checkout.js");
 const supabaseVersion = await assetVersion(path.join(dist, "src", "supabase-client.js"));
 await writeFile(checkoutPath, (await readFile(checkoutPath, "utf8")).replace('./supabase-client.js', `./supabase-client.js?v=${supabaseVersion}`));

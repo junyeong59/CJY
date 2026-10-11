@@ -1,3 +1,4 @@
+import { renderSiteHeader } from './header.js';
 import { renderPolicy, renderFooter } from "./policies.js";
 import { renderOrderLookup, renderOrderStatus, renderOrderDetails, bindOrder } from "./order.js";
 import { renderApplication, bindApplication } from "./application.js";
@@ -441,8 +442,9 @@ function renderApp() {
   }
   const disposeApplication = bindApplication(app);
   const disposeOrder = bindOrder(app, navigateTo);
-  cleanupApplication = () => { disposeApplication?.(); disposeOrder?.(); };
-  bindHeroGradient();
+  const disposePaymentDock = bindPaymentDock(app);
+  cleanupApplication = () => { disposeApplication?.(); disposeOrder?.(); disposePaymentDock?.(); };
+
   bindScrollReveal();
   document.body.dataset.route = normalizePath(window.location.pathname).startsWith("/musicnow/join/")
     ? "invite"
@@ -477,27 +479,26 @@ function bindScrollReveal() {
   }
 }
 
-function bindHeroGradient() {
-  const orb = app.querySelector(".hero-orb");
-  if (!orb) return;
-  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const reset = () => {
-    for (const property of ["--orb-x", "--orb-y", "--orb-angle", "--orb-hue"]) {
-      orb.style.removeProperty(property);
-    }
+function bindPaymentDock(root) {
+  const page = root.querySelector('.apply-page');
+  const dock = page?.querySelector('.payment-dock');
+  const footer = page?.querySelector('.business-footer');
+  if (!dock || !footer) return;
+  const update = () => {
+    page.style.setProperty('--dock-height', dock.getBoundingClientRect().height + 'px');
+    page.style.setProperty('--dock-footer-offset', Math.max(0, innerHeight - footer.getBoundingClientRect().top) + 'px');
   };
-  orb.addEventListener("pointermove", (event) => {
-    if (event.pointerType === "touch" || reducedMotion.matches) return;
-    const bounds = orb.getBoundingClientRect();
-    const x = Math.max(-1, Math.min(1, (event.clientX - bounds.left) / bounds.width * 2 - 1));
-    const y = Math.max(-1, Math.min(1, (event.clientY - bounds.top) / bounds.height * 2 - 1));
-    orb.style.setProperty("--orb-x", `${x * 6}%`);
-    orb.style.setProperty("--orb-y", `${y * 6}%`);
-    orb.style.setProperty("--orb-angle", `${x * 18 - y * 10}deg`);
-    orb.style.setProperty("--orb-hue", `${x * 22 + y * 14}deg`);
-  });
-  orb.addEventListener("pointerleave", reset);
-  orb.addEventListener("pointercancel", reset);
+  const observer = new ResizeObserver(update);
+  observer.observe(dock);
+  observer.observe(footer);
+  window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update);
+  update();
+  return () => {
+    observer.disconnect();
+    window.removeEventListener('scroll', update);
+    window.removeEventListener('resize', update);
+  };
 }
 
 function updateMeta(name, content, attr = "name") {
@@ -506,71 +507,35 @@ function updateMeta(name, content, attr = "name") {
 }
 
 function renderHome() {
-  const play = '<span class="demo-play"><img src="/assets/home/play.svg" alt="" width="22" height="24" /></span>';
   return `
     <div class="landing" id="top">
-      <header class="landing-header">
-        <nav class="landing-nav" aria-label="메인 메뉴">
-          <a class="landing-brand" href="#top" aria-label="CJY 처음으로"><img src="/component/CJY.svg" alt="CJY" width="73" height="31" /></a>
-          <a href="#product">Product</a>
-          <a href="#pricing">Pricing</a>
-          <a href="/order" data-link>Order</a>
-        </nav>
-      </header>
+      ${renderSiteHeader()}
       <main class="landing-main">
         <section class="landing-hero" aria-labelledby="home-title">
-          <h1 id="home-title">기획부터 납품까지 매일,<br />우리 브랜드에 맞는 릴스도 척척</h1>
-          <a class="hero-orb" href="/apply" data-link aria-label="서비스 신청하기"><img class="hero-orb-flow" src="/assets/home/orb.png" alt="" width="439" height="439" /></a>
+          <h1 id="home-title">당신만을 위한,<br />컨텐츠 제작 AI 에이전트팀.</h1>
+          <a class="hero-apply" href="/apply" data-link>신청하기</a>
         </section>
         <section id="product" class="landing-product" aria-labelledby="product-title" tabindex="-1">
           <h2 id="product-title">어떠한 기능을 할 수 있나요?</h2>
           <article class="feature">
-            <div class="feature-art" role="img" aria-label="릴스 제작 완료 보고와 영상 예시">
-              <div class="feature-visual"><div class="demo-phone demo-phone--reels" aria-hidden="true">
-                <div class="demo-message">기획부터 제작이 완료되었습니다.<br /><br />업로드 결과: 성공<br /><br />컨텐츠 내용: 주식 용어 설명</div>
-                <div class="demo-reel"><img src="/assets/home/reel.png" alt="" width="204" height="180" />${play}</div>
-              </div></div>
-            </div>
-            <div class="feature-copy"><h3>매일 릴스 제작·납품</h3><p>운영자가 신청·결제를 직접 검토하고 브랜드에 맞는 가이드라인과 시작일을 확정합니다. 협의한 기준에 따라 릴스를 제작·검수해 납품하며, 게시는 별도 계정 권한과 승인에 따라 진행합니다.</p></div>
+            <div class="feature-art" aria-hidden="true"></div>
+            <div class="feature-copy"><h3>매일 릴스 제작</h3><p>컨텐츠 제작 전문 AI 팀이 기획부터 게시까지,<br />매번 컨텐츠를 설명하지 않아도 척척 해냅니다.</p></div>
           </article>
           <article class="feature feature--reverse">
-            <div class="feature-art" role="img" aria-label="고객 요청에 맞춰 AI 드라마를 제작하는 채팅 예시">
-              <div class="feature-visual"><div class="demo-phone demo-phone--custom" aria-hidden="true">
-                <div class="demo-request">매일 AI 드라마 한 편씩 제작하고 업로드해줘. 드라마 내용은 로맨스로.</div>
-                <div class="demo-message">앞으로 매일 AI 드라마 한 편을 제작합니다.<br /><br />제목: 달콤한 회사생활<br /><br />내용: 신입사원으로 들어온 이…</div>
-              </div></div>
-            </div>
-            <div class="feature-copy"><h3>고객 맞춤 콘텐츠 제공</h3><p>고객의 니즈에 맞게 콘텐츠의 스타일, 대본, 영상 길이를 참고하여 콘텐츠를 <strong>매일 직접</strong> 제작하여 제공합니다.<br />AI 드라마부터 병원 마케팅까지, 모든 고객의 니즈에 맞게.</p></div>
+            <div class="feature-art" aria-hidden="true"></div>
+            <div class="feature-copy"><h3>고객 맞춤 컨텐츠 제공</h3><p>매일 고객의 니즈에 따른 새로운 컨텐츠를 제작합니다.<br />AI 드라마부터 병원 마케팅까지, 모든 고객의 니즈에 맞게 제작합니다.</p></div>
           </article>
           <article class="feature">
-            <div class="feature-art" role="img" aria-label="콘텐츠와 리포트의 전달 방법은 개별 협의">
-              <div class="feature-visual report-visual" aria-hidden="true">
-                <img class="report-icon report-icon--discord" src="/assets/home/report-discord.png" alt="" width="226" height="226" loading="lazy" />
-                <img class="report-icon report-icon--telegram" src="/assets/home/report-telegram.png" alt="" width="226" height="226" loading="lazy" />
-                <img class="report-icon report-icon--gmail" src="/assets/home/report-gmail.png" alt="" width="226" height="226" loading="lazy" />
-              </div>
-            </div>
-            <div class="feature-copy"><h3>직접 전달받는 콘텐츠와 리포트</h3><p>운영자가 완성 영상을 검수하고 콘텐츠와 리포트를 직접 전달합니다.<br /><strong>납품 방법은 개별 협의</strong>하며 고객 봇 연결이나 자동 전송을 요구하지 않습니다.</p></div>
-          </article>
-          <article class="feature feature--reverse">
-            <div class="feature-art feature-art--assistant" role="img" aria-label="일정 조율과 콘텐츠 제작을 돕는 개인 비서 예시">
-              <div class="feature-visual"><img class="assistant-orb" src="/assets/home/orb.png" alt="" width="251" height="251" loading="lazy" />
-              <div class="assistant-message assistant-message--one" aria-hidden="true">일정 조율이 완료되었습니다.<br /><br />다음 일정: 9월 11일 오후 6시</div>
-              <div class="assistant-message assistant-message--two" aria-hidden="true">고객님께 일정 연기 메시지를 전송합니다.</div>
-              <div class="assistant-message assistant-message--three" aria-hidden="true">병원 마케팅 콘텐츠 제작 완료되었습니다.<br /><br />주제: 임플란트, 아무데서나 하면 안 되는 이유</div></div>
-            </div>
-            <div class="feature-copy"><h3>더 나아가, 개인의 수행비서로</h3><p>고객과 완벽하게 연결되어, 이전 명령에 따라 더욱 발전하여 완전한 고객 맞춤형 수행비서로서 기능합니다. (출시 예정)</p></div>
+            <div class="feature-art" aria-hidden="true"></div>
+            <div class="feature-copy"><h3>일관성 있는, 훌륭한 컨텐츠</h3><p>브랜드 톤에 맞게 일관성 있게 컨텐츠를 제작합니다.<br />양과 질을 동시에 잡는 격이죠.</p></div>
           </article>
         </section>
         <section id="pricing" class="landing-pricing" aria-labelledby="pricing-title" tabindex="-1">
           <h2 id="pricing-title">가격표</h2>
-          <section class="pricing-group" aria-labelledby="reels-pricing"><h3 id="reels-pricing">매일 릴스 솔루션</h3><div class="pricing-grid">
-            ${renderPriceCard('Standard', ['하루 영상 1개 제작 및 리포트 전달', '타이포그래피 위주의 편집', 'TTS 포함', '자막 포함'], '149,000₩')}
-            ${renderPriceCard('Deluxe', ['하루 영상 1개 제작 및 리포트 전달', '생성형 이미지 위주의 편집', '적절한 타이포그래피', 'TTS 포함', '자막 포함'], '599,000₩')}
-            ${renderPriceCard('Premium', ['하루 영상 1개 제작 및 리포트 전달', '고퀄리티 영상 위주의 편집', '적절한 생성형 이미지 포함', '적절한 타이포그래피', 'TTS 포함', '자막 포함'], '999,000₩')}
-          </div></section>
-          <section class="pricing-group" aria-labelledby="assistant-pricing"><h3 id="assistant-pricing">개인 맞춤 비서 솔루션</h3><div class="pricing-grid">
-            ${renderPriceCard('Standard', ['고객 맞춤 서비스 제공', 'AI를 이용한 모든 서비스 제공', '콘텐츠 제작', '일정 관리', '클라이언트 관리'], 'Coming Soon', true)}
+          <section class="pricing-group" aria-labelledby="reels-pricing"><h3 id="reels-pricing">매일 릴스(게시물) 솔루션</h3><div class="pricing-grid">
+            ${renderPriceCard('Standard', ['타이포 그래피 위주의 편집', 'TTS 포함', '자막 포함'], '149,000₩')}
+            ${renderPriceCard('Deluxe', ['생성형 이미지 위주의 편집', '적절한 타이포 그래피', 'TTS 포함', '자막 포함'], '599,000₩')}
+            ${renderPriceCard('Premium', ['고퀄리티 영상 위주의 편집', '적절한 생성형 이미지 포함', '적절한 타이포 그래피', 'TTS 포함', '자막 포함'], '999,000₩')}
           </div></section>
         </section>
         ${renderProcess()}
@@ -581,12 +546,12 @@ function renderHome() {
 
 function renderProcess() {
   const steps = [
-    ['brief', '작성한 양식을 통해 원하는 콘텐츠, 스타일 취합'],
-    ['automation', '운영자가 신청·결제와 제작 가능 여부 직접 검토'],
-    ['approval', '고객과 가이드라인·시작일·납품 방법 개별 협의'],
-    ['account', '운영자가 고객 브랜드와 제작 기준 직접 설정'],
-    ['upload', '제작·검수 후 직접 납품 · 별도 승인 시 게시'],
-    ['renewal', '기간 이후 연장 또는 종료 선택 및 추가금 정산']
+    ['brief', '작성한 양식을 통해 원하는 컨텐츠, 스타일 취합'],
+    ['automation', '초기 자동화 파이프라인 생성'],
+    ['approval', '테스트 컨텐츠 전달 및 파이프라인 확정'],
+    ['account', '자동 게시 선택 여부에 따라 계정 전달 or 적용'],
+    ['upload', '선택 기간에 따라 자동으로 컨텐츠 업로드'],
+    ['renewal', '기간 이후 연장 or 종료 선택 및 추가금 정산']
   ];
   return `<section id="process" class="landing-process" aria-labelledby="process-title" tabindex="-1">
     <h2 id="process-title">작업 과정</h2>
