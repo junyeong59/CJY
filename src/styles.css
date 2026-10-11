@@ -1528,7 +1528,6 @@ html:has(.landing) { scroll-behavior: smooth; }
 .order-page .order-record-actions { margin-top: 100px; gap: 80px; }
 .order-page .order-record-actions .order-button { min-height: 70px; min-width: 283px; font-size: 32px; }
 .order-page .order-record-actions--saved > a:first-child { background: white; color: black; }
-.order-page .order-record-actions--saved > a:last-child { background: transparent; color: white; }
 .order-page [data-empty-actions] { margin-top: 500px; }
 .order-page [data-order-message]:not(:empty) { text-align: center; margin-top: 32px; line-height: 1.7; }
 @media (max-width: 1100px) {
