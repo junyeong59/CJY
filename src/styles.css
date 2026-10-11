@@ -1319,9 +1319,8 @@ html:has(.landing) { scroll-behavior: smooth; }
 .order-page .order-heading p { color: #777; font-size: 12px; margin: 6px 0; }
 .order-page .owned-order { padding: 0; margin: 48px 0; border: 0; border-radius: 0; background: transparent; text-align: center; }
 .order-page .owned-order h2 { text-align: left; font-size: 16px; margin: 32px 0 24px; }
-.order-page .order-number { font-size: 14px; color: #ccc; margin-top: -36px; }
+.order-page .order-heading .order-number { color: #ccc; }
 .order-page [data-order-progress] { display: flex; flex-direction: column; }
-.order-page .order-explanation { order: 2; margin-top: 20px; }
 .order-page details { font-size: 13px; color: #999; margin: 16px auto; max-width: 680px; line-height: 1.7; }
 .order-page summary { cursor: pointer; min-height: 32px; }
 .order-page summary:focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
@@ -1329,9 +1328,9 @@ html:has(.landing) { scroll-behavior: smooth; }
 .order-page [data-order-progress] .order-steps li { position: relative; display: block; padding: 0; background: transparent; border: 0; border-radius: 0; text-align: center; }
 .order-page .order-steps li:not(:last-child)::after { content: ''; position: absolute; top: clamp(24px, 4vw, 52px); left: 80%; width: 65%; height: 1px; background: #555; }
 .order-page [data-order-progress] .order-steps img { width: clamp(52px, 8vw, 104px); height: auto; margin: 0 auto 12px; opacity: .35; }
-.order-page [data-order-progress] .is-complete img { opacity: 1; }
+.order-page [data-order-progress] :is(.is-complete, .is-current) img { opacity: 1; }
 .order-page [data-order-progress] .order-steps h3 { color: #888; font-size: clamp(11px, 1.2vw, 15px); margin: 0 0 4px; }
-.order-page [data-order-progress] .is-complete h3 { color: white; }
+.order-page [data-order-progress] :is(.is-complete, .is-current) h3 { color: white; }
 .order-page [data-order-progress] .order-step-state { color: #888; background: transparent; border: 0; padding: 0; margin: 0; font-size: clamp(10px, 1vw, 12px); }
 .order-page [data-order-progress] .is-complete .order-step-state { color: #fff; background: transparent; }
 .order-page .order-telegram { border: 0; border-radius: 0; background: transparent; padding: 0; margin: 32px 0; }
@@ -1339,7 +1338,6 @@ html:has(.landing) { scroll-behavior: smooth; }
 .order-page .order-connection-state { font-size: 12px; }
 .order-page .order-state-note { color: #888; font-size: 12px; max-width: 560px; margin: 24px auto; line-height: 1.7; }
 .order-page .order-button { min-height: 44px; min-width: 140px; padding: 10px 24px; font-size: 14px; }
-.order-page .order-record { margin-top: 32px; text-align: left; }
 .order-page .order-actions { justify-content: center; flex-direction: row; gap: 16px; margin-top: 56px; }
 .order-page .order-actions > a { font-size: 14px; min-height: 44px; padding: 10px 16px; border: 0; }
 .order-page [data-order-refresh] { background: transparent; color: #999; min-width: auto; }

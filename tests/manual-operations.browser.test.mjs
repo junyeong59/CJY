@@ -14,8 +14,8 @@ test('paid legacy order never offers Telegram connection or bot renewal and does
  assert.equal(await page.locator('[data-telegram-connection], [data-monthly-renew], a[href*="t.me/"]').count(),0);
  const text=await page.locator('[data-order-list]').textContent();
  assert.doesNotMatch(text,/Telegram|텔레그램|Pilot|자동 게시 개시/);
- assert.match(text,/운영자.*가이드라인.*시작일.*납품 방법/);
- assert.match(await page.locator('[data-stage=consultation]').textContent(),/운영자 확인 대기/);
+ assert.match(await page.locator('[data-current-stage]').textContent(),/결제 완료/);
+ assert.equal(await page.locator('[data-stage=consultation]').getAttribute('class'),'is-pending');
  assert.equal(actions.includes('monthly-renew'),false);
 });
 test('home describes operator review and individually agreed delivery, retaining products', async t => {
