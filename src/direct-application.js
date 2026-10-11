@@ -37,7 +37,7 @@ export function bindDirectApplication(root){
  const sync=()=>{const locked=Boolean(current.orderId||(current.receipt&&current.editable!==true))&&!recoverable();save.disabled=!ready||busy||unknown||locked;submit.disabled=!ready||busy||unknown||locked;};
  const show=(r,restore=false)=>{if(disposed)return;if(r.environment&&r.environment!=='test')throw Error('environment');current={...r,draftId:r.draftId??current.draftId};
  if(Object.hasOwn(PRICING.plans,r.plan)){field('plan').value=r.plan;update();}
- existing.hidden=!(r.receipt&&r.editable!==true&&!recoverable());existing.textContent=!existing.hidden?'결제·보관된 접수는 읽기 전용입니다. 결제 상태는 주문 현황에서 확인해주세요.':'';form.hidden=Boolean(r.receipt&&!r.application&&!recoverable());
+ existing.hidden=true;existing.textContent='';form.hidden=Boolean(r.receipt&&!r.application&&!recoverable());
  if(r.application&&restore){
   if(names.some(n=>typeof r.application[n]!=='string')||Object.keys(r.application).some(n=>!names.includes(n)))throw Error('invalid_application');
   for(const n of names)field(n).value=r.application[n];
