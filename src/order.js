@@ -7,7 +7,12 @@ export const productionLabel=()=> '운영자 확인 대기';
 // Payment authority is separate from operator-managed display progress.
 export function orderJourney(o){
  const paid=o.state==='paid'||o.state==='pilot_pending';
- const stage=paid?([1,2,3].includes(o.orderProgressStage)?o.orderProgressStage:1):0;
+ // Bank API stages include awaiting deposit (1); the three visual milestones
+ // start at confirmed payment (2). Legacy paid stage1 remains payment complete.
+ const progress=o.paymentMethod==='bank_transfer'
+  ?([2,3,4].includes(o.orderProgressStage)?o.orderProgressStage-1:1)
+  :([1,2,3].includes(o.orderProgressStage)?o.orderProgressStage:1);
+ const stage=paid?progress:0;
  const titles=['결제 완료','협의 및 파이프라인 확정','협의 날짜에 따라 작업 시작'];
  const steps=[['payment','payment'],['consultation','discussion'],['monthly','upload']];
  const current=stage?titles[stage-1]:o.state==='pending_payment'&&o.paymentMethod==='bank_transfer'?'결제 대기중':labels[o.state]??'상태 확인 필요';
