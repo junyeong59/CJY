@@ -8,6 +8,7 @@ import {
   HISTORICAL_PAYMENT_DISABLED_POLICY_DOCUMENTS,
   HISTORICAL_PAYMENT_DISABLED_POLICY_EVIDENCE,
   POLICY_DOCUMENTS,
+  HISTORICAL_PG_POLICY_DOCUMENTS,
   POLICY_METADATA,
   canonicalizePolicyDocument,
   createPolicyConsentEvidence
@@ -64,11 +65,11 @@ test('refund calculation rejects invalid counts instead of silently changing the
   assert.throws(() => calculateRefund({...input, deliveredItemCount: 0, promisedItemCount: 0}), /promisedItemCount/);
 });
 
-test('policy metadata preserves current consent evidence but blocks checkout and payment activation', () => {
-  assert.equal(POLICY_METADATA.versionDate, '2026-10-09');
-  assert.equal(POLICY_METADATA.effectiveState, 'effective-current-service-payment-activation-blocked');
-  assert.equal(POLICY_METADATA.checkoutEligible, false);
-  assert.equal(POLICY_METADATA.paymentLive, false);
+test('bank policy metadata binds current consent evidence and permits bank orders only', () => {
+  assert.equal(POLICY_METADATA.versionDate, '2026-10-14');
+  assert.equal(POLICY_METADATA.effectiveState, 'effective-bank-transfer-service');
+  assert.equal(POLICY_METADATA.checkoutEligible, true);
+  assert.equal(POLICY_METADATA.paymentLive, true);
   assert.deepEqual(Object.keys(POLICY_METADATA.documents).sort(), ['privacy', 'refund', 'terms']);
 
   for (const [kind, document] of Object.entries(POLICY_DOCUMENTS)) {
@@ -78,9 +79,9 @@ test('policy metadata preserves current consent evidence but blocks checkout and
   }
 });
 
-test('current privacy describes TEST Supabase processing and persisted anonymous identity without expanding authority', () => {
+test('current privacy describes bank transfer and Supabase processing and persisted anonymous identity without expanding authority', () => {
   const section = title => POLICY_DOCUMENTS.privacy.sections.find(([heading]) => heading === title).slice(1).join(' ');
-  assert.match(section('개인정보 처리방침'), /Supabase.*TEST/);
+  assert.match(section('개인정보 처리방침'), /계좌이체 주문.*운영자의 입금 확인/);
   assert.doesNotMatch(canonicalizePolicyDocument(POLICY_DOCUMENTS.privacy), /Railway/);
   assert.match(section('신청 처리 목적과 항목'), /익명 사용자 식별자/);
   const flow = section('현재 처리 흐름과 외부 서비스');
@@ -95,14 +96,14 @@ test('current privacy describes TEST Supabase processing and persisted anonymous
   assert.match(storage, /Supabase.*공식 SDK.*익명 인증 세션.*localStorage.*지속 저장/);
   assert.match(storage, /브라우저.*삭제.*익명.*접근.*잃/);
   assert.doesNotMatch(storage, /식별자만 sessionStorage/);
-  assert.equal(POLICY_METADATA.checkoutEligible, false);
-  assert.equal(POLICY_METADATA.paymentLive, false);
+  assert.equal(POLICY_METADATA.checkoutEligible, true);
+  assert.equal(POLICY_METADATA.paymentLive, true);
 });
 
 test('application consent evidence is an exact bounded snapshot of the current policy registry', () => {
   assert.deepEqual(createPolicyConsentEvidence(), {
     schemaVersion: 1,
-    effectiveState: 'effective-current-service-payment-activation-blocked',
+    effectiveState: 'effective-bank-transfer-service',
     documents: ['terms','privacy','refund'].map(kind => ({kind, ...POLICY_METADATA.documents[kind]}))
   });
   assert.equal('collectedAt' in createPolicyConsentEvidence(), false);
@@ -114,10 +115,10 @@ test('the 2026-09-22 payment-disabled policy remains byte-identical and separate
   assert.deepEqual(HISTORICAL_PAYMENT_DISABLED_POLICY_EVIDENCE,{schemaVersion:1,effectiveState:'effective-current-service-payment-disabled',documents:['terms','privacy','refund'].map(kind=>({kind,versionDate:'2026-09-22',canonicalSha256:hashes[kind]}))});
 });
 
-test('final commercial terms state the bounded PortOne/PG, authority, refund, processor, and legal-right facts', () => {
-  const terms = canonicalizePolicyDocument(POLICY_DOCUMENTS.terms);
-  const privacy = canonicalizePolicyDocument(POLICY_DOCUMENTS.privacy);
-  const refund = canonicalizePolicyDocument(POLICY_DOCUMENTS.refund);
+test('historical PG terms retain their original provider, authority and refund facts', () => {
+  const terms = canonicalizePolicyDocument(HISTORICAL_PG_POLICY_DOCUMENTS.terms);
+  const privacy = canonicalizePolicyDocument(HISTORICAL_PG_POLICY_DOCUMENTS.privacy);
+  const refund = canonicalizePolicyDocument(HISTORICAL_PG_POLICY_DOCUMENTS.refund);
 
   for (const text of ['PortOne V2','KG이니시스','NHN KCP','100,000원', 'Standard 149,000원', 'Deluxe 599,000원', 'Premium 999,000원', '273,900원', '768,900원', '1,208,900원', '자동 정기결제']) assert.match(terms, new RegExp(text));
   assert.match(terms, /카드.*PG 결제창.*간편결제/);
@@ -168,15 +169,15 @@ test('application and footer expose all policies and distinguish guideline revis
   assert.doesNotMatch(application, /200,000₩/);
 });
 
-test('rendered policies identify final commercial terms while checkout and payment stay blocked', () => {
+test('rendered policies identify bank effective date and exact document hashes', () => {
   for (const kind of ['terms', 'privacy', 'refund']) {
     const html = renderPolicy(kind);
-    assert.match(html, /시행일 2026\.10\.09 · 버전 2026\.10\.09 · 상업·결제·환불 조건 확정 · 결제 활성화 차단/);
-    assert.match(html, /수령 법인.*처리 국가.*보유 기간.*확인·공개/);
-    assert.match(html, /개인정보 처리방침.*완결.*아닙니다/);
-    assert.match(html, /data-effective-state="effective-current-service-payment-activation-blocked"/);
-    assert.match(html, /data-checkout-eligible="false"/);
-    assert.match(html, /data-payment-live="false"/);
+    assert.match(html, /시행일 2026\.10\.14 · 버전 2026\.10\.14 · 계좌이체 · 운영자 입금 확인/);
+    assert.match(html, /신규 계좌이체 주문.*기존 주문.*증빙.*보존/);
+    assert.match(html, /확인되지 않은 제공자 처리 정보.*확정된 것으로 안내하지/);
+    assert.match(html, /data-effective-state="effective-bank-transfer-service"/);
+    assert.match(html, /data-checkout-eligible="true"/);
+    assert.match(html, /data-payment-live="true"/);
     assert.match(html, new RegExp(`data-policy-hash="${POLICY_METADATA.documents[kind].canonicalSha256}"`));
   }
 });
@@ -189,9 +190,9 @@ test('tracked display sources contain no stale setup fee or old totals and landi
   assert.match(sources[0], /초기 설치비 100,000원/);
 });
 
-test('release-blocker phrases cannot regress into checkout-ready, no-contract, or unconditional deletion claims', () => {
+test('bank policy does not claim automatic authority or unconditional provider deletion', () => {
   const source=[renderApplication(),...['terms','privacy','refund'].map(renderPolicy)].join('\n');
-  for(const forbidden of [/checkout-eligible="true"/,/결제에 사용할 수 있도록 확정·시행/,/결제만으로[^.]*고객 구속력 있는 계약 확정[^.]*생기지/,/콘텐츠 아티팩트는 계약 종료일부터 7일 이내 삭제합니다/]) assert.doesNotMatch(source,forbidden);
-  assert.match(source,/checkout-eligible="false"/);
-  assert.match(source,/결제 활성화.*차단/);
+  for(const forbidden of [/결제에 사용할 수 있도록 확정·시행/,/결제만으로[^.]*고객 구속력 있는 계약 확정[^.]*생기지/,/콘텐츠 아티팩트는 계약 종료일부터 7일 이내 삭제합니다/]) assert.doesNotMatch(source,forbidden);
+  assert.match(source,/checkout-eligible="true"/);
+  assert.match(source,/신규 계좌이체 주문/);
 });

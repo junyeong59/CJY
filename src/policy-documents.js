@@ -1,5 +1,5 @@
-export const POLICY_VERSION_DATE = '2026-10-09';
-export const POLICY_EFFECTIVE_STATE = 'effective-current-service-payment-activation-blocked';
+export const POLICY_VERSION_DATE = '2026-10-14';
+export const POLICY_EFFECTIVE_STATE = 'effective-bank-transfer-service';
 
 export const HISTORICAL_PAYMENT_DISABLED_POLICY_DOCUMENTS = Object.freeze({
   terms: Object.freeze({
@@ -44,7 +44,7 @@ export const HISTORICAL_PAYMENT_DISABLED_POLICY_DOCUMENTS = Object.freeze({
   })
 });
 
-export const POLICY_DOCUMENTS = Object.freeze({
+export const HISTORICAL_PG_POLICY_DOCUMENTS = Object.freeze({
   terms: Object.freeze({
     title: 'Terms',
     label: '이용약관',
@@ -102,15 +102,15 @@ export function canonicalizePolicyDocument(document) {
   return JSON.stringify(sortForCanonicalJson(document));
 }
 
-export const POLICY_METADATA = Object.freeze({
-  versionDate: POLICY_VERSION_DATE,
-  effectiveState: POLICY_EFFECTIVE_STATE,
+export const HISTORICAL_PG_POLICY_METADATA = Object.freeze({
+  versionDate: '2026-10-09',
+  effectiveState: 'effective-current-service-payment-activation-blocked',
   checkoutEligible: false,
   paymentLive: false,
   documents: Object.freeze({
-    terms: Object.freeze({versionDate: POLICY_VERSION_DATE, canonicalSha256: 'e2dfe816ab5d949b5e51a7a5bb984d86128bbd203a96e7f13635a0880cad3adc'}),
-    privacy: Object.freeze({versionDate: POLICY_VERSION_DATE, canonicalSha256: '8d30b161e2cf69a9cf84f39d1804aaf0b61ab56472be38107daca2266d95fc9e'}),
-    refund: Object.freeze({versionDate: POLICY_VERSION_DATE, canonicalSha256: 'ab16ecefb34ab6d2949d742e5710a92e91f52f978a2b29d99eb0305db4ff700b'})
+    terms: Object.freeze({versionDate: '2026-10-09', canonicalSha256: 'e2dfe816ab5d949b5e51a7a5bb984d86128bbd203a96e7f13635a0880cad3adc'}),
+    privacy: Object.freeze({versionDate: '2026-10-09', canonicalSha256: '8d30b161e2cf69a9cf84f39d1804aaf0b61ab56472be38107daca2266d95fc9e'}),
+    refund: Object.freeze({versionDate: '2026-10-09', canonicalSha256: 'ab16ecefb34ab6d2949d742e5710a92e91f52f978a2b29d99eb0305db4ff700b'})
   })
 });
 
@@ -123,6 +123,54 @@ export const HISTORICAL_PAYMENT_DISABLED_POLICY_EVIDENCE = Object.freeze({
     Object.freeze({kind:'refund', versionDate:'2026-09-22', canonicalSha256:'337bca0be7f4246fee9e0062a1723cf1df83dc41dd5cc69b9bc2fea6923da49e'})
   ])
 });
+
+
+const BANK_POLICY_REPLACEMENTS = {
+  "terms": {
+    "서비스 이용약관": [
+      "이 약관은 씨제이와이(CJY)(대표 최준영)가 제공하는 매일 릴스 솔루션의 신청, 계좌이체를 통한 일회성 구매와 이용 조건을 정합니다."
+    ],
+    "결제 사업자와 수단": [
+      "현재 결제수단은 운영자 계좌로의 계좌이체입니다. 본인 주문의 입금 안내에 표시된 은행, 계좌번호, 예금주, 주문번호 및 서버가 확정한 부가세 포함 최종 금액을 확인하고 이체해주세요. 운영자가 실제 입금 내역과 주문을 대조·확인한 뒤 주문 상태가 결제 완료로 변경됩니다. 상태 조회나 입금 안내 표시만으로 입금이 확인되지 않습니다.",
+      "신규 계좌이체 주문에서는 PortOne 또는 PG 결제창을 호출하거나 신청 정보를 PG에 전달하지 않습니다. 은행 로그인 정보, 계좌 비밀번호, 카드번호, CVC 또는 인증정보를 수집하지 않습니다. 기존 PG 주문은 자동으로 계좌이체 주문으로 전환하지 않습니다. 기존 PG 주문의 확인·환불에는 당시 결제 처리 흐름과 정책이 적용될 수 있습니다."
+    ],
+    "결제·설치와 권한 경계": [
+      "운영자의 입금 확인으로 선택한 서비스의 한 달 구매·주문과 환불 권리가 확정됩니다. 입금 확인 전에는 입금 확인 대기 상태이며 설치를 시작하지 않습니다. 입금 확인이 지연되거나 금액·주문 매칭이 불명확하면 재입금하지 말고 주문번호와 함께 문의해주세요.",
+      "설치는 운영자의 입금 확인 후 시작합니다. 결제만으로 내부 고객 등록·바인딩, 제작, 전달 또는 게시 권한이 생기지 않습니다. 제작은 상담, 고객 자료 사용 권한 확인, 가이드라인 확정과 별도의 제작 권한 확인 후 진행합니다. 전달과 자동 게시는 고객이 선택하고 별도로 승인한 채널과 권한 범위에서만 진행하며 자동 게시의 기본값은 비활성입니다."
+    ]
+  },
+  "privacy": {
+    "개인정보 처리방침": [
+      "씨제이와이(CJY)(대표 최준영, 이하 “운영자”)는 매일 릴스 솔루션 신청, 계좌이체 주문, 운영자의 입금 확인, 상담 및 계약 이행에 필요한 개인정보 처리 내용을 안내합니다."
+    ],
+    "결제 처리 목적과 항목": [
+      "주문 생성, 운영자의 입금 대조·확인, 취소·환불 및 분쟁 대응을 위해 주문번호, 금액·통화, 결제수단, 주문·입금 확인 상태, 관련 시각 및 최소한의 요청 식별·무결성 기록을 처리합니다. 운영자는 실제 입금 거래에서 확인되는 입금자명, 금액과 입금 시각 등 주문 대조에 필요한 내역을 확인할 수 있습니다.",
+      "신청 폼에서는 성함, 전화번호와 서비스 요청 등 최소 신청 항목을 처리하며 결제용 이메일을 요구하지 않습니다. 은행 로그인 정보, 계좌 비밀번호, 카드번호, CVC 및 인증정보를 수집하지 않으며 신규 계좌이체 주문의 신청·주문 정보를 PortOne 또는 PG로 전달하지 않습니다. 환불 계좌는 계좌이체 환불에 필요한 경우에만 운영자가 문의 채널에서 은행명, 계좌번호와 예금주 등 최소 항목을 별도로 확인합니다."
+    ],
+    "현재 처리 흐름과 외부 서비스": [
+      "Supabase Auth는 익명 인증에, 데이터베이스는 신청·주문 및 처리 기록 저장에, Edge Functions는 신청·주문 API 처리에 사용합니다. 현재 데이터베이스 리전은 서울입니다. Edge Functions는 전 세계에서 실행될 수 있어 모든 처리가 서울에 한정된다고 주장하지 않습니다. 운영자가 실제 입금을 대조·확인한 후 서버에 확인 상태를 기록합니다. 이용자의 상태 조회는 읽기 전용이며 입금 확인 권한을 부여하지 않습니다.",
+      "실제 제작이 별도로 승인된 경우 my-video Mac에서 운영자가 제작·전달을 수동으로 검토·진행하며 Hermes를 통해 OpenAI/Codex를 이용하고 음성 생성에는 ElevenLabs를 이용할 수 있습니다. 고객 Telegram으로 콘텐츠와 리포트를 자동 전달하지 않습니다. 전달은 고객이 선택하고 별도로 승인한 채널에서만 수동으로 진행합니다. 고객 자료와 결과물은 고객 전용 비공개 저장소에서 다른 고객 자료와 구분합니다."
+    ],
+    "위탁·제3자 제공 및 국외 처리": [
+      "외부 서비스가 운영자의 지시에 따라 처리하는지 독립된 목적으로 제공받는지는 실제 계약과 처리 흐름에 따라 구분합니다. 실제 사용 전에 대상 서비스, 목적, 전달 항목과 필요한 동의 또는 권한을 확인합니다.",
+      "Supabase의 실제 수령 법인, 데이터베이스 외 서비스의 처리 국가와 제공자 보유 기간은 미확정이며 서울 데이터베이스 리전만으로 이를 단정하지 않습니다. 호스팅·제작·전달 서비스의 실제 수령 법인, 처리 국가와 보유 기간은 계약과 배포 위치로 확인된 범위만 공개합니다. 확인되지 않은 수령 법인, 국가나 보유 기간을 단정하지 않으며 개인정보 처리 공개가 완결되었다고 주장하지 않습니다. 현재 계좌이체 흐름은 신청·주문 정보를 PG로 전달하지 않습니다."
+    ]
+  },
+  "refund": {
+    "취소 및 환불 정책": [
+      "이 정책은 계좌이체를 통한 일회성 한 달 구매에 적용합니다. 운영자가 실제 입금을 확인한 주문을 기준으로 제공 단계와 아래 환불 산식을 확인합니다. 입금 확인 전 취소 또는 입금 매칭 문의는 운영자에게 주문번호와 함께 요청해주세요."
+    ],
+    "환불 요청과 처리": [
+      "cjy.support@gmail.com 또는 070-8121-2974로 주문번호, 신청자 성함과 취소 사유를 알려주세요. 운영자가 주문과 제공 단계를 확인해 환불액을 산정하고 계좌이체로 수동 환불합니다. 환불 계좌는 필요한 경우에만 문의 채널에서 은행명, 계좌번호와 예금주 등 최소 정보를 확인합니다. 은행 로그인 정보, 비밀번호, 카드번호, CVC 또는 인증정보는 보내지 마세요.",
+      "운영자는 환불 처리 상태와 관련 시각을 확인해 결과를 안내합니다. 법령상 환급 기한과 권리를 준수하며 실제 반영 시점은 은행 절차에 따라 달라질 수 있습니다."
+    ],
+    "불명확 상태와 수동 보류": [
+      "입금 또는 환불 처리 상태가 불명확하거나 금액·주문 매칭이 일치하지 않으면 중복 입금·환불을 자동 재시도하지 않고 수동 보류합니다. 운영자는 실제 은행 거래와 주문 기록을 대조한 뒤 확인된 결과와 필요한 후속 조치를 안내합니다."
+    ]
+  }
+};
+export const POLICY_DOCUMENTS = Object.freeze(Object.fromEntries(Object.entries(HISTORICAL_PG_POLICY_DOCUMENTS).map(([kind, doc]) => [kind, Object.freeze({...doc, sections:Object.freeze(doc.sections.map(([heading,...body]) => Object.freeze([heading, ...(BANK_POLICY_REPLACEMENTS[kind][heading] ?? body)])))})])));
+export const POLICY_METADATA = Object.freeze({versionDate:POLICY_VERSION_DATE,effectiveState:POLICY_EFFECTIVE_STATE,checkoutEligible:true,paymentLive:true,documents:Object.freeze({terms:{versionDate:POLICY_VERSION_DATE,canonicalSha256:'6be7949a500c6e60637dbca627d50d51e044fa835aedd65045037b4c7fbbb72a'},privacy:{versionDate:POLICY_VERSION_DATE,canonicalSha256:'0bfce66ef62e03780c84745d167b0fbf1959ca7f05361aa59283ee12236adc05'},refund:{versionDate:POLICY_VERSION_DATE,canonicalSha256:'d134a56e9b8d0fe3673be4a2d5c2b55a44d37444146bd4587052ca6806ab5de6'}})});
 
 const CONSENT_DOCUMENT_ORDER = Object.freeze(['terms', 'privacy', 'refund']);
 

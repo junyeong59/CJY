@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {POLICY_DOCUMENTS} from '../src/policy-documents.js';import {renderPolicy} from '../src/policies.js';
+test('new policy scope excludes historical PG processing and renders bank effective state',()=>{assert.match(JSON.stringify(POLICY_DOCUMENTS),/신규 계좌이체 주문/);assert.match(renderPolicy('terms'),/계좌이체.*운영자.*입금 확인/);assert.doesNotMatch(renderPolicy('terms'),/결제 활성화 차단/);});

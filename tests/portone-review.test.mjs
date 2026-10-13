@@ -180,7 +180,7 @@ test('local policy links render unchanged policy metadata; mobile missing-config
   for(const kind of ['terms','privacy','refund']){
     const response=await fetch(base+'/'+kind);assert.equal(response.status,200);
     const html=await response.text();assert.match(html,new RegExp('data-policy-kind="'+kind+'"'));
-    assert.match(html,/data-checkout-eligible="false"/);assert.match(html,/data-payment-live="false"/);
+    assert.match(html,/data-checkout-eligible="true"/);assert.match(html,/data-payment-live="true"/);assert.match(html,/data-effective-state="effective-bank-transfer-service"/);assert.match(html,/data-policy-version="2026-10-14"/);
   }
   await page.setViewportSize({width:390,height:844});
   // ResizeObserver/layout can settle after the already-present TEST status.

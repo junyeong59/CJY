@@ -27,7 +27,7 @@ const assetVersion = async (filePath) => {
 };
 
 const headerVersion = await assetVersion(path.join(dist, "src", "header.js"));
-for (const module of ["app.js", "application.js", "direct-application.js", "order.js", "policies.js"]) {
+for (const module of ["app.js", "application.js", "direct-application.js", "bank-transfer.js", "order.js", "policies.js"]) {
   const filePath = path.join(dist, "src", module);
   await writeFile(filePath, (await readFile(filePath, "utf8")).replace('./header.js', `./header.js?v=${headerVersion}`));
 }
@@ -36,7 +36,7 @@ const checkoutPath = path.join(dist, "src", "apply-checkout.js");
 const supabaseVersion = await assetVersion(path.join(dist, "src", "supabase-client.js"));
 await writeFile(checkoutPath, (await readFile(checkoutPath, "utf8")).replace('./supabase-client.js', `./supabase-client.js?v=${supabaseVersion}`));
 const checkoutVersion = await assetVersion(checkoutPath);
-for (const module of ["direct-application.js", "order.js"]) {
+for (const module of ["direct-application.js", "bank-transfer.js", "order.js"]) {
   const filePath = path.join(dist, "src", module);
   await writeFile(filePath, (await readFile(filePath, "utf8")).replace('./apply-checkout.js', `./apply-checkout.js?v=${checkoutVersion}`));
 }
@@ -45,13 +45,23 @@ const configVersion = await assetVersion(configPath);
 const appPath = path.join(dist, "src", "app.js");
 const appSource = await readFile(appPath, "utf8");
 const applicationPath = path.join(dist, "src", "application.js");
+const policyVersion = await assetVersion(path.join(dist, "src", "policy-documents.js"));
+for (const module of ["direct-application.js", "application.js", "policies.js"]) {
+  const filePath = path.join(dist, "src", module);
+  await writeFile(filePath, (await readFile(filePath, "utf8")).replace('./policy-documents.js', `./policy-documents.js?v=${policyVersion}`));
+}
+const bankVersion = await assetVersion(path.join(dist, "src", "bank-transfer.js"));
+for (const module of ['direct-application.js', 'order.js']) {
+  const filePath = path.join(dist, 'src', module);
+  await writeFile(filePath, (await readFile(filePath, 'utf8')).replace('./bank-transfer.js', `./bank-transfer.js?v=${bankVersion}`));
+}
 const directVersion = await assetVersion(path.join(dist, "src", "direct-application.js"));
 const applicationSource = await readFile(applicationPath, "utf8");
 await writeFile(applicationPath, applicationSource.replace('./direct-application.js', `./direct-application.js?v=${directVersion}`));
 const applicationVersion = await assetVersion(applicationPath);
 const policiesVersion = await assetVersion(path.join(dist, "src", "policies.js"));
 const orderVersion = await assetVersion(path.join(dist, "src", "order.js"));
-const versionedAppSource = appSource.replace("./policies.js", `./policies.js?v=${policiesVersion}`).replace("./order.js", `./order.js?v=${orderVersion}`).replace("./application.js", `./application.js?v=${applicationVersion}`).replace(
+const versionedAppSource = appSource.replace('./bank-transfer.js', `./bank-transfer.js?v=${bankVersion}`).replace("./policies.js", `./policies.js?v=${policiesVersion}`).replace("./order.js", `./order.js?v=${orderVersion}`).replace("./application.js", `./application.js?v=${applicationVersion}`).replace(
   /\.\/config\.js(?:\?v=[^"]*)?/u,
   `./config.js?v=${configVersion}`
 );

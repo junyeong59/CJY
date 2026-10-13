@@ -1615,3 +1615,13 @@ html:has(.landing) { scroll-behavior: smooth; }
  .order-page .order-heading .order-number, .order-page .owned-order h2, .order-page .order-empty-copy > p:first-child { font-size: 17px; }
  .order-page .order-record-actions .order-button, .order-page [data-empty-actions] .order-button, .order-page [data-empty-actions] > a { font-size: 16px; min-height: 44px; }
 }
+
+/* Deposit guide only; preserve the existing application and order designs. */
+[data-bank-guide] .order-record-actions { flex-wrap: wrap; }
+[data-bank-guide] .order-record-actions > * { max-width: 100%; min-height: 44px; }
+[data-bank-guide] .order-summary { margin-top: 40px; }
+[data-bank-guide] dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+@media (max-width: 600px) {
+  [data-bank-guide] .order-summary > div { display: grid; grid-template-columns: 1fr; }
+  [data-bank-guide] .order-record-actions { gap: 12px; }
+}
