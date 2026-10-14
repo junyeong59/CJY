@@ -15,13 +15,13 @@ for(const built of [false,true])test(`bank stages and state authority preserve e
  let item={...bank,state:'pending_payment',orderProgressStage:1};
  const actions=[];
  const {page}=await bankPage(t,async(a,r)=>{actions.push(a);if(a==='orders'){await r.fulfill({json:{draftId:draft,orders:[item]}});return true;}if(a==='application'){await r.fulfill({json:item});return true;}},{path:'/order',built});
- await page.getByText('현재 단계: 결제 대기중',{exact:true}).waitFor();
- await assertStage(page,0);assert.equal(await page.locator('[data-bank-guide],[data-bank-refresh]').count(),2);
+ await page.getByRole('heading',{name:'결제 대기중',exact:true}).waitFor();
+ assert.equal(await page.locator('.order-steps > li').count(),0);assert.equal(await page.locator('[data-bank-guide],[data-bank-refresh]').count(),1);
  item={...bank,orderProgressStage:2};
- await page.locator('[data-bank-refresh]').click();
+ await page.reload();
  await page.getByText('현재 단계: 결제 완료',{exact:true}).waitFor();
  await assertStage(page,1);assert.equal(await page.locator('[data-bank-guide],[data-bank-refresh]').count(),0);
- assert.deepEqual(actions,['orders','application','orders']);
+ assert.deepEqual(actions,['orders','orders']);
  for(const [apiStage,visual] of [[1,1],[2,1],[3,2],[4,3],[undefined,1],[null,1],[0,1],[5,1],['4',1],[2.5,1]]){
   item={...bank,orderProgressStage:apiStage};await page.reload();await page.waitForSelector('.owned-order');await assertStage(page,visual);
   assert.equal(await page.locator('[data-current-stage]').textContent(),'현재 단계: '+titles[visual-1]);
@@ -40,7 +40,7 @@ for(const built of [false,true])test(`bank stages and state authority preserve e
   await page.setViewportSize({width,height:1000});item={...bank,orderProgressStage:4};await page.reload();await page.waitForSelector('.owned-order');await assertStage(page,3);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
   assert.deepEqual(await page.locator('.order-steps img').evaluateAll(es=>es.map(e=>[new URL(e.src).pathname,e.getAttribute('width'),e.getAttribute('height')])),['payment','discussion','upload'].map(n=>[`/assets/order/${n}.png`,'274','274']));
-  await page.screenshot({path:`/Users/choi/cache/cjy-stage-release/frontend-${built?'built':'source'}-${width}.png`,fullPage:true,animations:'disabled'});
+  await page.screenshot({path:`/tmp/cjy-frontend-${built?'built':'source'}-${width}.png`,fullPage:true,animations:'disabled'});
  }
 });
 test('bank paid stage3 maps to consultation using the existing three cumulative icons',async t=>{

@@ -1625,3 +1625,22 @@ html:has(.landing) { scroll-behavior: smooth; }
   [data-bank-guide] .order-summary > div { display: grid; grid-template-columns: 1fr; }
   [data-bank-guide] .order-record-actions { gap: 12px; }
 }
+
+/* Pending bank payment follows the Figma composition at the shared Order scale. */
+.order-page--bank-pending .order-heading { margin-bottom: calc(118 * var(--order-scale)); }
+.order-page--bank-pending .bank-pending-amount { margin: 0; font-size: max(20px, calc(32 * var(--order-scale))); font-weight: 600; line-height: 1.5; word-break: keep-all; }
+.order-page--bank-pending .bank-pending-amount strong { font-weight: inherit; white-space: nowrap; }
+.order-page--bank-pending .bank-pending-account { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 0 16px; margin: calc(84 * var(--order-scale)) 0 0; padding: 12px 20px; min-height: calc(81 * var(--order-scale)); background: #171717; font-size: max(24px, calc(48 * var(--order-scale))); font-weight: 700; line-height: 1.3; }
+.order-page--bank-pending .bank-pending-account span { overflow-wrap: anywhere; min-width: 0; }
+.order-page--bank-pending .bank-pending-note { color: #7e7e7e; font-size: 12px; line-height: 1.7; text-align: center; margin: 16px 0 0; word-break: keep-all; }
+.order-page--bank-pending .owned-order > .order-record-actions { margin-top: calc(150 * var(--order-scale)); }
+.order-page--bank-pending .owned-order > .order-record-actions > a:first-child { background: transparent; color: white; }
+@media (max-width: 600px) {
+ .order-page--bank-pending .order-heading { margin-bottom: 48px; }
+ .order-page--bank-pending .bank-pending-amount { font-size: 18px; }
+ .order-page--bank-pending .bank-pending-account { margin-top: 32px; padding: 20px 16px; gap: 8px 12px; font-size: 22px; }
+ .order-page--bank-pending .bank-pending-account span:nth-child(2) { flex-basis: 100%; text-align: center; order: 1; }
+ .order-page--bank-pending .owned-order > .order-record-actions { margin-top: 56px; gap: 12px; }
+}
+.order-page--bank-pending .bank-pending-amount { color: #fff; text-align: left; }
+.order-page--bank-pending .bank-pending-account { color: #fff; }
