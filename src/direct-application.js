@@ -7,7 +7,7 @@ export const DIRECT_CONSENT_VERSION='cjy-bank-transfer-2026-10-14';
 const money=n=>n.toLocaleString('ko-KR')+'₩';
 export function renderDirectApplication(){return `<div class="landing application apply-page">${renderSiteHeader()}
 <main class="application-main"><h1>서비스 신청하기</h1>
-<p data-existing-order hidden class="customer-note" role="status"></p><form id="application-form" data-direct-checkout method="dialog"><div class="application-fields">
+<form id="application-form" data-direct-checkout method="dialog"><div class="application-fields">
 <section class="customer-section"><h2 class="application-section-title">고객 정보</h2><div class="customer-fields">
 <label class="customer-field">성함<input name="customerName" autocomplete="name" required maxlength="100" /></label>
 <label class="customer-field">전화번호<input type="tel" name="customerPhone" autocomplete="tel" required maxlength="30" /></label>
@@ -49,7 +49,7 @@ export function bindDirectApplication(root){
   if(!uuid.test(r.draftId??''))throw Error('invalid_draft');
   current=r;
   if(r.application){if(names.some(n=>typeof r.application[n]!=='string')||Object.keys(r.application).some(n=>!names.includes(n)))throw Error('invalid_application');for(const n of names)field(n).value=r.application[n];for(const n of ['termsConsent','privacyConsent','draftPrivacyConsent'])field(n).checked=false;for(const el of form.elements)if(el.name)el.disabled=r.editable!==true||(el.name==='channel'&&el.value!=='manual');update();}
-  if(r.orderId){for(const el of form.elements)if(el.name)el.disabled=true;const note=root.querySelector('[data-existing-order]');note.hidden=r.paymentMethod==='bank_transfer'&&r.state==='pending_payment';note.textContent=r.paymentMethod==='bank_transfer'?(r.state==='pending_payment'?'결제 대기중 · 주문은 수정할 수 없습니다.':'입금 확인 보류 또는 종료된 주문 · 주문 현황을 확인하거나 운영자에게 문의해주세요.'):'기존 결제 주문 · 운영자 확인이 필요합니다. 재결제하지 마세요.';}
+  if(r.orderId){for(const el of form.elements)if(el.name)el.disabled=true;}
   sync();
  };
  form.addEventListener('submit',async e=>{e.preventDefault();if(!ready||busy||submit.disabled||!validate()||!form.reportValidity())return;busy=true;sync();status.textContent='입금 안내 준비 중…';

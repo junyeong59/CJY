@@ -13,6 +13,7 @@ for(const built of [false,true])for(const stage of [2,3,4])test(`${built?'built'
  assert.equal(new URL(page.url()).pathname,'/apply');assert.equal(new URL(page.url()).searchParams.get('draftId'),draft);
  for(const [name,value] of Object.entries(application)){assert.equal(await page.locator(`[name=${name}]`).first().inputValue(),value);assert.equal(await page.locator(`[name=${name}]`).first().isDisabled(),true);}
  assert.equal(await page.locator('[data-save-application]').isDisabled(),true);assert.equal(await page.locator('[type=submit]').isDisabled(),true);
+ assert.equal(await page.locator('[data-existing-order]').count(),0);
  await page.evaluate(()=>{document.querySelector('[data-save-application]').dispatchEvent(new MouseEvent('click',{bubbles:true}));document.querySelector('form').dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));});
  assert.equal(await page.locator('script:not([src]), [onerror]').count(),0);
  assert.deepEqual(actions,['orders','status','application']);assert.deepEqual(lookups,[{draftId:draft}]);
@@ -36,6 +37,6 @@ for(const built of [false,true])for(const state of ['pending_payment','refunded'
  const {page}=await bankPage(t,async(a,r)=>{actions.push(a);if(a==='status'){await r.fulfill({json:{status:'session-ready',draftId:active}});return true;}if(a==='application'){await r.fulfill({json:record});return true;}},{query:'?draftId='+draft,built});
  await page.waitForFunction(()=>document.querySelector('[name=brief]')?.value.startsWith('선택한 원본'));
  assert.equal(new URL(page.url()).pathname,'/apply');assert.equal(await page.locator('[name=brief]').isDisabled(),true);assert.equal(await page.locator('[type=submit]').isDisabled(),true);assert.equal(await page.locator('[data-save-application]').isDisabled(),true);
- if(state==='pending_payment')assert.equal(await page.locator('[data-existing-order]').isVisible(),false);
+ assert.equal(await page.locator('[data-existing-order]').count(),0);
  assert.deepEqual(actions,['status','application']);
 });
