@@ -68,6 +68,6 @@ export function bindDirectApplication(root){
    if(latest.draftId===active.draftId&&latest.receipt&&latest.application&&latest.editable===true&&!latest.orderId&&latest.status==='pending-review'){r=latest;if(!disposed)history.replaceState(null,'','/apply?draftId='+encodeURIComponent(r.draftId));}
   }
  }
- if(disposed)return;if(r.status==='session-expired')throw Error('session_expired');if(pending===r.draftId&&r.paymentMethod==='bank_transfer'&&r.orderId){validateBankOrder(r,pending);sessionStorage.removeItem('cjy-pending-bank-draft');}if(r.paymentMethod==='bank_transfer'&&r.state==='paid'){validateBankOrder(r,r.draftId);location.assign('/order');return;}show(r);ready=true;sync();}).catch(()=>{if(!disposed)status.textContent='신청 연결을 확인하지 못했습니다. 세션 만료 또는 접근 오류일 수 있습니다. 새로고침하거나 운영자에게 문의해주세요.';});
+ if(disposed)return;if(r.status==='session-expired')throw Error('session_expired');if(pending===r.draftId&&r.paymentMethod==='bank_transfer'&&r.orderId){validateBankOrder(r,pending);sessionStorage.removeItem('cjy-pending-bank-draft');}if(r.paymentMethod==='bank_transfer'&&r.state==='paid'){validateBankOrder(r,r.draftId);if(!params.get('draftId')){location.assign('/order');return;}}show(r);ready=true;sync();}).catch(()=>{if(!disposed)status.textContent='신청 연결을 확인하지 못했습니다. 세션 만료 또는 접근 오류일 수 있습니다. 새로고침하거나 운영자에게 문의해주세요.';});
  return ()=>{disposed=true;};
 }

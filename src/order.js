@@ -30,16 +30,18 @@ export const renderOrderDetails=renderOrderLookup;
 export function bindOrder(root,navigate) {
  const list=root.querySelector('[data-order-list]');if(!list)return;
  const create=root.querySelector('[data-order-new]'),message=root.querySelector('[data-order-message]');
- let busy=false,disposed=false,current={orders:[]};
+ let busy=false,disposed=false,ownedOrdersReady=false,current={orders:[]};
  const selectCurrent=result=>{const meaningful=result.orders.filter(o=>o.state!=='archived'&&(o.receipt||o.orderId));return meaningful.find(o=>o.draftId===result.draftId)??meaningful.find(o=>o.orderId&&o.state!=='saved')??meaningful[0];};
  // The PG query is advisory only. Official persisted Supabase Auth, not URL
  // parameters or browser payment results, authorizes owner-scoped API reads.
  if(location.search)history.replaceState(null,'',location.pathname);
  function show(result){
   if(disposed)return;
+  if(result.status==='session-expired')throw Error('session_expired');
   if(!Array.isArray(result.orders)||result.orders.some(o=>o.environment!=='test'&&!(o.environment==='live'&&o.paymentMethod==='bank_transfer')))throw Error('invalid_owned_orders');
   if(result.orders.some(o=>o.state==='pending_payment'&&o.paymentMethod==='bank_transfer')){if(result.status==='session-expired')throw Error('session_expired');for(const o of result.orders)if(o.state==='pending_payment'&&o.paymentMethod==='bank_transfer')validateBankOrder(o,o.draftId);}
-  const selected=selectCurrent(result);current={...result,orders:selected?[selected]:[]};create.hidden=Boolean(selected);root.querySelector('[data-empty-actions]').hidden=Boolean(selected);if(selected)create.remove();else if(!create.isConnected)root.querySelector('[data-empty-actions]').prepend(create);create.textContent='새 주문';create.disabled=!result.draftId||busy||result.status==='session-expired';
+  ownedOrdersReady=true;
+  const selected=selectCurrent(result);current={...result,orders:selected?[selected]:[]};create.hidden=Boolean(selected);root.querySelector('[data-empty-actions]').hidden=Boolean(selected);if(selected)create.remove();else if(!create.isConnected)root.querySelector('[data-empty-actions]').prepend(create);create.textContent='새 주문';create.disabled=!ownedOrdersReady||busy||result.status==='session-expired';
   const bankPending=selected?.state==='pending_payment'&&selected.paymentMethod==='bank_transfer';
   root.querySelector('.order-page').classList.toggle('order-page--bank-pending',bankPending);
   root.querySelector('.order-heading h1').textContent=bankPending?'결제 대기중':'주문 현황';
@@ -48,15 +50,15 @@ export function bindOrder(root,navigate) {
   list.innerHTML=current.orders.length?current.orders.map(o=>`<article class="owned-order">${bankPending?'':orderJourney(o)}${renderBankDetails(o,{compact:bankPending})}<div class="order-record-actions ${o.state==='saved'?'order-record-actions--saved':''}">${o.draftId?`<a class="order-button" data-link data-view-draft="${esc(o.draftId)}" href="/apply?draftId=${encodeURIComponent(o.draftId)}">${o.state==='saved'?'신청하러 가기':'신청 내용 보기'}</a>`:''}${o.state==='saved'?'':'<a class="order-button" href="mailto:cjy.support@gmail.com">문의하기</a>'}</div>${o.state==='pending_payment'&&o.paymentMethod!=='bank_transfer'?`<button type="button" class="order-button" data-verify-draft="${esc(o.draftId)}">결제 상태 확인</button>`:''}</article>`).join(''):'<div class="order-empty-copy"><p>이 브라우저에서 접수한 주문 내역이 없습니다</p><p class="order-empty-hint">기존 주문은 당시 신청한 브라우저로 접속하시거나 문의하기를 이용해주세요.</p></div>';
  }
  async function load(reconcile=false){
-  if(busy||disposed)return;busy=true;create.disabled=true;message.textContent='';
+  if(busy||disposed)return;busy=true;ownedOrdersReady=false;create.disabled=true;message.textContent='';
   try{if(disposed)return;show(await applyApi('orders'));
    const pending=current.orders.find(o=>o.state==='pending_payment');
    if(reconcile&&pending&&pending.paymentMethod!=='bank_transfer'){await applyApi('verify',{draftId:pending.draftId});if(!disposed)show(await applyApi('orders'));}
   }catch{if(!disposed){message.textContent='상태 확인이 지연되고 있습니다. 재결제하지 말고 잠시 후 새로고침해주세요.';if(!current.orders.length)list.textContent='';}}
-  finally{busy=false;if(!disposed){create.disabled=!current.draftId||current.status==='session-expired';}}
+  finally{busy=false;if(!disposed){create.disabled=!ownedOrdersReady||current.status==='session-expired';}}
  }
- list.addEventListener('click',async e=>{const button=e.target.closest('[data-verify-draft],[data-bank-refresh]');if(!button||busy)return;busy=true;button.disabled=true;const bankDraft=button.dataset.bankRefresh;if(bankDraft)button.closest('[data-bank-guide]').querySelector('[data-bank-info]').textContent='본인 주문의 입금 확인 상태를 조회하는 중…';try{if(bankDraft){const r=await applyApi('application',{draftId:bankDraft});if(disposed)return;validateBankOrder(r,bankDraft);}else await applyApi('verify',{draftId:button.dataset.verifyDraft});show(await applyApi('orders'));message.textContent='서버 상태를 확인했습니다.';}catch{if(!disposed){if(bankDraft){const guide=list.querySelector('[data-bank-info]');if(guide)guide.textContent='입금 정보를 확인하지 못했습니다. 새로고침하거나 운영자에게 문의해주세요.';}message.textContent='확인 중입니다. 재입금·재결제하지 말고 잠시 후 다시 확인해주세요.';}}finally{busy=false;if(!disposed){if(button.isConnected)button.disabled=false;create.disabled=!current.draftId||current.status==='session-expired';}}});
- create.addEventListener('click',()=>{if(busy||disposed||create.disabled)return;navigate('/apply');});
+ list.addEventListener('click',async e=>{const button=e.target.closest('[data-verify-draft],[data-bank-refresh]');if(!button||busy)return;busy=true;button.disabled=true;const bankDraft=button.dataset.bankRefresh;if(bankDraft)button.closest('[data-bank-guide]').querySelector('[data-bank-info]').textContent='본인 주문의 입금 확인 상태를 조회하는 중…';try{if(bankDraft){const r=await applyApi('application',{draftId:bankDraft});if(disposed)return;validateBankOrder(r,bankDraft);}else await applyApi('verify',{draftId:button.dataset.verifyDraft});show(await applyApi('orders'));message.textContent='서버 상태를 확인했습니다.';}catch{if(!disposed){if(bankDraft){const guide=list.querySelector('[data-bank-info]');if(guide)guide.textContent='입금 정보를 확인하지 못했습니다. 새로고침하거나 운영자에게 문의해주세요.';}message.textContent='확인 중입니다. 재입금·재결제하지 말고 잠시 후 다시 확인해주세요.';}}finally{busy=false;if(!disposed){if(button.isConnected)button.disabled=false;create.disabled=!ownedOrdersReady||current.status==='session-expired';}}});
+ create.addEventListener('click',()=>{if(busy||disposed||create.disabled)return;busy=true;create.disabled=true;navigate('/apply');});
 
  load(true);return ()=>{disposed=true;};
 }
