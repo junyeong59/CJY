@@ -49,7 +49,7 @@ export function bindDirectApplication(root){
   if(!uuid.test(r.draftId??''))throw Error('invalid_draft');
   current=r;
   if(r.application){if(names.some(n=>typeof r.application[n]!=='string')||Object.keys(r.application).some(n=>!names.includes(n)))throw Error('invalid_application');for(const n of names)field(n).value=r.application[n];for(const n of ['termsConsent','privacyConsent','draftPrivacyConsent'])field(n).checked=false;for(const el of form.elements)if(el.name)el.disabled=r.editable!==true||(el.name==='channel'&&el.value!=='manual');update();}
-  if(r.orderId){for(const el of form.elements)if(el.name)el.disabled=true;const note=root.querySelector('[data-existing-order]');note.hidden=false;note.textContent=r.paymentMethod==='bank_transfer'?(r.state==='pending_payment'?'결제 대기중 · 주문은 수정할 수 없습니다.':'입금 확인 보류 또는 종료된 주문 · 주문 현황을 확인하거나 운영자에게 문의해주세요.'):'기존 결제 주문 · 운영자 확인이 필요합니다. 재결제하지 마세요.';if(r.paymentMethod==='bank_transfer'&&r.state==='pending_payment'){const a=document.createElement('a');a.href='/order';a.textContent='주문 현황';a.dataset.link='';note.append(' ',a);}}
+  if(r.orderId){for(const el of form.elements)if(el.name)el.disabled=true;const note=root.querySelector('[data-existing-order]');note.hidden=r.paymentMethod==='bank_transfer'&&r.state==='pending_payment';note.textContent=r.paymentMethod==='bank_transfer'?(r.state==='pending_payment'?'결제 대기중 · 주문은 수정할 수 없습니다.':'입금 확인 보류 또는 종료된 주문 · 주문 현황을 확인하거나 운영자에게 문의해주세요.'):'기존 결제 주문 · 운영자 확인이 필요합니다. 재결제하지 마세요.';}
   sync();
  };
  form.addEventListener('submit',async e=>{e.preventDefault();if(!ready||busy||submit.disabled||!validate()||!form.reportValidity())return;busy=true;sync();status.textContent='입금 안내 준비 중…';
