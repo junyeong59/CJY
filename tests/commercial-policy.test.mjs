@@ -20,19 +20,19 @@ import {
 } from '../src/commercial.js';
 
 test('confirmed setup and monthly supply amounts produce exact VAT-inclusive first-month totals', () => {
-  assert.equal(PRICING.setupSupplyWon, 100_000);
+  assert.equal(PRICING.setupSupplyWon, 0);
   const expected = {
-    Standard: { monthlySupplyWon: 149_000, vatWon: 24_900, totalWon: 273_900 },
-    Deluxe: { monthlySupplyWon: 599_000, vatWon: 69_900, totalWon: 768_900 },
-    Premium: { monthlySupplyWon: 999_000, vatWon: 109_900, totalWon: 1_208_900 }
+    Standard: { monthlySupplyWon: 99_000, vatWon: 9_900, totalWon: 108_900 },
+    Deluxe: { monthlySupplyWon: 199_000, vatWon: 19_900, totalWon: 218_900 },
+    Premium: { monthlySupplyWon: 499_000, vatWon: 49_900, totalWon: 548_900 }
   };
 
   for (const [plan, values] of Object.entries(expected)) {
     assert.equal(PRICING.plans[plan], values.monthlySupplyWon);
     assert.deepEqual(calculateFirstMonthPrice(plan), {
-      setupSupplyWon: 100_000,
+      setupSupplyWon: 0,
       monthlySupplyWon: values.monthlySupplyWon,
-      supplyTotalWon: 100_000 + values.monthlySupplyWon,
+      supplyTotalWon: values.monthlySupplyWon,
       vatWon: values.vatWon,
       totalWon: values.totalWon
     });
@@ -40,7 +40,8 @@ test('confirmed setup and monthly supply amounts produce exact VAT-inclusive fir
 });
 
 test('refund stages use the confirmed formula and round the final result half-up to whole won', () => {
-  const standard = calculateFirstMonthPrice('Standard');
+  // Historical order snapshot: refunds must not be repriced from today's catalog.
+  const standard = {totalWon: 273_900};
   const common = {
     vatInclusiveTotalWon: standard.totalWon,
     vatInclusiveMonthlyWon: 163_900,
@@ -66,7 +67,7 @@ test('refund calculation rejects invalid counts instead of silently changing the
 });
 
 test('bank policy metadata binds current consent evidence and permits bank orders only', () => {
-  assert.equal(POLICY_METADATA.versionDate, '2026-10-14');
+  assert.equal(POLICY_METADATA.versionDate, '2026-10-15');
   assert.equal(POLICY_METADATA.effectiveState, 'effective-bank-transfer-service');
   assert.equal(POLICY_METADATA.checkoutEligible, true);
   assert.equal(POLICY_METADATA.paymentLive, true);
@@ -75,7 +76,7 @@ test('bank policy metadata binds current consent evidence and permits bank order
   for (const [kind, document] of Object.entries(POLICY_DOCUMENTS)) {
     const digest = createHash('sha256').update(canonicalizePolicyDocument(document)).digest('hex');
     assert.equal(POLICY_METADATA.documents[kind].canonicalSha256, digest);
-    assert.equal(POLICY_METADATA.documents[kind].versionDate, POLICY_METADATA.versionDate);
+    assert.equal(POLICY_METADATA.documents[kind].versionDate, kind === 'privacy' ? '2026-10-14' : POLICY_METADATA.versionDate);
   }
 });
 
@@ -159,7 +160,7 @@ test('historical PG terms retain their original provider, authority and refund f
 
 test('application and footer expose all policies and distinguish guideline revisions from item revisions', () => {
   const application = renderApplication();
-  assert.match(application, /100,000₩/);
+  assert.doesNotMatch(application, /파이프라인 설치 비용|100,000₩/);
   assert.match(application, /파이프라인 가이드라인.*최대 2회/);
   assert.match(application, /개별 콘텐츠.*수정.*아닙니다/);
   for (const [href, label] of [['/terms', '이용약관'], ['/privacy', '개인정보처리방침'], ['/refund', '환불 정책']]) {
@@ -172,7 +173,7 @@ test('application and footer expose all policies and distinguish guideline revis
 test('rendered policies identify bank effective date and exact document hashes', () => {
   for (const kind of ['terms', 'privacy', 'refund']) {
     const html = renderPolicy(kind);
-    assert.match(html, /시행일 2026\.10\.14 · 버전 2026\.10\.14 · 계좌이체 · 운영자 입금 확인/);
+    assert.ok(html.includes(`시행일 ${kind === 'privacy' ? '2026.10.14' : '2026.10.15'} · 버전 ${kind === 'privacy' ? '2026.10.14' : '2026.10.15'} · 계좌이체 · 운영자 입금 확인`));
     assert.match(html, /신규 계좌이체 주문.*기존 주문.*증빙.*보존/);
     assert.match(html, /확인되지 않은 제공자 처리 정보.*확정된 것으로 안내하지/);
     assert.match(html, /data-effective-state="effective-bank-transfer-service"/);
@@ -182,12 +183,12 @@ test('rendered policies identify bank effective date and exact document hashes',
   }
 });
 
-test('tracked display sources contain no stale setup fee or old totals and landing pricing names the setup amount', async () => {
+test('tracked display sources contain no stale setup fee or old totals and landing pricing omits setup charge', async () => {
   const files = ['../src/app.js', '../src/application.js', '../src/order.js', '../src/policy-documents.js', '../README.md'];
   const sources = await Promise.all(files.map(path => readFile(new URL(path, import.meta.url), 'utf8')));
   const combined = sources.join('\n');
   assert.doesNotMatch(combined, /200,000|383,900|878,900|1,318,900|349,000/);
-  assert.match(sources[0], /초기 설치비 100,000원/);
+  assert.doesNotMatch(sources[0], /초기 설치비 100,000원|설치 비용 미포함/);
 });
 
 test('bank policy does not claim automatic authority or unconditional provider deletion', () => {

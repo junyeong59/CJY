@@ -3,6 +3,7 @@ import { renderPolicy, renderFooter } from "./policies.js";
 import { renderOrderLookup, renderOrderStatus, renderOrderDetails, bindOrder } from "./order.js";
 import { renderApplication, bindApplication } from "./application.js";
 import { SITE_CONFIG } from "./config.js";
+import { PRICING } from "./commercial.js";
 
 const app = document.querySelector("#app");
 let revealObserver;
@@ -533,9 +534,9 @@ function renderHome() {
         <section id="pricing" class="landing-pricing" aria-labelledby="pricing-title" tabindex="-1">
           <h2 id="pricing-title">가격표</h2>
           <section class="pricing-group" aria-labelledby="reels-pricing"><h3 id="reels-pricing">매일 릴스(게시물) 솔루션</h3><div class="pricing-grid">
-            ${renderPriceCard('Standard', ['타이포 그래피 위주의 편집', 'TTS 포함', '자막 포함'], '149,000₩')}
-            ${renderPriceCard('Deluxe', ['생성형 이미지 위주의 편집', '적절한 타이포 그래피', 'TTS 포함', '자막 포함'], '599,000₩')}
-            ${renderPriceCard('Premium', ['고퀄리티 영상 위주의 편집', '적절한 생성형 이미지 포함', '적절한 타이포 그래피', 'TTS 포함', '자막 포함'], '999,000₩')}
+            ${renderPriceCard('Standard', ['타이포 그래피 위주의 편집', 'TTS 포함', '자막 포함'], PRICING.plans.Standard.toLocaleString('ko-KR') + '₩')}
+            ${renderPriceCard('Deluxe', ['생성형 이미지 위주의 편집', '적절한 타이포 그래피', 'TTS 포함', '자막 포함'], PRICING.plans.Deluxe.toLocaleString('ko-KR') + '₩')}
+            ${renderPriceCard('Premium', ['고퀄리티 영상 위주의 편집', '적절한 생성형 이미지 포함', '적절한 타이포 그래피', 'TTS 포함', '자막 포함'], PRICING.plans.Premium.toLocaleString('ko-KR') + '₩')}
           </div></section>
           <section class="pricing-group" aria-labelledby="special-pricing"><h3 id="special-pricing">특별 상품</h3><div class="pricing-grid">
             ${renderPriceCard('AI Influencer Start-pack', ['매일 새로운 컨텐츠', '실제 같은 게시물', '실제 모션을 이용한 릴스 챌린지', 'AI 인플루언서를 위한 초기 세팅'], '999,000₩', true)}
@@ -575,7 +576,7 @@ function renderPriceCard(name, features, price, comingSoon = false) {
     <h4>${comingSoon ? escapeHtml(name).replace(' Start-pack', '<br />Start-pack') : escapeHtml(name)}</h4>
     <ul>${features.map(feature => `<li>${escapeHtml(feature)}</li>`).join('')}</ul>
     <div class="price-card-footer">
-      ${comingSoon ? '<p>초기 파이프라인 설치 비용 미포함</p>' : '<p>월 요금 · 부가세 별도 · 초기 설치비 100,000원 별도</p>'}
+      ${comingSoon ? `<p>${name === 'AI Influencer Start-pack' ? '일회성 구매 · 부가세 별도' : '가격 협의'} · 준비중</p>` : '<p>월 요금 · 부가세 별도</p>'}
       ${comingSoon ? `<button type="button" class="price-label" data-product-coming-soon aria-label="${escapeHtml(name)} ${escapeHtml(price)} · 준비중">${escapeHtml(price)}</button>` : `<a class="price-label" data-link href="/apply?service=reels&plan=${encodeURIComponent(name)}" aria-label="매일 릴스 솔루션 ${escapeHtml(name)} 신청하기">${escapeHtml(price)}</a>`}
     </div>
   </article>`;

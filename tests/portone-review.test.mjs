@@ -73,13 +73,13 @@ test('mock SDK: single local checkout opens KG V2 request with exact price and m
   assert.equal(await page.locator('.checkout button').count(),1);
   assert.equal(requests.sdk,0);
   await fill();await page.locator('[name=plan]').selectOption('Deluxe');
-  assert.equal(await page.locator('#order-total').textContent(),'총 가격: 768,900₩');
+  assert.equal(await page.locator('#order-total').textContent(),'총 가격: 218,900₩');
   await page.evaluate(()=>window.reply={code:'FAILURE_TYPE_STOPPED',message:'provider text not for display'});
   await page.locator('button[type=submit]').click();
   await page.waitForFunction(()=>document.querySelector('#checkout-status').textContent.includes('취소'));
   const calls=await page.evaluate(()=>window.calls);assert.equal(calls.length,1);
   const request=calls[0];assert.equal(request.storeId,fixture.PORTONE_TEST_STORE_ID);assert.equal(request.channelKey,fixture.PORTONE_TEST_CHANNEL_KEY);
-  assert.equal(request.totalAmount,768900);assert.equal(request.currency,'KRW');assert.equal(request.payMethod,'CARD');
+  assert.equal(request.totalAmount,218900);assert.equal(request.currency,'KRW');assert.equal(request.payMethod,'CARD');
   assert.deepEqual(request.customer,{fullName:'Review User',phoneNumber:'01000000000',email:'review@example.invalid'});
   assert.ok(request.paymentId.length>=1&&request.paymentId.length<=40,'KG oid must contain 1–40 characters');
   assert.match(request.paymentId,/^cjy-[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/,'retain the entire random UUID v4');
@@ -180,7 +180,7 @@ test('local policy links render unchanged policy metadata; mobile missing-config
   for(const kind of ['terms','privacy','refund']){
     const response=await fetch(base+'/'+kind);assert.equal(response.status,200);
     const html=await response.text();assert.match(html,new RegExp('data-policy-kind="'+kind+'"'));
-    assert.match(html,/data-checkout-eligible="true"/);assert.match(html,/data-payment-live="true"/);assert.match(html,/data-effective-state="effective-bank-transfer-service"/);assert.match(html,/data-policy-version="2026-10-14"/);
+    assert.match(html,/data-checkout-eligible="true"/);assert.match(html,/data-payment-live="true"/);assert.match(html,/data-effective-state="effective-bank-transfer-service"/);assert.ok(html.includes(`data-policy-version="${kind === 'privacy' ? '2026-10-14' : '2026-10-15'}"`));
   }
   await page.setViewportSize({width:390,height:844});
   // ResizeObserver/layout can settle after the already-present TEST status.

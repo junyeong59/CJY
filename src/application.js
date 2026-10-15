@@ -61,8 +61,8 @@ export function renderApplication({integrated=false}={}) {
       <label class="customer-note test-email">TEST 결제 이메일 (PG 전달 전용, 신청 서버에는 저장하지 않음)<input type="email" name="testEmail" autocomplete="email" maxlength="254" /></label>
       <div data-test-controls hidden><button type="button" data-test-pay>승인 확인 후 TEST 결제 계속</button><button type="button" data-test-check>접수·결제 상태 확인</button></div><p class="customer-note">동일 브라우저의 필수 보안 쿠키로 7일간 접수 상태를 확인합니다. 쿠키를 삭제하면 자동 복구할 수 없습니다.</p></fieldset>` : ''}
       </div>
-      <div class="payment-dock"><div class="order-summary" aria-live="polite"><div data-setup><span>파이프라인 설치 비용</span><strong>${money(PRICING.setupSupplyWon)}</strong></div><div><span id="order-service"></span><strong id="order-price"></strong></div><div><span>부가세 (10%)</span><strong id="order-vat"></strong></div></div>
-      <p class="price-note">설치비와 서비스비는 부가세 별도이며, 아래 합계에는 부가세 10%가 포함됩니다.</p>
+      <div class="payment-dock"><div class="order-summary" aria-live="polite"><div><span id="order-service"></span><strong id="order-price"></strong></div><div><span>부가세 (10%)</span><strong id="order-vat"></strong></div></div>
+      <p class="price-note">월 서비스비는 부가세 별도이며, 아래 합계에는 부가세 10%가 포함됩니다.</p>
       <div class="checkout"><strong id="order-total" aria-live="polite"></strong><button type="submit"${integrated ? ' disabled' : ''}>신청 접수하기</button></div>
       <p class="checkout-note">2026.09.23 상업·결제·환불 조건은 PG 검토용 최종 기준으로 확정되었습니다. 그러나 실제 결제 처리자의 수령 법인, 처리 국가와 보유 기간이 확인·공개되기 전까지 결제 활성화는 차단되며, 개인정보 처리 공개가 완결되었다고 주장하지 않습니다. 공개 신청은 검토 대기로 접수됩니다. 운영자가 해당 접수의 권리·예산·실행 시간을 사전 승인한 경우에만 별도 동의로 TEST 결제를 진행합니다. LIVE 결제·고객 등록·정기 제작·자동 게시는 활성화하지 않습니다. 접수번호를 보관해주세요. Order 화면은 예시이며 실제 접수 조회 기능은 아닙니다.</p>
 

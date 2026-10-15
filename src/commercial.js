@@ -1,10 +1,10 @@
 export const PRICING = Object.freeze({
-  setupSupplyWon: 100_000,
+  setupSupplyWon: 0,
   vatRatePercent: 10,
   plans: Object.freeze({
-    Standard: 149_000,
-    Deluxe: 599_000,
-    Premium: 999_000
+    Standard: 99_000,
+    Deluxe: 199_000,
+    Premium: 499_000
   })
 });
 

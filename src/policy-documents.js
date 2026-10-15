@@ -1,4 +1,6 @@
-export const POLICY_VERSION_DATE = '2026-10-14';
+import {PRICING, calculateFirstMonthPrice, calculateRefund} from './commercial.js';
+
+export const POLICY_VERSION_DATE = '2026-10-15';
 export const POLICY_EFFECTIVE_STATE = 'effective-bank-transfer-service';
 
 export const HISTORICAL_PAYMENT_DISABLED_POLICY_DOCUMENTS = Object.freeze({
@@ -125,8 +127,16 @@ export const HISTORICAL_PAYMENT_DISABLED_POLICY_EVIDENCE = Object.freeze({
 });
 
 
+const won = value => value.toLocaleString('ko-KR');
+const currentStandard = calculateFirstMonthPrice('Standard').totalWon;
+const currentRefundExample = calculateRefund({stage:'service-active', vatInclusiveTotalWon:currentStandard, vatInclusiveMonthlyWon:currentStandard, promisedItemCount:30, deliveredItemCount:10});
+
 const BANK_POLICY_REPLACEMENTS = {
   "terms": {
+    "요금·부가세와 일회성 구매": [
+      `별도 설치비는 없습니다. 한 달 요금 공급가액은 ${Object.entries(PRICING.plans).map(([plan, amount]) => `${plan} ${won(amount)}원`).join(', ')}이며 부가세 10%가 별도입니다. 첫 달 부가세 포함 총액은 ${Object.keys(PRICING.plans).map(plan => `${plan} ${won(calculateFirstMonthPrice(plan).totalWon)}원`).join(', ')}입니다. 신규 주문에 적용되며 기존 주문의 금액과 당시 약관·동의 증빙은 변경하지 않습니다.`,
+      HISTORICAL_PG_POLICY_DOCUMENTS.terms.sections.find(([heading]) => heading === "요금·부가세와 일회성 구매")[2]
+    ],
     "서비스 이용약관": [
       "이 약관은 씨제이와이(CJY)(대표 최준영)가 제공하는 매일 릴스 솔루션의 신청, 계좌이체를 통한 일회성 구매와 이용 조건을 정합니다."
     ],
@@ -157,6 +167,9 @@ const BANK_POLICY_REPLACEMENTS = {
     ]
   },
   "refund": {
+    "계산 예시": [
+      `Standard 첫 달 결제액 ${won(currentStandard)}원, 부가세 포함 월 이용료 ${won(currentStandard)}원, 약정 콘텐츠 30개 중 10개 제공 완료라면 ${won(currentStandard)} × 0.5 − (${won(currentStandard)} ÷ 30 × 10)으로 계산하여 최종 환불액은 ${won(currentRefundExample)}원입니다. 30개를 모두 제공한 경우 식의 결과가 음수이므로 환불액은 0원입니다. 기존 주문은 당시 결제액과 약관에 따라 계산합니다.`
+    ],
     "취소 및 환불 정책": [
       "이 정책은 계좌이체를 통한 일회성 한 달 구매에 적용합니다. 운영자가 실제 입금을 확인한 주문을 기준으로 제공 단계와 아래 환불 산식을 확인합니다. 입금 확인 전 취소 또는 입금 매칭 문의는 운영자에게 주문번호와 함께 요청해주세요."
     ],
@@ -170,7 +183,7 @@ const BANK_POLICY_REPLACEMENTS = {
   }
 };
 export const POLICY_DOCUMENTS = Object.freeze(Object.fromEntries(Object.entries(HISTORICAL_PG_POLICY_DOCUMENTS).map(([kind, doc]) => [kind, Object.freeze({...doc, sections:Object.freeze(doc.sections.map(([heading,...body]) => Object.freeze([heading, ...(BANK_POLICY_REPLACEMENTS[kind][heading] ?? body)])))})])));
-export const POLICY_METADATA = Object.freeze({versionDate:POLICY_VERSION_DATE,effectiveState:POLICY_EFFECTIVE_STATE,checkoutEligible:true,paymentLive:true,documents:Object.freeze({terms:{versionDate:POLICY_VERSION_DATE,canonicalSha256:'6be7949a500c6e60637dbca627d50d51e044fa835aedd65045037b4c7fbbb72a'},privacy:{versionDate:POLICY_VERSION_DATE,canonicalSha256:'0bfce66ef62e03780c84745d167b0fbf1959ca7f05361aa59283ee12236adc05'},refund:{versionDate:POLICY_VERSION_DATE,canonicalSha256:'d134a56e9b8d0fe3673be4a2d5c2b55a44d37444146bd4587052ca6806ab5de6'}})});
+export const POLICY_METADATA = Object.freeze({versionDate:POLICY_VERSION_DATE,effectiveState:POLICY_EFFECTIVE_STATE,checkoutEligible:true,paymentLive:true,documents:Object.freeze({terms:{versionDate:POLICY_VERSION_DATE,canonicalSha256:'e80a6f2fbbe4422b68b1bf98f8b0b88173638814d4253d713d0916e5e9f200c7'},privacy:{versionDate:'2026-10-14',canonicalSha256:'0bfce66ef62e03780c84745d167b0fbf1959ca7f05361aa59283ee12236adc05'},refund:{versionDate:POLICY_VERSION_DATE,canonicalSha256:'2db19a0ec3d96c59764b8a75a4dafcb287239173a4801059b3db10b994bd0824'}})});
 
 const CONSENT_DOCUMENT_ORDER = Object.freeze(['terms', 'privacy', 'refund']);
 

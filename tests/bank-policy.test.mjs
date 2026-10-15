@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import * as p from '../src/policy-documents.js';
 test('bank policy binds exact new documents while preserving October PG evidence',()=>{
- assert.equal(p.POLICY_VERSION_DATE,'2026-10-14');
+ assert.equal(p.POLICY_VERSION_DATE,'2026-10-15');
  assert.equal(p.POLICY_EFFECTIVE_STATE,'effective-bank-transfer-service');
  assert.equal(p.HISTORICAL_PG_POLICY_METADATA.versionDate,'2026-10-09');
  for(const [kind,document] of Object.entries(p.POLICY_DOCUMENTS))assert.equal(p.POLICY_METADATA.documents[kind].canonicalSha256,createHash('sha256').update(p.canonicalizePolicyDocument(document)).digest('hex'));
