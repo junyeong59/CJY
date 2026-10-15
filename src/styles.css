@@ -772,10 +772,12 @@ html:has(.landing) { scroll-behavior: smooth; }
 .price-card-footer { margin-top: auto; }
 .price-card-footer p { font-size: 14px; text-align: center; color: #7a7a7a; margin-bottom: 14px; }
 .price-label { min-height: 54px; display: flex; align-items: center; justify-content: center; border-radius: 100px; background: #fff; color: #000; font-size: 24px; font-weight: 700; }
-.price-card--soon { min-height: 405px; }
-.price-card--soon h4 { color: #585858; }
-.price-card--soon ul { color: #434343; margin-bottom: 30px; }
-.price-card--soon .price-label { background: #4b4b4b; color: #000; }
+.price-card--special { color: #000; background: #fff url('/assets/pricing/influencer-card.svg') center / cover no-repeat; }
+.price-card--special + .price-card--special { background-image: url('/assets/pricing/cinema-card.svg'); }
+.price-card--special ul { margin-top: 48px; }
+.price-card--special .price-card-footer p { color: #0b0b0b; }
+.price-card--special .price-label { width: 100%; border: 0; background: #000; color: #fff; font-family: inherit; cursor: pointer; }
+.price-card--special .price-label:focus-visible { outline: 3px solid #777; outline-offset: 4px; }
 /* Scale each illustration in its own frame, centered within the visible panel. */
 .feature-visual { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; }
 @media (min-width: 1101px) {

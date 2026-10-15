@@ -13,7 +13,7 @@ export function renderDirectApplication(){return `<div class="landing applicatio
 <label class="customer-field">전화번호<input type="tel" name="customerPhone" autocomplete="tel" required maxlength="30" /></label>
 </div><p class="customer-note">*결제 확인 후 솔루션 전달을 위해 반드시 필요한 정보이니 정확하게 작성해주세요.</p></section>
 <h2 class="application-section-title">서비스 신청</h2>
-<label class="form-field">서비스 종류<select name="service"><option value="reels">매일 릴스 솔루션</option></select></label>
+<label class="form-field">서비스 종류<select name="service"><option value="reels">매일 릴스 솔루션</option><option value="ai-influencer" disabled>AI Influencer Start-pack (준비중)</option><option value="ai-cinema" disabled>AI Cinema Start-pack (준비중)</option></select></label>
 <label class="form-field">요금제<select name="plan"><option>Standard</option><option>Deluxe</option><option>Premium</option></select></label>
 
 <label class="form-field">자동 게시 여부<select name="autoPost"><option value="no">사용안함</option><option value="yes">사용함</option></select></label>

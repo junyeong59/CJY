@@ -537,6 +537,10 @@ function renderHome() {
             ${renderPriceCard('Deluxe', ['생성형 이미지 위주의 편집', '적절한 타이포 그래피', 'TTS 포함', '자막 포함'], '599,000₩')}
             ${renderPriceCard('Premium', ['고퀄리티 영상 위주의 편집', '적절한 생성형 이미지 포함', '적절한 타이포 그래피', 'TTS 포함', '자막 포함'], '999,000₩')}
           </div></section>
+          <section class="pricing-group" aria-labelledby="special-pricing"><h3 id="special-pricing">특별 상품</h3><div class="pricing-grid">
+            ${renderPriceCard('AI Influencer Start-pack', ['매일 새로운 컨텐츠', '실제 같은 게시물', '실제 모션을 이용한 릴스 챌린지', 'AI 인플루언서를 위한 초기 세팅'], '999,000₩', true)}
+            ${renderPriceCard('AI Cinema Start-pack', ['매일 연재되는 AI 드라마', '일관성 있는 캐릭터', '직접 만든 스토리를 드라마로'], '가격 협의', true)}
+          </div></section>
         </section>
         ${renderProcess()}
       </main>
@@ -567,12 +571,12 @@ function renderProcess() {
 }
 
 function renderPriceCard(name, features, price, comingSoon = false) {
-  return `<article class="price-card${comingSoon ? ' price-card--soon' : ''}">
-    <h4>${escapeHtml(name)}</h4>
+  return `<article class="price-card${comingSoon ? ' price-card--special' : ''}">
+    <h4>${comingSoon ? escapeHtml(name).replace(' Start-pack', '<br />Start-pack') : escapeHtml(name)}</h4>
     <ul>${features.map(feature => `<li>${escapeHtml(feature)}</li>`).join('')}</ul>
     <div class="price-card-footer">
-      ${comingSoon ? '' : '<p>월 요금 · 부가세 별도 · 초기 설치비 100,000원 별도</p>'}
-      ${comingSoon ? `<div class="price-label" aria-disabled="true">${escapeHtml(price)}</div>` : `<a class="price-label" data-link href="/apply?service=reels&plan=${encodeURIComponent(name)}" aria-label="매일 릴스 솔루션 ${escapeHtml(name)} 신청하기">${escapeHtml(price)}</a>`}
+      ${comingSoon ? '<p>초기 파이프라인 설치 비용 미포함</p>' : '<p>월 요금 · 부가세 별도 · 초기 설치비 100,000원 별도</p>'}
+      ${comingSoon ? `<button type="button" class="price-label" data-product-coming-soon aria-label="${escapeHtml(name)} ${escapeHtml(price)} · 준비중">${escapeHtml(price)}</button>` : `<a class="price-label" data-link href="/apply?service=reels&plan=${encodeURIComponent(name)}" aria-label="매일 릴스 솔루션 ${escapeHtml(name)} 신청하기">${escapeHtml(price)}</a>`}
     </div>
   </article>`;
 }
@@ -731,6 +735,10 @@ function navigateTo(pathname) {
 }
 
 app.addEventListener("click", async (event) => {
+  if (event.target.closest('[data-product-coming-soon]')) {
+    window.alert('아직 준비중인상품입니다');
+    return;
+  }
   const link = event.target.closest("a[data-link]");
   if (link && link.origin === window.location.origin && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey && event.button === 0) {
     event.preventDefault();
