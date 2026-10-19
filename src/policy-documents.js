@@ -135,14 +135,14 @@ const BANK_POLICY_REPLACEMENTS = {
   "terms": {
     "상담·시작일과 제공 수량": [
       HISTORICAL_PG_POLICY_DOCUMENTS.terms.sections.find(([heading]) => heading === "상담·시작일과 제공 수량")[1],
-      "신규 구매는 신청 시 선택한 수량의 콘텐츠입니다. 가이드라인 확정 뒤 협의된 날짜부터 제공하며, 2개 이상의 수량을 선택할 시 콘텐츠는 매일 하나씩 전달됩니다. 기존 계약의 기간과 약정 콘텐츠 수는 당시 계약대로 보존합니다."
+      "신규 구매는 신청 시 선택한 수량의 콘텐츠입니다. 가이드라인 확정 뒤 선택한 수량의 콘텐츠를 고객과 협의된 일정에 제작·전달합니다. 제작·전달 일정과 자동 게시를 선택한 경우의 게시 일정은 고객과 별도로 협의하고 승인한 범위에서 확정합니다. 기존 계약의 기간과 약정 콘텐츠 수는 당시 계약대로 보존합니다."
     ],
     "요금·부가세와 일회성 구매": [
       `별도 설치비는 없습니다. 콘텐츠 1건 공급가액은 ${Object.entries(PRICING.plans).map(([plan, amount]) => `${({Standard:'텍스트형',Deluxe:'이미지형',Premium:'영상형'})[plan]} ${won(amount)}원`).join(', ')}이며 부가세 10%가 별도입니다. 1건 부가세 포함 총액은 ${Object.keys(PRICING.plans).map(plan => `${({Standard:'텍스트형',Deluxe:'이미지형',Premium:'영상형'})[plan]} ${won(calculateFirstMonthPrice(plan).totalWon)}원`).join(', ')}입니다. 신규 주문에 적용되며 기존 주문의 금액과 당시 약관·동의 증빙은 변경하지 않습니다.`,
       "각 구매는 선택한 수량에 대한 일회성 직접 결제입니다. 공급가액은 건당 단가에 선택 수량을 곱하고 부가세 10%를 더하며, 수량 할인은 적용하지 않습니다. 자동 정기결제, 자동 갱신 또는 빌링키 결제를 하지 않습니다."
     ],
     "서비스 이용약관": [
-      "이 약관은 씨제이와이(CJY)(대표 최준영)가 제공하는 매일 릴스 솔루션의 신청, 계좌이체를 통한 일회성 구매와 이용 조건을 정합니다."
+      "이 약관은 씨제이와이(CJY)(대표 최준영)가 제공하는 릴스 솔루션의 신청, 계좌이체를 통한 일회성 구매와 이용 조건을 정합니다."
     ],
     "결제 사업자와 수단": [
       "현재 결제수단은 운영자 계좌로의 계좌이체입니다. 본인 주문의 입금 안내에 표시된 은행, 계좌번호, 예금주, 주문번호 및 서버가 확정한 부가세 포함 최종 금액을 확인하고 이체해주세요. 운영자가 실제 입금 내역과 주문을 대조·확인한 뒤 주문 상태가 결제 완료로 변경됩니다. 상태 조회나 입금 안내 표시만으로 입금이 확인되지 않습니다.",
@@ -155,7 +155,7 @@ const BANK_POLICY_REPLACEMENTS = {
   },
   "privacy": {
     "개인정보 처리방침": [
-      "씨제이와이(CJY)(대표 최준영, 이하 “운영자”)는 매일 릴스 솔루션 신청, 계좌이체 주문, 운영자의 입금 확인, 상담 및 계약 이행에 필요한 개인정보 처리 내용을 안내합니다."
+      "씨제이와이(CJY)(대표 최준영, 이하 “운영자”)는 릴스 솔루션 신청, 계좌이체 주문, 운영자의 입금 확인, 상담 및 계약 이행에 필요한 개인정보 처리 내용을 안내합니다."
     ],
     "결제 처리 목적과 항목": [
       "주문 생성, 운영자의 입금 대조·확인, 취소·환불 및 분쟁 대응을 위해 주문번호, 금액·통화, 결제수단, 주문·입금 확인 상태, 관련 시각 및 최소한의 요청 식별·무결성 기록을 처리합니다. 운영자는 실제 입금 거래에서 확인되는 입금자명, 금액과 입금 시각 등 주문 대조에 필요한 내역을 확인할 수 있습니다.",
@@ -188,7 +188,7 @@ const BANK_POLICY_REPLACEMENTS = {
   }
 };
 export const POLICY_DOCUMENTS = Object.freeze(Object.fromEntries(Object.entries(HISTORICAL_PG_POLICY_DOCUMENTS).map(([kind, doc]) => [kind, Object.freeze({...doc, sections:Object.freeze(doc.sections.map(([heading,...body]) => Object.freeze([heading, ...(BANK_POLICY_REPLACEMENTS[kind][heading] ?? body)])))})])));
-export const POLICY_METADATA = Object.freeze({versionDate:POLICY_VERSION_DATE,effectiveState:POLICY_EFFECTIVE_STATE,checkoutEligible:true,paymentLive:true,documents:Object.freeze({terms:{versionDate:POLICY_VERSION_DATE,canonicalSha256:'7b1fd69d1a00165054b52340889969fa17660d800ad7abb65739fb93125f1cb7'},privacy:{versionDate:'2026-10-14',canonicalSha256:'0bfce66ef62e03780c84745d167b0fbf1959ca7f05361aa59283ee12236adc05'},refund:{versionDate:POLICY_VERSION_DATE,canonicalSha256:'4fcb0bb1df782485a1869790677a38033d83b7aa62eb126aa8752036c9819221'}})});
+export const POLICY_METADATA = Object.freeze({versionDate:POLICY_VERSION_DATE,effectiveState:POLICY_EFFECTIVE_STATE,checkoutEligible:true,paymentLive:true,documents:Object.freeze({terms:{versionDate:POLICY_VERSION_DATE,canonicalSha256:'600cad2faee3fb73cc07741b25b9c3f2278654db44c1bcf39174e5ee8919b65c'},privacy:{versionDate:POLICY_VERSION_DATE,canonicalSha256:'16ac126d95822aca918850d2ac37789b110c836737044c2f7fddfab36cff99fc'},refund:{versionDate:POLICY_VERSION_DATE,canonicalSha256:'4fcb0bb1df782485a1869790677a38033d83b7aa62eb126aa8752036c9819221'}})});
 
 const CONSENT_DOCUMENT_ORDER = Object.freeze(['terms', 'privacy', 'refund']);
 

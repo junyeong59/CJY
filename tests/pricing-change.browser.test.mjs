@@ -11,7 +11,7 @@ test('public bank application prices per-item supply and separate VAT with no in
  }
  assert.doesNotMatch(await page.locator('.payment-dock').textContent(),/설치 비용|설치비|월 서비스비/);
  assert.deepEqual(await page.locator('[name=plan] option:not(:disabled)').allTextContents(),['텍스트형','이미지형','영상형']);
- assert.match(await page.locator('#order-service').textContent(),/영상형.*1건/);
+ assert.match(await page.locator('#order-service').textContent(),/영상형.*× 1/);
  assert.doesNotMatch(await page.locator('.application-notices').textContent(),/한달간|한 달간/);
  assert.equal(await page.locator('[name=plan] option:disabled').count(),2);
  await page.locator('.landing-brand').click();await page.waitForURL('https://cjy.app/');
@@ -23,9 +23,9 @@ test('public bank application prices per-item supply and separate VAT with no in
  }
  // Screenshot-only: omit the fixed header overlay; product CSS is untouched.
  await page.mouse.move(0,0);
- await page.locator('#pricing').screenshot({path:'/Users/choi/cache/cjy-per-item-pricing/pricing-desktop.png',style:'.landing-header { visibility: hidden !important; }'});
+ await page.locator('#pricing').screenshot({path:'/tmp/cjy-pricing-pricing-desktop.png',style:'.landing-header { visibility: hidden !important; }'});
  await page.setViewportSize({width:390,height:844});
- await page.locator('#pricing').screenshot({path:'/Users/choi/cache/cjy-per-item-pricing/pricing-mobile.png',style:'.landing-header { visibility: hidden !important; }'});
+ await page.locator('#pricing').screenshot({path:'/tmp/cjy-pricing-pricing-mobile.png',style:'.landing-header { visibility: hidden !important; }'});
  const special=page.locator('.price-card--special');assert.equal(await special.count(),2);
  assert.match(await special.nth(0).textContent(),/일회성 구매[^]*999,000₩/);
  assert.match(await special.nth(1).textContent(),/가격 협의/);

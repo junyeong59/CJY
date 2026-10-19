@@ -1070,16 +1070,17 @@ html:has(.landing) { scroll-behavior: smooth; }
 }
 
 /* Scoped item selection: existing dark rounded controls remain unchanged. */
-.application .service-quantity-row { display: grid; grid-template-columns: minmax(0, 400px) minmax(100px, 160px); gap: 24px; max-width: 584px; }
-.application .service-quantity-row .form-field { width: 100%; min-width: 0; margin-bottom: 12px; }
-.application .service-quantity-row select { padding-left: 16px; padding-right: 38px; }
-.application .quantity-note { margin: 0 0 var(--form-gap); line-height: 1.6; }
+.application .service-quantity-row { display: grid; grid-template-columns: repeat(2, minmax(0, 338px)); gap: 79px; max-width: 755px; }
+.application .service-quantity-row .form-field { width: 100%; min-width: 0; margin-bottom: 0; }
+.application .service-quantity-row select { width: 100%; padding-left: 44px; padding-right: 44px; text-align: center; }
+.application .customer-note.quantity-note { margin: 16px 0 32px; line-height: 1.7; }
 .application.apply-page [data-account] .form-field { width: 100%; }
 .application.apply-page [data-account] select { width: 338px; max-width: 100%; }
 .application.apply-page [data-account] .form-field::after { right: max(20px, calc(100% - 312px)); }
-.application .account-inline-note { color: #aaa; font-size: .8em; }
+.application .account-inline-note { color: inherit; font: inherit; }
 @media (max-width: 600px) {
-  .application .service-quantity-row { grid-template-columns: minmax(0, 1fr) 96px; gap: 12px; }
+  .application .service-quantity-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .application.apply-page .service-quantity-row select { padding-left: 12px; padding-right: 30px; font-size: 16px; }
   .application.apply-page [data-account] .form-field::after { right: 20px; }
   .application.apply-page [data-account] select { width: 100%; }
 }
@@ -1445,7 +1446,7 @@ html:has(.landing) { scroll-behavior: smooth; }
  .apply-page .order-summary { padding: 32px; }
  .apply-page .order-summary > div { font-size: 22px; }
  .apply-page [data-direct-checkout] .checkout { grid-template-columns: minmax(0,1fr) 130px 200px; gap: 16px; padding: 32px; }
- .apply-page [data-direct-checkout] .checkout > strong { font-size: 28px; }
+ .apply-page [data-direct-checkout] .checkout > strong { font-size: 40px; }
  .apply-page [data-direct-checkout] .checkout button { font-size: 22px; min-height: 56px; }
 }
 @media (max-width: 600px) {
@@ -1470,17 +1471,23 @@ html:has(.landing) { scroll-behavior: smooth; }
 
 /* Keep the full-width price dock visible, then lift it above the footer. */
 .apply-page .application-main { padding-bottom: calc(var(--dock-height, 300px) + 48px); }
-.apply-page [data-direct-checkout] .payment-dock { position: fixed; inset: auto 0 var(--dock-footer-offset, 0px); width: 100%; margin: 0; max-height: 45dvh; overflow-y: auto; box-shadow: 0 -8px 24px rgb(0 0 0 / 35%); }
-.apply-page .payment-dock .order-summary { padding: 12px var(--form-gutter); border-radius: 32px 32px 0 0; }
-.apply-page .payment-dock .order-summary > div { font-size: 18px; padding: 4px 0; }
+.apply-page [data-direct-checkout] .payment-dock { position: fixed; inset: auto 0 var(--dock-footer-offset, 0px); width: 100%; margin: 0; max-height: 65dvh; overflow-y: auto; box-shadow: 0 -8px 24px rgb(0 0 0 / 35%); }
+.apply-page .payment-dock .order-summary { padding: 40px 80px 24px; border-radius: 80px 80px 0 0; }
+.apply-page .payment-dock .order-summary > div { font-size: 32px; padding: 12px 0; }
+.apply-page .payment-dock .order-summary span { display: flex; align-items: baseline; gap: 40px; }
+.apply-page .payment-dock .order-summary span::before { content: ""; width: 20px; height: 20px; flex: 0 0 20px; background: currentColor; margin: 0; }
+.apply-page .payment-dock .order-summary strong { font-variant-numeric: tabular-nums; }
 .apply-page .payment-dock .price-note { padding: 0 var(--form-gutter) 8px; }
-.apply-page [data-direct-checkout] .checkout { padding: 16px var(--form-gutter); }
-.apply-page [data-direct-checkout] .checkout > strong { font-size: 28px; }
-.apply-page [data-direct-checkout] .checkout button { min-height: 52px; font-size: 22px; }
+.apply-page [data-direct-checkout] .checkout { padding: 40px var(--form-gutter); }
+.apply-page [data-direct-checkout] .checkout > strong { font-size: 40px; }
+.apply-page [data-direct-checkout] .checkout button { width: 100%; min-height: 70px; font-size: 28px; }
 .apply-page #checkout-status { margin: 0; padding: 0 var(--form-gutter) 12px; }
 .apply-page #checkout-status:empty { display: none; }
 @media (max-width: 600px) {
- .apply-page .payment-dock .order-summary > div { font-size: 14px; }
+ .apply-page .payment-dock .order-summary { padding: 20px 24px 12px; border-radius: 32px 32px 0 0; }
+ .apply-page .payment-dock .order-summary > div { font-size: 16px; padding: 6px 0; }
+ .apply-page .payment-dock .order-summary span { gap: 12px; }
+ .apply-page .payment-dock .order-summary span::before { width: 10px; height: 10px; flex-basis: 10px; }
  .apply-page [data-direct-checkout] .checkout { gap: 8px; padding-block: 12px; }
  .apply-page [data-direct-checkout] .checkout > strong { font-size: 22px; }
  .apply-page [data-direct-checkout] .checkout button { min-height: 44px; font-size: 18px; }
@@ -1657,3 +1664,12 @@ html:has(.landing) { scroll-behavior: smooth; }
 }
 .order-page--bank-pending .bank-pending-amount { color: #fff; text-align: left; }
 .order-page--bank-pending .bank-pending-account { color: #fff; }
+
+@media (min-width: 601px) and (max-width: 1100px) {
+ .apply-page .service-quantity-row { gap: 36px; }
+ .apply-page .payment-dock .order-summary { padding: 24px 32px 16px; border-radius: 48px 48px 0 0; }
+ .apply-page .payment-dock .order-summary > div { font-size: 24px; }
+ .apply-page [data-direct-checkout] .checkout { padding: 24px 32px; }
+ .apply-page [data-direct-checkout] .checkout > strong { font-size: 28px; }
+ .apply-page [data-direct-checkout] .checkout button { font-size: 22px; min-height: 56px; }
+}

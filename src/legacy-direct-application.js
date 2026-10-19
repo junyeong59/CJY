@@ -13,7 +13,7 @@ export function renderDirectApplication(){return `<div class="landing applicatio
 <label class="customer-field">전화번호<input type="tel" name="customerPhone" autocomplete="tel" required maxlength="30" /></label>
 <label class="customer-field">이메일<input type="email" name="testEmail" autocomplete="email" required maxlength="254" /></label></div><p class="customer-note">*결제 확인 후 솔루션 전달을 위해 반드시 필요한 정보이니 정확하게 작성해주세요.</p></section>
 <h2 class="application-section-title">서비스 신청</h2>
-<label class="form-field">서비스 종류<select name="service"><option value="reels">매일 릴스 솔루션</option></select></label>
+<label class="form-field">서비스 종류<select name="service"><option value="reels">릴스 솔루션</option></select></label>
 <label class="form-field">요금제<select name="plan"><option value="Standard">텍스트형</option><option value="Deluxe">이미지형</option><option value="Premium">영상형</option></select></label>
 
 <label class="form-field">자동 게시 여부<select name="autoPost"><option value="no">사용안함</option><option value="yes">사용함</option></select></label>
@@ -26,7 +26,7 @@ export function renderDirectApplication(){return `<div class="landing applicatio
 <label><input type="checkbox" name="termsConsent" required /><span><a href="/terms" data-link>이용약관</a> 및 <a href="/refund" data-link>환불 정책</a>에 동의합니다</span></label>
 <label><input type="checkbox" name="privacyConsent" required /><span>솔루션 전달을 위한 전화번호 및 성함과 같은 개인정보 수집에 동의합니다</span><a class="consent-policy-link" href="/privacy" data-link>개인정보 처리방침</a></label>
 </fieldset>
-<section class="application-notices" aria-labelledby="application-notices-title"><h2 id="application-notices-title" class="application-section-title">주의 사항</h2><p>결제일 이후 고객 맞춤 파이프라인 확정을 위해 추가적인 협의가 필요하며, 협의는 <strong>메시지로 진행됩니다.</strong></p><p>컨텐츠 업로드는 파이프 확정 이후, <strong>협의된 날짜에 콘텐츠 1건을 제공합니다.</strong> 추가 콘텐츠는 별도 구매가 필요합니다.</p></section>
+<section class="application-notices" aria-labelledby="application-notices-title"><h2 id="application-notices-title" class="application-section-title">주의 사항</h2><p>결제일 이후 고객 맞춤 파이프라인 확정을 위해 추가적인 협의가 필요하며, 협의는 <strong>메시지로 진행됩니다.</strong></p><p>가이드라인 확정 이후, <strong>콘텐츠 1건을 협의된 일정에 제작·전달합니다.</strong> 추가 콘텐츠는 별도 구매가 필요합니다.</p></section>
 
 </div><div class="payment-dock"><div class="order-summary" aria-live="polite"><div><span id="order-service"></span><strong id="order-price"></strong></div><div><span>부가세 (10%)</span><strong id="order-vat"></strong></div><p class="price-note">건당 서비스비는 부가세 별도이며, 아래 합계에는 부가세 10%가 포함됩니다.</p></div><div class="checkout"><strong id="order-total"></strong><button type="button" data-save-application disabled>저장하기</button><button type="submit" disabled>결제하기</button></div><p id="checkout-status" role="status"></p></div></form></main></div>`;}
 export function bindDirectApplication(root){
@@ -59,7 +59,7 @@ export function bindDirectApplication(root){
  // Cancel is only permission to edit, never evidence of nonpayment. Resolve an
  // immutable child on save/pay; the next checkout retains server verification.
  const cancelledReturn=(r,restore=false)=>{r={...r,draftId:r.draftId??current.draftId};show({...r,editable:true,cancelled:true},restore);unknown=false;status.textContent='결제창을 닫았습니다. 내용을 수정·저장하거나 다시 결제할 수 있습니다.';history.replaceState(null,'','/apply?draftId='+encodeURIComponent(r.draftId)+(r.windowId?'&windowId='+encodeURIComponent(r.windowId):'')+'&code=FAILURE_TYPE_STOPPED');};
- const update=()=>{for(const label of form.querySelectorAll('[data-legacy-channel]'))label.hidden=!label.querySelector('input').checked;const plan=field('plan').value,p=calculateFirstMonthPrice(plan);form.querySelector('#order-service').textContent='매일 릴스 솔루션 ('+field('plan').selectedOptions[0].textContent+' · 1건)';form.querySelector('#order-price').textContent=money(p.monthlySupplyWon);form.querySelector('#order-vat').textContent=money(p.vatWon);form.querySelector('#order-total').textContent='총 가격: '+money(p.totalWon);form.querySelector('[data-account]').hidden=field('autoPost').value==='no';};form.addEventListener('change',update);update();
+ const update=()=>{for(const label of form.querySelectorAll('[data-legacy-channel]'))label.hidden=!label.querySelector('input').checked;const plan=field('plan').value,p=calculateFirstMonthPrice(plan);form.querySelector('#order-service').textContent='릴스 솔루션 ('+field('plan').selectedOptions[0].textContent+' · 1건)';form.querySelector('#order-price').textContent=money(p.monthlySupplyWon);form.querySelector('#order-vat').textContent=money(p.vatWon);form.querySelector('#order-total').textContent='총 가격: '+money(p.totalWon);form.querySelector('[data-account]').hidden=field('autoPost').value==='no';};form.addEventListener('change',update);update();
  form.querySelector('.brief-help').addEventListener('click',e=>{const g=form.querySelector('#brief-guide');g.hidden=!g.hidden;e.currentTarget.setAttribute('aria-expanded',String(!g.hidden));});
  for(const n of ['customerName','customerPhone','brief'])field(n).addEventListener('input',()=>field(n).setCustomValidity(''));
  form.addEventListener('submit',async event=>{event.preventDefault();if(!ready||busy||unknown||(!recoverable()&&(current.orderId||(current.receipt&&current.editable!==true))))return;

@@ -24,7 +24,7 @@ export function renderApplication({integrated=false}={}) {
           <p id="customer-note" class="customer-note">*신청 내용 검토 및 연락을 위한 정보입니다. 신청만으로 결제·고객 등록·제작·게시가 시작되지 않습니다.</p>
         </section>
         <h2 class="application-section-title">서비스 신청</h2>
-        <label class="form-field">서비스 종류<select name="service"><option value="reels">매일 릴스 솔루션</option><option value="ai-influencer" disabled>AI Influencer Start-pack (준비중)</option><option value="ai-cinema" disabled>AI Cinema Start-pack (준비중)</option></select></label>
+        <label class="form-field">서비스 종류<select name="service"><option value="reels">릴스 솔루션</option><option value="ai-influencer" disabled>AI Influencer Start-pack (준비중)</option><option value="ai-cinema" disabled>AI Cinema Start-pack (준비중)</option></select></label>
         <div data-reels>
           <label class="form-field">요금제<select name="plan"><option value="Standard">텍스트형</option><option value="Deluxe">이미지형</option><option value="Premium">영상형</option></select></label>
           <label class="form-field">자동 게시 여부<select name="autoPost"><option value="yes">사용함</option><option value="no">사용하지 않음</option></select></label>
@@ -54,7 +54,7 @@ export function renderApplication({integrated=false}={}) {
         </fieldset>
         <fieldset class="consents application-notices"><legend>주의 사항</legend>
           <p>결제일에 설치를 시작합니다. 초기 상담에서 고객은 <strong>파이프라인 가이드라인 수정을 최대 2회</strong> 요청할 수 있습니다. 이는 가이드라인 확정을 위한 횟수이며 <strong>개별 콘텐츠마다 제공되는 수정 권리가 아닙니다.</strong></p>
-          <p>콘텐츠 제공은 가이드라인 확정 후 <strong>협의된 날짜에 콘텐츠 1건</strong>을 제공합니다. 추가 콘텐츠는 별도 구매하며 자동 정기결제되지 않습니다.</p>
+          <p>콘텐츠 제공은 가이드라인 확정 후 <strong>협의된 일정에 콘텐츠 1건을 제작·전달</strong>합니다. 추가 콘텐츠는 별도 구매하며 자동 정기결제되지 않습니다.</p>
           <label><input type="checkbox" name="noticeConsent" required />네 이해했습니다.</label>
         </fieldset>
       ${integrated ? `<fieldset class="consents"><legend>사전 승인 TEST 안내</legend><label class="customer-note"><input type="checkbox" name="testConsent" /> (선택) 사전 승인된 Standard 텍스트·음성 첫 시안 1건만 TEST 결제 후 운영자에게 전달됨을 이해합니다. 실제 청구·LIVE·정기 운영·자동 게시가 아닙니다. 결제 시 신청 성함·전화번호와 아래 이메일이 PortOne·PG로 전달됩니다.</label>
@@ -95,7 +95,7 @@ export function bindApplication(root) {
     const plan = field('plan').value;
     const price = plans[plan];
     const firstMonth = calculateFirstMonthPrice(plan);
-    root.querySelector('#order-service').textContent = `매일 릴스 솔루션 (${field('plan').selectedOptions[0].textContent} · 1건)`;
+    root.querySelector('#order-service').textContent = `릴스 솔루션 (${field('plan').selectedOptions[0].textContent} · 1건)`;
     root.querySelector('#order-price').textContent = money(price);
     root.querySelector('#order-vat').textContent = money(firstMonth.vatWon);
     root.querySelector('#order-total').textContent = `총 가격: ${money(firstMonth.totalWon)}`;

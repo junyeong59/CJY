@@ -76,7 +76,7 @@ test('bank policy metadata binds current consent evidence and permits bank order
   for (const [kind, document] of Object.entries(POLICY_DOCUMENTS)) {
     const digest = createHash('sha256').update(canonicalizePolicyDocument(document)).digest('hex');
     assert.equal(POLICY_METADATA.documents[kind].canonicalSha256, digest);
-    assert.equal(POLICY_METADATA.documents[kind].versionDate, kind === 'privacy' ? '2026-10-14' : POLICY_METADATA.versionDate);
+    assert.equal(POLICY_METADATA.documents[kind].versionDate, POLICY_METADATA.versionDate);
   }
 });
 
@@ -173,7 +173,7 @@ test('application and footer expose all policies and distinguish guideline revis
 test('rendered policies identify bank effective date and exact document hashes', () => {
   for (const kind of ['terms', 'privacy', 'refund']) {
     const html = renderPolicy(kind);
-    assert.ok(html.includes(`시행일 ${kind === 'privacy' ? '2026.10.14' : '2026.10.19'} · 버전 ${kind === 'privacy' ? '2026.10.14' : '2026.10.19'} · 계좌이체 · 운영자 입금 확인`));
+    assert.ok(html.includes(`시행일 ${'2026.10.19'} · 버전 ${'2026.10.19'} · 계좌이체 · 운영자 입금 확인`));
     assert.match(html, /신규 계좌이체 주문.*기존 주문.*증빙.*보존/);
     assert.match(html, /확인되지 않은 제공자 처리 정보.*확정된 것으로 안내하지/);
     assert.match(html, /data-effective-state="effective-bank-transfer-service"/);

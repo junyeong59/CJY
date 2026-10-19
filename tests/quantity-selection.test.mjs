@@ -5,8 +5,8 @@ import {POLICY_DOCUMENTS} from '../src/policy-documents.js';
 test('new policy binds selected quantity without changing old monthly documents',()=>{
  const text=JSON.stringify(POLICY_DOCUMENTS);
  assert.match(text,/선택한 수량/);
- assert.match(text,/2개 이상.*매일 하나씩/);
- assert.doesNotMatch(text,/신규 구매는 콘텐츠 1건입니다|각 구매는 콘텐츠 1건에 대한/);
+ assert.match(text,/선택한 수량의 콘텐츠를.*협의된 일정에 제작·전달/);
+ assert.doesNotMatch(text,/매일|기간 이후 연장|신규 구매는 콘텐츠 1건입니다|각 구매는 콘텐츠 1건에 대한/);
 });
 test('normal item quotes multiply unit supply and VAT for quantities 1, 2, 30',()=>{
  for(const [plan,unit] of [['Standard',4900],['Deluxe',9900],['Premium',34900]])for(const quantity of [1,2,30]){

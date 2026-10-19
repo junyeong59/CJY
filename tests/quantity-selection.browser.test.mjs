@@ -24,17 +24,17 @@ test('service and quantity controls quote, save, restore and send numeric quanti
   assert.equal(await page.locator('#order-vat').textContent(),(unit*q/10).toLocaleString('ko-KR')+'₩');
   assert.equal(await page.locator('#order-total').textContent(),'총 가격: '+(unit*q*11/10).toLocaleString('ko-KR')+'₩');
  }
- assert.equal(await page.locator('[data-quantity-note]').textContent(),'*2개 이상의 수량을 선택할 시 콘텐츠는 매일 하나씩 전달됩니다');
+ assert.equal(await page.locator('[data-quantity-note]').textContent(),'*선택한 수량의 콘텐츠를 협의된 일정에 제작·전달합니다.');
  assert.match(await page.locator('.application-notices').textContent(),/선택한 수량/);
  assert.doesNotMatch(await page.locator('.application-notices').textContent(),/콘텐츠 1건을 제공합니다/);
  await page.locator('[name=autoPost]').selectOption('yes');
- const account=await page.locator('[data-account]').textContent();assert.match(account,/기존 계정 사용 여부 \(기존 계정을 사용 할 시, 별도의 추가 작업이 필요할 수 있습니다\)/);assert.equal(await page.locator('[data-account] .customer-note').count(),0);
+ const account=await page.locator('[data-account]').textContent();assert.match(account,/기존 계정 사용 여부 \(추가작업 필요\)/);assert.equal(await page.locator('[data-account] .customer-note').count(),0);
  for(const width of [1440,390,320]){
   await page.setViewportSize({width,height:1000});
   const a=await page.locator('[name=plan]').boundingBox(),b=await page.locator('[name=quantity]').boundingBox();
   if(width===1440){assert.equal(Math.round(a.y),Math.round(b.y));assert.ok(b.x>a.x);}
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
-  if(width!==320)await page.locator('.application-fields').screenshot({path:`/Users/choi/cache/cjy-quantity-selection/form-${width}.png`,style:'.payment-dock,.landing-header {visibility:hidden !important;}'});
+  if(width!==320)await page.locator('.application-fields').screenshot({path:`/tmp/cjy-quantity-form-${width}.png`,style:'.payment-dock,.landing-header {visibility:hidden !important;}'});
  }
  await fill();await page.locator('[name=draftPrivacyConsent]').check();await page.locator('[data-save-application]').click();await page.getByText('접수를 저장했습니다. 결제는 시작되지 않았습니다.',{exact:true}).waitFor();
  assert.equal(calls.find(([a])=>a==='save')[1].quantity,30);
