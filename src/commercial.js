@@ -2,12 +2,13 @@ export const PRICING = Object.freeze({
   setupSupplyWon: 0,
   vatRatePercent: 10,
   plans: Object.freeze({
-    Standard: 99_000,
-    Deluxe: 199_000,
-    Premium: 499_000
+    Standard: 4_900,
+    Deluxe: 9_900,
+    Premium: 34_900
   })
 });
 
+// Legacy function/field names remain for existing callers; new quotes are for one item.
 export function calculateFirstMonthPrice(plan) {
   const monthlySupplyWon = PRICING.plans[plan];
   if (!Number.isInteger(monthlySupplyWon)) throw new RangeError(`Unknown plan: ${plan}`);

@@ -19,12 +19,12 @@ import {
   calculateRefund
 } from '../src/commercial.js';
 
-test('confirmed setup and monthly supply amounts produce exact VAT-inclusive first-month totals', () => {
+test('per-item supply amounts produce exact VAT-inclusive totals', () => {
   assert.equal(PRICING.setupSupplyWon, 0);
   const expected = {
-    Standard: { monthlySupplyWon: 99_000, vatWon: 9_900, totalWon: 108_900 },
-    Deluxe: { monthlySupplyWon: 199_000, vatWon: 19_900, totalWon: 218_900 },
-    Premium: { monthlySupplyWon: 499_000, vatWon: 49_900, totalWon: 548_900 }
+    Standard: { monthlySupplyWon: 4_900, vatWon: 490, totalWon: 5_390 },
+    Deluxe: { monthlySupplyWon: 9_900, vatWon: 990, totalWon: 10_890 },
+    Premium: { monthlySupplyWon: 34_900, vatWon: 3_490, totalWon: 38_390 }
   };
 
   for (const [plan, values] of Object.entries(expected)) {
@@ -67,7 +67,7 @@ test('refund calculation rejects invalid counts instead of silently changing the
 });
 
 test('bank policy metadata binds current consent evidence and permits bank orders only', () => {
-  assert.equal(POLICY_METADATA.versionDate, '2026-10-15');
+  assert.equal(POLICY_METADATA.versionDate, '2026-10-19');
   assert.equal(POLICY_METADATA.effectiveState, 'effective-bank-transfer-service');
   assert.equal(POLICY_METADATA.checkoutEligible, true);
   assert.equal(POLICY_METADATA.paymentLive, true);
@@ -173,7 +173,7 @@ test('application and footer expose all policies and distinguish guideline revis
 test('rendered policies identify bank effective date and exact document hashes', () => {
   for (const kind of ['terms', 'privacy', 'refund']) {
     const html = renderPolicy(kind);
-    assert.ok(html.includes(`시행일 ${kind === 'privacy' ? '2026.10.14' : '2026.10.15'} · 버전 ${kind === 'privacy' ? '2026.10.14' : '2026.10.15'} · 계좌이체 · 운영자 입금 확인`));
+    assert.ok(html.includes(`시행일 ${kind === 'privacy' ? '2026.10.14' : '2026.10.19'} · 버전 ${kind === 'privacy' ? '2026.10.14' : '2026.10.19'} · 계좌이체 · 운영자 입금 확인`));
     assert.match(html, /신규 계좌이체 주문.*기존 주문.*증빙.*보존/);
     assert.match(html, /확인되지 않은 제공자 처리 정보.*확정된 것으로 안내하지/);
     assert.match(html, /data-effective-state="effective-bank-transfer-service"/);

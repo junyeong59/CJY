@@ -572,12 +572,13 @@ function renderProcess() {
 }
 
 function renderPriceCard(name, features, price, comingSoon = false) {
+  const title = ({Standard:'텍스트형',Deluxe:'이미지형',Premium:'영상형'})[name] || name;
   return `<article class="price-card${comingSoon ? ' price-card--special' : ''}">
-    <h4>${comingSoon ? escapeHtml(name).replace(' Start-pack', '<br />Start-pack') : escapeHtml(name)}</h4>
+    <h4>${comingSoon ? escapeHtml(name).replace(' Start-pack', '<br />Start-pack') : escapeHtml(title)}</h4>
     <ul>${features.map(feature => `<li>${escapeHtml(feature)}</li>`).join('')}</ul>
     <div class="price-card-footer">
-      ${comingSoon ? `<p>${name === 'AI Influencer Start-pack' ? '일회성 구매 · 부가세 별도' : '가격 협의'} · 준비중</p>` : '<p>월 요금 · 부가세 별도</p>'}
-      ${comingSoon ? `<button type="button" class="price-label" data-product-coming-soon aria-label="${escapeHtml(name)} ${escapeHtml(price)} · 준비중">${escapeHtml(price)}</button>` : `<a class="price-label" data-link href="/apply?service=reels&plan=${encodeURIComponent(name)}" aria-label="매일 릴스 솔루션 ${escapeHtml(name)} 신청하기">${escapeHtml(price)}</a>`}
+      ${comingSoon ? `<p>${name === 'AI Influencer Start-pack' ? '일회성 구매 · 부가세 별도' : '가격 협의'} · 준비중</p>` : '<p>건당 요금 · 부가세 별도</p>'}
+      ${comingSoon ? `<button type="button" class="price-label" data-product-coming-soon aria-label="${escapeHtml(name)} ${escapeHtml(price)} · 준비중">${escapeHtml(price)}</button>` : `<a class="price-label" data-link href="/apply?service=reels&plan=${encodeURIComponent(name)}" aria-label="매일 릴스 솔루션 ${escapeHtml(title)} 1건 신청하기">${escapeHtml(price)}/건</a>`}
     </div>
   </article>`;
 }

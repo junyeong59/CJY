@@ -26,7 +26,7 @@ export function renderApplication({integrated=false}={}) {
         <h2 class="application-section-title">서비스 신청</h2>
         <label class="form-field">서비스 종류<select name="service"><option value="reels">매일 릴스 솔루션</option><option value="ai-influencer" disabled>AI Influencer Start-pack (준비중)</option><option value="ai-cinema" disabled>AI Cinema Start-pack (준비중)</option></select></label>
         <div data-reels>
-          <label class="form-field">요금제<select name="plan"><option>Standard</option><option>Deluxe</option><option>Premium</option></select></label>
+          <label class="form-field">요금제<select name="plan"><option value="Standard">텍스트형</option><option value="Deluxe">이미지형</option><option value="Premium">영상형</option></select></label>
           <label class="form-field">자동 게시 여부<select name="autoPost"><option value="yes">사용함</option><option value="no">사용하지 않음</option></select></label>
           <div data-account>
             <label class="form-field">기존 계정 사용 여부<select name="existingAccount" aria-describedby="existing-account-note"><option value="no">사용하지 않음</option><option value="yes">사용함</option></select></label>
@@ -54,7 +54,7 @@ export function renderApplication({integrated=false}={}) {
         </fieldset>
         <fieldset class="consents application-notices"><legend>주의 사항</legend>
           <p>결제일에 설치를 시작합니다. 초기 상담에서 고객은 <strong>파이프라인 가이드라인 수정을 최대 2회</strong> 요청할 수 있습니다. 이는 가이드라인 확정을 위한 횟수이며 <strong>개별 콘텐츠마다 제공되는 수정 권리가 아닙니다.</strong></p>
-          <p>콘텐츠 제공은 가이드라인 확정 후 <strong>고객이 선택한 시작일부터 한 달간 달력일마다 1개</strong> 진행합니다. 계약 시 확정한 약정 콘텐츠 수는 임의로 변경하지 않습니다. 연장은 매달 직접 결제하며 자동 정기결제되지 않습니다.</p>
+          <p>콘텐츠 제공은 가이드라인 확정 후 <strong>협의된 날짜에 콘텐츠 1건</strong>을 제공합니다. 추가 콘텐츠는 별도 구매하며 자동 정기결제되지 않습니다.</p>
           <label><input type="checkbox" name="noticeConsent" required />네 이해했습니다.</label>
         </fieldset>
       ${integrated ? `<fieldset class="consents"><legend>사전 승인 TEST 안내</legend><label class="customer-note"><input type="checkbox" name="testConsent" /> (선택) 사전 승인된 Standard 텍스트·음성 첫 시안 1건만 TEST 결제 후 운영자에게 전달됨을 이해합니다. 실제 청구·LIVE·정기 운영·자동 게시가 아닙니다. 결제 시 신청 성함·전화번호와 아래 이메일이 PortOne·PG로 전달됩니다.</label>
@@ -62,7 +62,7 @@ export function renderApplication({integrated=false}={}) {
       <div data-test-controls hidden><button type="button" data-test-pay>승인 확인 후 TEST 결제 계속</button><button type="button" data-test-check>접수·결제 상태 확인</button></div><p class="customer-note">동일 브라우저의 필수 보안 쿠키로 7일간 접수 상태를 확인합니다. 쿠키를 삭제하면 자동 복구할 수 없습니다.</p></fieldset>` : ''}
       </div>
       <div class="payment-dock"><div class="order-summary" aria-live="polite"><div><span id="order-service"></span><strong id="order-price"></strong></div><div><span>부가세 (10%)</span><strong id="order-vat"></strong></div></div>
-      <p class="price-note">월 서비스비는 부가세 별도이며, 아래 합계에는 부가세 10%가 포함됩니다.</p>
+      <p class="price-note">건당 서비스비는 부가세 별도이며, 아래 합계에는 부가세 10%가 포함됩니다.</p>
       <div class="checkout"><strong id="order-total" aria-live="polite"></strong><button type="submit"${integrated ? ' disabled' : ''}>신청 접수하기</button></div>
       <p class="checkout-note">2026.09.23 상업·결제·환불 조건은 PG 검토용 최종 기준으로 확정되었습니다. 그러나 실제 결제 처리자의 수령 법인, 처리 국가와 보유 기간이 확인·공개되기 전까지 결제 활성화는 차단되며, 개인정보 처리 공개가 완결되었다고 주장하지 않습니다. 공개 신청은 검토 대기로 접수됩니다. 운영자가 해당 접수의 권리·예산·실행 시간을 사전 승인한 경우에만 별도 동의로 TEST 결제를 진행합니다. LIVE 결제·고객 등록·정기 제작·자동 게시는 활성화하지 않습니다. 접수번호를 보관해주세요. Order 화면은 예시이며 실제 접수 조회 기능은 아닙니다.</p>
 
@@ -95,7 +95,7 @@ export function bindApplication(root) {
     const plan = field('plan').value;
     const price = plans[plan];
     const firstMonth = calculateFirstMonthPrice(plan);
-    root.querySelector('#order-service').textContent = `매일 릴스 솔루션 (${field('plan').value})`;
+    root.querySelector('#order-service').textContent = `매일 릴스 솔루션 (${field('plan').selectedOptions[0].textContent} · 1건)`;
     root.querySelector('#order-price').textContent = money(price);
     root.querySelector('#order-vat').textContent = money(firstMonth.vatWon);
     root.querySelector('#order-total').textContent = `총 가격: ${money(firstMonth.totalWon)}`;

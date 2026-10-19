@@ -13,10 +13,16 @@ function landing() {
  const section=source.slice(source.indexOf('function renderHome('),source.indexOf('function renderMusicNow('));
  return vm.runInNewContext(section+';renderHome()', {PRICING,escapeHtml:x=>String(x),renderSiteHeader:()=>'',renderFooter:()=>''});
 }
-test('pricing cards use shared monthly prices and specials stay one-off coming soon',()=>{
+test('pricing cards use shared per-item prices and specials stay one-off coming soon',()=>{
  const html=landing();
- for(const amount of [99000,199000,499000]) assert.match(html,new RegExp(amount.toLocaleString('ko-KR')+'₩'));
+ for(const amount of [4900,9900,34900]) assert.match(html,new RegExp(amount.toLocaleString('ko-KR')+'₩'));
  assert.doesNotMatch(html,/초기 설치비|설치 비용 미포함/);
+ for(const [id,title] of [['Standard','텍스트형'],['Deluxe','이미지형'],['Premium','영상형']]){
+  assert.match(html,new RegExp('<h4>'+title+'</h4>'));
+  assert.ok(html.includes('plan='+id));
+ }
+ assert.equal((html.match(/\/건/g)||[]).length,3);
+ assert.doesNotMatch(html,/월 요금/);
  const specials=[...html.matchAll(/<article class="price-card price-card--special">([^]*?)<\/article>/g)].map(m=>m[1]);
  assert.equal(specials.length,2);
  assert.match(specials[0],/999,000₩/);assert.match(specials[0],/일회성/);assert.match(specials[1],/가격 협의/);
