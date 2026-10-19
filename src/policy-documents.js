@@ -135,11 +135,11 @@ const BANK_POLICY_REPLACEMENTS = {
   "terms": {
     "상담·시작일과 제공 수량": [
       HISTORICAL_PG_POLICY_DOCUMENTS.terms.sections.find(([heading]) => heading === "상담·시작일과 제공 수량")[1],
-      "신규 구매는 콘텐츠 1건입니다. 가이드라인 확정 뒤 협의된 날짜에 제공하며 추가 콘텐츠는 별도 구매입니다. 기존 계약의 기간과 약정 콘텐츠 수는 당시 계약대로 보존합니다."
+      "신규 구매는 신청 시 선택한 수량의 콘텐츠입니다. 가이드라인 확정 뒤 협의된 날짜부터 제공하며, 2개 이상의 수량을 선택할 시 콘텐츠는 매일 하나씩 전달됩니다. 기존 계약의 기간과 약정 콘텐츠 수는 당시 계약대로 보존합니다."
     ],
     "요금·부가세와 일회성 구매": [
       `별도 설치비는 없습니다. 콘텐츠 1건 공급가액은 ${Object.entries(PRICING.plans).map(([plan, amount]) => `${({Standard:'텍스트형',Deluxe:'이미지형',Premium:'영상형'})[plan]} ${won(amount)}원`).join(', ')}이며 부가세 10%가 별도입니다. 1건 부가세 포함 총액은 ${Object.keys(PRICING.plans).map(plan => `${({Standard:'텍스트형',Deluxe:'이미지형',Premium:'영상형'})[plan]} ${won(calculateFirstMonthPrice(plan).totalWon)}원`).join(', ')}입니다. 신규 주문에 적용되며 기존 주문의 금액과 당시 약관·동의 증빙은 변경하지 않습니다.`,
-      "각 구매는 콘텐츠 1건에 대한 일회성 직접 결제이며 자동 정기결제, 자동 갱신 또는 빌링키 결제를 하지 않습니다. 추가 콘텐츠는 별도 구매입니다."
+      "각 구매는 선택한 수량에 대한 일회성 직접 결제입니다. 공급가액은 건당 단가에 선택 수량을 곱하고 부가세 10%를 더하며, 수량 할인은 적용하지 않습니다. 자동 정기결제, 자동 갱신 또는 빌링키 결제를 하지 않습니다."
     ],
     "서비스 이용약관": [
       "이 약관은 씨제이와이(CJY)(대표 최준영)가 제공하는 매일 릴스 솔루션의 신청, 계좌이체를 통한 일회성 구매와 이용 조건을 정합니다."
@@ -149,7 +149,7 @@ const BANK_POLICY_REPLACEMENTS = {
       "신규 계좌이체 주문에서는 PortOne 또는 PG 결제창을 호출하거나 신청 정보를 PG에 전달하지 않습니다. 은행 로그인 정보, 계좌 비밀번호, 카드번호, CVC 또는 인증정보를 수집하지 않습니다. 기존 PG 주문은 자동으로 계좌이체 주문으로 전환하지 않습니다. 기존 PG 주문의 확인·환불에는 당시 결제 처리 흐름과 정책이 적용될 수 있습니다."
     ],
     "결제·설치와 권한 경계": [
-      "운영자의 입금 확인으로 선택한 콘텐츠 1건 구매·주문과 환불 권리가 확정됩니다. 입금 확인 전에는 입금 확인 대기 상태이며 설치를 시작하지 않습니다. 입금 확인이 지연되거나 금액·주문 매칭이 불명확하면 재입금하지 말고 주문번호와 함께 문의해주세요.",
+      "운영자의 입금 확인으로 선택한 수량의 콘텐츠 구매·주문과 환불 권리가 확정됩니다. 입금 확인 전에는 입금 확인 대기 상태이며 설치를 시작하지 않습니다. 입금 확인이 지연되거나 금액·주문 매칭이 불명확하면 재입금하지 말고 주문번호와 함께 문의해주세요.",
       "설치는 운영자의 입금 확인 후 시작합니다. 결제만으로 내부 고객 등록·바인딩, 제작, 전달 또는 게시 권한이 생기지 않습니다. 제작은 상담, 고객 자료 사용 권한 확인, 가이드라인 확정과 별도의 제작 권한 확인 후 진행합니다. 전달과 자동 게시는 고객이 선택하고 별도로 승인한 채널과 권한 범위에서만 진행하며 자동 게시의 기본값은 비활성입니다."
     ]
   },
@@ -171,12 +171,12 @@ const BANK_POLICY_REPLACEMENTS = {
     ]
   },
   "refund": {
-    "환불 단계": HISTORICAL_PG_POLICY_DOCUMENTS.refund.sections.find(([heading]) => heading === "환불 단계").slice(1).map(text => text.replace('부가세 포함 월 이용료', '부가세 포함 콘텐츠 1건 요금')),
+    "환불 단계": HISTORICAL_PG_POLICY_DOCUMENTS.refund.sections.find(([heading]) => heading === "환불 단계").slice(1).map(text => text.replace('부가세 포함 월 이용료', '부가세 포함 선택 수량 전체 콘텐츠 요금')),
     "계산 예시": [
       `텍스트형 1건 결제액 ${won(currentStandard)}원, 서비스 활성화 후 콘텐츠 1건 중 제공 완료 0건이면 ${won(currentStandard)} × 0.5 − (${won(currentStandard)} ÷ 1 × 0)으로 계산하여 환불액은 ${won(currentRefundExample)}원입니다. 1건을 제공 완료하면 환불액은 0원입니다. 기존 주문은 당시 결제액과 약관에 따라 계산합니다.`
     ],
     "취소 및 환불 정책": [
-      "이 정책은 계좌이체를 통한 일회성 콘텐츠 1건 구매에 적용합니다. 운영자가 실제 입금을 확인한 주문을 기준으로 제공 단계와 아래 환불 산식을 확인합니다. 입금 확인 전 취소 또는 입금 매칭 문의는 운영자에게 주문번호와 함께 요청해주세요."
+      "이 정책은 계좌이체를 통한 일회성 콘텐츠 구매에 적용합니다. 약정 콘텐츠 수는 주문 시 선택한 수량이며, 운영자가 실제 입금을 확인한 주문의 확정 총액을 기준으로 제공 단계와 아래 환불 산식을 확인합니다. 입금 확인 전 취소 또는 입금 매칭 문의는 운영자에게 주문번호와 함께 요청해주세요."
     ],
     "환불 요청과 처리": [
       "cjy.support@gmail.com 또는 070-8121-2974로 주문번호, 신청자 성함과 취소 사유를 알려주세요. 운영자가 주문과 제공 단계를 확인해 환불액을 산정하고 계좌이체로 수동 환불합니다. 환불 계좌는 필요한 경우에만 문의 채널에서 은행명, 계좌번호와 예금주 등 최소 정보를 확인합니다. 은행 로그인 정보, 비밀번호, 카드번호, CVC 또는 인증정보는 보내지 마세요.",
@@ -188,7 +188,7 @@ const BANK_POLICY_REPLACEMENTS = {
   }
 };
 export const POLICY_DOCUMENTS = Object.freeze(Object.fromEntries(Object.entries(HISTORICAL_PG_POLICY_DOCUMENTS).map(([kind, doc]) => [kind, Object.freeze({...doc, sections:Object.freeze(doc.sections.map(([heading,...body]) => Object.freeze([heading, ...(BANK_POLICY_REPLACEMENTS[kind][heading] ?? body)])))})])));
-export const POLICY_METADATA = Object.freeze({versionDate:POLICY_VERSION_DATE,effectiveState:POLICY_EFFECTIVE_STATE,checkoutEligible:true,paymentLive:true,documents:Object.freeze({terms:{versionDate:POLICY_VERSION_DATE,canonicalSha256:'668603b13a5d5296faa7b44b98da8aabfd6276c5381fb605192d3703b25a0c2b'},privacy:{versionDate:'2026-10-14',canonicalSha256:'0bfce66ef62e03780c84745d167b0fbf1959ca7f05361aa59283ee12236adc05'},refund:{versionDate:POLICY_VERSION_DATE,canonicalSha256:'3f0c514ee2a711487aea145dca4ed15d715ed327cfacfa7a57f2e3449343a31b'}})});
+export const POLICY_METADATA = Object.freeze({versionDate:POLICY_VERSION_DATE,effectiveState:POLICY_EFFECTIVE_STATE,checkoutEligible:true,paymentLive:true,documents:Object.freeze({terms:{versionDate:POLICY_VERSION_DATE,canonicalSha256:'7b1fd69d1a00165054b52340889969fa17660d800ad7abb65739fb93125f1cb7'},privacy:{versionDate:'2026-10-14',canonicalSha256:'0bfce66ef62e03780c84745d167b0fbf1959ca7f05361aa59283ee12236adc05'},refund:{versionDate:POLICY_VERSION_DATE,canonicalSha256:'4fcb0bb1df782485a1869790677a38033d83b7aa62eb126aa8752036c9819221'}})});
 
 const CONSENT_DOCUMENT_ORDER = Object.freeze(['terms', 'privacy', 'refund']);
 

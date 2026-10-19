@@ -1,4 +1,5 @@
 import { renderSiteHeader } from './header.js';
+import {renderServiceQuantity} from './service-quantity.js';
 import {PRICING,calculateFirstMonthPrice} from './commercial.js';
 import {createPolicyConsentEvidence} from './policy-documents.js';
 import {applyApi} from './apply-checkout.js';
@@ -13,11 +14,10 @@ export function renderDirectApplication(){return `<div class="landing applicatio
 <label class="customer-field">전화번호<input type="tel" name="customerPhone" autocomplete="tel" required maxlength="30" /></label>
 </div><p class="customer-note">*결제 확인 후 솔루션 전달을 위해 반드시 필요한 정보이니 정확하게 작성해주세요.</p></section>
 <h2 class="application-section-title">서비스 신청</h2>
-<label class="form-field">서비스 종류<select name="service"><option value="reels">매일 릴스 솔루션</option><option value="ai-influencer" disabled>AI Influencer Start-pack (준비중)</option><option value="ai-cinema" disabled>AI Cinema Start-pack (준비중)</option></select></label>
-<label class="form-field">요금제<select name="plan"><option value="Standard">텍스트형</option><option value="Deluxe">이미지형</option><option value="Premium">영상형</option></select></label>
+${renderServiceQuantity()}
 
 <label class="form-field">자동 게시 여부<select name="autoPost"><option value="no">사용안함</option><option value="yes">사용함</option></select></label>
-<div data-account><label class="form-field">기존 계정 사용 여부<select name="existingAccount"><option value="no">사용하지 않음</option><option value="yes">사용함</option></select></label><p class="customer-note">*기존 계정을 사용 할 시, 별도의 추가 작업이 필요할 수 있습니다</p></div>
+<div data-account><label class="form-field"><span>기존 계정 사용 여부 <span class="account-inline-note">(기존 계정을 사용 할 시, 별도의 추가 작업이 필요할 수 있습니다)</span></span><select name="existingAccount"><option value="no">사용하지 않음</option><option value="yes">사용함</option></select></label></div>
 <div class="brief-field"><div class="brief-heading"><label for="application-brief">컨텐츠 스타일 및 내용</label><button type="button" class="brief-help" aria-expanded="false" aria-controls="brief-guide">꼭 포함되어야하는 내용</button></div><p id="brief-guide" hidden>브랜드 소개, 주제, 원하는 분위기, 참고 링크와 꼭 포함하거나 제외할 내용을 적어주세요.</p><textarea id="application-brief" name="brief" required maxlength="10000" placeholder="꼭 포함되어야하는 내용을 포함해서 자유롭게 작성해주세요.."></textarea></div>
 <fieldset class="delivery" hidden><legend>결과 전달 방법</legend><input type="radio" name="channel" value="manual" checked /><label data-legacy-channel hidden><input type="radio" name="channel" value="telegram" disabled /></label><label data-legacy-channel hidden><input type="radio" name="channel" value="discord" disabled /></label><label data-legacy-channel hidden><input type="radio" name="channel" value="gmail" disabled /></label></fieldset>
 
@@ -26,7 +26,7 @@ export function renderDirectApplication(){return `<div class="landing applicatio
 <label><input type="checkbox" name="termsConsent" required /><span><a href="/terms" data-link>이용약관</a> 및 <a href="/refund" data-link>환불 정책</a>에 동의합니다</span></label>
 <label><input type="checkbox" name="privacyConsent" required /><span>솔루션 전달을 위한 전화번호 및 성함과 같은 개인정보 수집에 동의합니다</span><a class="consent-policy-link" href="/privacy" data-link>개인정보 처리방침</a></label>
 </fieldset>
-<section class="application-notices" aria-labelledby="application-notices-title"><h2 id="application-notices-title" class="application-section-title">주의 사항</h2><p>결제일 이후 고객 맞춤 파이프라인 확정을 위해 추가적인 협의가 필요하며, 협의는 <strong>메시지로 진행됩니다.</strong></p><p>컨텐츠 업로드는 파이프 확정 이후, <strong>협의된 날짜에 콘텐츠 1건을 제공합니다.</strong> 추가 콘텐츠는 별도 구매가 필요합니다.</p></section>
+<section class="application-notices" aria-labelledby="application-notices-title"><h2 id="application-notices-title" class="application-section-title">주의 사항</h2><p>결제일 이후 고객 맞춤 파이프라인 확정을 위해 추가적인 협의가 필요하며, 협의는 <strong>메시지로 진행됩니다.</strong></p><p>컨텐츠 업로드는 파이프 확정 이후, <strong>협의된 날짜부터 선택한 수량의 콘텐츠를 제공합니다.</strong> 2개 이상의 수량을 선택할 시 콘텐츠는 매일 하나씩 전달됩니다.</p></section>
 
 </div><div class="payment-dock"><div class="order-summary" aria-live="polite"><div><span id="order-service"></span><strong id="order-price"></strong></div><div><span>부가세 (10%)</span><strong id="order-vat"></strong></div><p class="price-note">건당 서비스비는 부가세 별도이며, 아래 합계에는 부가세 10%가 포함됩니다.</p></div><div class="checkout"><strong id="order-total"></strong><button type="button" data-save-application disabled>저장하기</button><button type="submit" disabled>결제하기</button></div><p id="checkout-status" role="status"></p></div></form></main></div>`;}
 export function bindDirectApplication(root){
@@ -37,19 +37,20 @@ export function bindDirectApplication(root){
  let current={},busy=false,ready=false,disposed=false;
  const params=new URLSearchParams(location.search);
  const sync=()=>{const locked=Boolean(current.orderId||(current.receipt&&current.editable!==true));save.disabled=submit.disabled=!ready||busy||locked;};
- const update=()=>{for(const label of form.querySelectorAll('[data-legacy-channel]'))label.hidden=!label.querySelector('input').checked;const plan=field('plan').value,p=calculateFirstMonthPrice(plan);form.querySelector('#order-service').textContent='매일 릴스 솔루션 ('+field('plan').selectedOptions[0].textContent+' · 1건)';form.querySelector('#order-price').textContent=money(p.monthlySupplyWon);form.querySelector('#order-vat').textContent=money(p.vatWon);form.querySelector('#order-total').textContent='총 가격: '+money(p.totalWon);form.querySelector('[data-account]').hidden=field('autoPost').value==='no';};
+ const update=()=>{for(const label of form.querySelectorAll('[data-legacy-channel]'))label.hidden=!label.querySelector('input').checked;const plan=field('plan').value,quantity=Number(field('quantity').value),p=calculateFirstMonthPrice(plan,quantity);form.querySelector('#order-service').textContent='매일 릴스 솔루션 ('+field('plan').selectedOptions[0].textContent+' · '+quantity+'건)';form.querySelector('#order-price').textContent=money(p.monthlySupplyWon);form.querySelector('#order-vat').textContent=money(p.vatWon);form.querySelector('#order-total').textContent='총 가격: '+money(p.totalWon);form.querySelector('[data-account]').hidden=field('autoPost').value==='no';};
  field('plan').value=Object.hasOwn(PRICING.plans,params.get('plan'))?params.get('plan'):'Standard';form.addEventListener('change',update);update();
  form.querySelector('.brief-help').addEventListener('click',e=>{const g=form.querySelector('#brief-guide');g.hidden=!g.hidden;e.currentTarget.setAttribute('aria-expanded',String(!g.hidden));});
  for(const n of ['customerName','customerPhone','brief'])field(n).addEventListener('input',()=>field(n).setCustomValidity(''));
  const validate=()=>{const phone=field('customerPhone').value.trim();field('customerPhone').setCustomValidity(/^[+\d][\d ()-]{5,29}$/.test(phone)&&phone.replace(/\D/g,'').length>=7&&phone.replace(/\D/g,'').length<=15?'':'전화번호를 확인해주세요.');field('customerName').setCustomValidity(field('customerName').value.trim()&&new TextEncoder().encode(field('customerName').value.trim()).length<=30?'':'성함은 30바이트 이내로 입력해주세요.');field('brief').setCustomValidity(field('brief').value.trim()?'':'내용을 입력해주세요.');return ['customerName','customerPhone','brief'].every(n=>field(n).reportValidity());};
- const payload=()=>{const p=Object.fromEntries(names.map(n=>[n,field(n).value.trim()]));if(p.autoPost==='no')p.existingAccount='no';return {...p,draftId:current.draftId,policyEvidence:createPolicyConsentEvidence()};};
+ const payload=()=>{const p=Object.fromEntries(names.map(n=>[n,field(n).value.trim()]));if(p.autoPost==='no')p.existingAccount='no';return {...p,quantity:Number(field('quantity').value),draftId:current.draftId,policyEvidence:createPolicyConsentEvidence()};};
  const show=r=>{
   if(disposed)return;
   if(r.environment&&r.environment!=='test'&&!(r.environment==='live'&&r.paymentMethod==='bank_transfer'))throw Error('environment');
   if(!uuid.test(r.draftId??''))throw Error('invalid_draft');
   current=r;
-  if(r.application){if(names.some(n=>typeof r.application[n]!=='string')||Object.keys(r.application).some(n=>!names.includes(n)))throw Error('invalid_application');for(const n of names)field(n).value=r.application[n];for(const n of ['termsConsent','privacyConsent','draftPrivacyConsent'])field(n).checked=false;for(const el of form.elements)if(el.name)el.disabled=r.editable!==true||(el.name==='channel'&&el.value!=='manual');update();}
+  if(r.application){if(names.some(n=>typeof r.application[n]!=='string')||Object.keys(r.application).some(n=>!names.includes(n)&&n!=='quantity'))throw Error('invalid_application');for(const n of names)field(n).value=r.application[n];const q=r.application.quantity;if(q!==undefined&&(!Number.isSafeInteger(q)||q<1||q>30))throw Error('invalid_quantity');field('quantity').value=String(q??1);for(const n of ['termsConsent','privacyConsent','draftPrivacyConsent'])field(n).checked=false;for(const el of form.elements)if(el.name)el.disabled=r.editable!==true||(el.name==='channel'&&el.value!=='manual');update();}
   if(r.orderId){
+   if(r.application?.quantity===undefined){field('quantity').closest('label').style.display='none';form.querySelector('[data-quantity-note]').hidden=true;}
    for(const el of form.elements)if(el.name)el.disabled=true;
    // Stored orders are evidence, not fresh quotes. Do not infer a new unit or
    // reconstruct a supply/VAT breakdown absent from their immutable snapshot.

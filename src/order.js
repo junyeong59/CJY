@@ -3,6 +3,11 @@ import {applyApi} from './apply-checkout.js';
 import {renderBankDetails,validateBankOrder} from './bank-transfer.js';
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const labels={paid:'결제 완료',pilot_pending:'결제 완료',pending_payment:'결제 확인 중',manual_hold:'결제 확인 보류',saved:'접수 저장 · 결제 시작 전',archived:'이전 접수 · 보관',cancelled:'취소',refunded:'환불 완료',partially_refunded:'부분 환불',disputed:'분쟁 확인 중'};
+const itemSelection=o=>{
+ const a=o.application,q=a?.quantity,title=({Standard:'텍스트형',Deluxe:'이미지형',Premium:'영상형'})[a?.plan];
+ // No quantity label is inferred for historic monthly orders.
+ return title&&Number.isSafeInteger(q)&&q>=1&&q<=30?`<p class="customer-note" data-order-selection>${esc(title)} · ${q}건</p>`:'';
+};
 export const productionLabel=()=> '운영자 확인 대기';
 // Payment authority is separate from operator-managed display progress.
 export function orderJourney(o){
@@ -47,7 +52,7 @@ export function bindOrder(root,navigate) {
   root.querySelector('.order-heading h1').textContent=bankPending?'결제 대기중':'주문 현황';
   root.querySelector('[data-order-description]').hidden=bankPending||!selected||selected.state==='saved';
   root.querySelector('[data-order-identity]').innerHTML=selected&&selected.state!=='saved'?`<p class="order-number">${selected.orderId?'주문 번호':'접수 번호'}: ${esc(selected.orderId??selected.receipt)}</p>`:'';
-  list.innerHTML=current.orders.length?current.orders.map(o=>`<article class="owned-order">${bankPending?'':orderJourney(o)}${renderBankDetails(o,{compact:bankPending})}<div class="order-record-actions ${o.state==='saved'?'order-record-actions--saved':''}">${o.draftId?`<a class="order-button" data-link data-view-draft="${esc(o.draftId)}" href="/apply?draftId=${encodeURIComponent(o.draftId)}">${o.state==='saved'?'신청하러 가기':'신청 내용 보기'}</a>`:''}${o.state==='saved'?'':'<a class="order-button" href="mailto:cjy.support@gmail.com">문의하기</a>'}</div>${o.state==='pending_payment'&&o.paymentMethod!=='bank_transfer'?`<button type="button" class="order-button" data-verify-draft="${esc(o.draftId)}">결제 상태 확인</button>`:''}</article>`).join(''):'<div class="order-empty-copy"><p>이 브라우저에서 접수한 주문 내역이 없습니다</p><p class="order-empty-hint">기존 주문은 당시 신청한 브라우저로 접속하시거나 문의하기를 이용해주세요.</p></div>';
+  list.innerHTML=current.orders.length?current.orders.map(o=>`<article class="owned-order">${bankPending?'':orderJourney(o)}${renderBankDetails(o,{compact:bankPending})}${itemSelection(o)}<div class="order-record-actions ${o.state==='saved'?'order-record-actions--saved':''}">${o.draftId?`<a class="order-button" data-link data-view-draft="${esc(o.draftId)}" href="/apply?draftId=${encodeURIComponent(o.draftId)}">${o.state==='saved'?'신청하러 가기':'신청 내용 보기'}</a>`:''}${o.state==='saved'?'':'<a class="order-button" href="mailto:cjy.support@gmail.com">문의하기</a>'}</div>${o.state==='pending_payment'&&o.paymentMethod!=='bank_transfer'?`<button type="button" class="order-button" data-verify-draft="${esc(o.draftId)}">결제 상태 확인</button>`:''}</article>`).join(''):'<div class="order-empty-copy"><p>이 브라우저에서 접수한 주문 내역이 없습니다</p><p class="order-empty-hint">기존 주문은 당시 신청한 브라우저로 접속하시거나 문의하기를 이용해주세요.</p></div>';
  }
  async function load(reconcile=false){
   if(busy||disposed)return;busy=true;ownedOrdersReady=false;create.disabled=true;message.textContent='';

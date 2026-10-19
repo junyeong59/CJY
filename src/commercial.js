@@ -8,10 +8,18 @@ export const PRICING = Object.freeze({
   })
 });
 
-// Legacy function/field names remain for existing callers; new quotes are for one item.
-export function calculateFirstMonthPrice(plan) {
-  const monthlySupplyWon = PRICING.plans[plan];
-  if (!Number.isInteger(monthlySupplyWon)) throw new RangeError(`Unknown plan: ${plan}`);
+export const MAX_ORDER_QUANTITY = 30;
+export function validateQuantity(quantity = 1) {
+  if (!Number.isSafeInteger(quantity) || quantity < 1 || quantity > MAX_ORDER_QUANTITY) throw new RangeError('Quantity must be an integer from 1 to 30');
+  return quantity;
+}
+
+// Legacy function/field names retained for caller compatibility; quantity is item count.
+export function calculateFirstMonthPrice(plan, quantity = 1) {
+  validateQuantity(quantity);
+  const unitSupplyWon = PRICING.plans[plan];
+  if (!Number.isInteger(unitSupplyWon)) throw new RangeError(`Unknown plan: ${plan}`);
+  const monthlySupplyWon = unitSupplyWon * quantity;
   const supplyTotalWon = PRICING.setupSupplyWon + monthlySupplyWon;
   const vatWon = Math.round(supplyTotalWon * PRICING.vatRatePercent / 100);
   return {

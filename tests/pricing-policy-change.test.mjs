@@ -11,7 +11,7 @@ test('current bank terms price new orders without changing historical PG policy 
 });
 test('current refund example uses current totals but the substantive refund stages and calculation are unchanged',()=>{
  const section=(doc,heading)=>doc.sections.find(s=>s[0]===heading);
- assert.deepEqual(section(POLICY_DOCUMENTS.refund,'환불 단계'),section(HISTORICAL_PG_POLICY_DOCUMENTS.refund,'환불 단계').map(text=>text.replace('부가세 포함 월 이용료','부가세 포함 콘텐츠 1건 요금')));
+ assert.deepEqual(section(POLICY_DOCUMENTS.refund,'환불 단계'),section(HISTORICAL_PG_POLICY_DOCUMENTS.refund,'환불 단계').map(text=>text.replace('부가세 포함 월 이용료','부가세 포함 선택 수량 전체 콘텐츠 요금')));
  const example=section(POLICY_DOCUMENTS.refund,'계산 예시').join(' ');
  assert.match(example,/5,390/);assert.match(example,/2,695원/);assert.doesNotMatch(example,/273,900|163,900|82,317/);
 });
