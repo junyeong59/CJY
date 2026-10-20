@@ -3,12 +3,20 @@ import { createReadStream, existsSync, statSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { build } from "esbuild";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
 const publicRoot = path.join(root, "public");
-const port = Number(process.env.PORT || 4173);
+const port = Number(process.argv.find(arg => arg.startsWith('--port='))?.slice(7) || process.env.PORT || 4173);
 const host = process.env.HOST || "127.0.0.1";
+
+// Match the production build: browsers cannot resolve bare npm imports.
+const clientBundle = await build({
+  entryPoints: [path.join(root, "src", "supabase-client.js")],
+  bundle: true, write: false, format: "esm", platform: "browser", target: "es2022",
+  define: { __CJY_SUPABASE_PUBLIC_KEY__: JSON.stringify(process.env.CJY_SUPABASE_PUBLIC_KEY) || "undefined" }
+});
 
 const mimeTypes = new Map([
   [".css", "text/css; charset=utf-8"],
@@ -23,6 +31,11 @@ const mimeTypes = new Map([
 const server = createServer(async (request, response) => {
   const url = new URL(request.url || "/", `http://${request.headers.host}`);
   const pathname = decodePath(url.pathname);
+  if (pathname === "/src/supabase-client.js") {
+    response.writeHead(200, { "content-type": "text/javascript; charset=utf-8", "cache-control": "no-store" });
+    response.end(clientBundle.outputFiles[0].text);
+    return;
+  }
   const filePath = resolveRequest(pathname);
 
   if (!filePath) {
@@ -45,7 +58,7 @@ const server = createServer(async (request, response) => {
 });
 
 server.listen(port, host, () => {
-  console.log(`CJY site running at http://${host}:${port}`);
+  console.log(`CJY site running at http://${host}:${server.address().port}`);
 });
 
 function resolveRequest(pathname) {

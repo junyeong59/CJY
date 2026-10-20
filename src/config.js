@@ -1,4 +1,5 @@
 export const SITE_CONFIG = {
+  contentExamplesUrl: "https://www.instagram.com/cjy.ai?exln=MXZmZjVhbTdlc2IxZQ%3D%3D&utm_source=qr", // Final HTTPS examples page; videos are hosted separately.
   siteUrl: "https://cjy.app",
   developerName: "CJY",
   contactEmail: "cjy.support@gmail.com",

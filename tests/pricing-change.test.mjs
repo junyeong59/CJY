@@ -1,4 +1,6 @@
+import {FEATURE_VISUALS} from '../src/feature-visuals.js';
 import test from 'node:test';
+import {LANDING_VISUALS} from '../src/landing-visuals.js';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
@@ -11,7 +13,7 @@ import {renderBankDetails} from '../src/bank-transfer.js';
 function landing() {
  const source=readFileSync(new URL('../src/app.js',import.meta.url),'utf8');
  const section=source.slice(source.indexOf('function renderHome('),source.indexOf('function renderMusicNow('));
- return vm.runInNewContext(section+';renderHome()', {PRICING,escapeHtml:x=>String(x),renderSiteHeader:()=>'',renderFooter:()=>''});
+ return vm.runInNewContext(section+';renderHome()', {PRICING,LANDING_VISUALS,FEATURE_VISUALS,escapeHtml:x=>String(x),renderSiteHeader:()=>'',renderFooter:()=>''});
 }
 test('pricing cards use shared per-item prices and specials stay one-off coming soon',()=>{
  const html=landing();

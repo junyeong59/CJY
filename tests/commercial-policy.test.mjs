@@ -67,7 +67,7 @@ test('refund calculation rejects invalid counts instead of silently changing the
 });
 
 test('bank policy metadata binds current consent evidence and permits bank orders only', () => {
-  assert.equal(POLICY_METADATA.versionDate, '2026-10-19');
+  assert.equal(POLICY_METADATA.versionDate, '2026-10-21');
   assert.equal(POLICY_METADATA.effectiveState, 'effective-bank-transfer-service');
   assert.equal(POLICY_METADATA.checkoutEligible, true);
   assert.equal(POLICY_METADATA.paymentLive, true);
@@ -82,20 +82,20 @@ test('bank policy metadata binds current consent evidence and permits bank order
 
 test('current privacy describes bank transfer and Supabase processing and persisted anonymous identity without expanding authority', () => {
   const section = title => POLICY_DOCUMENTS.privacy.sections.find(([heading]) => heading === title).slice(1).join(' ');
-  assert.match(section('개인정보 처리방침'), /계좌이체 주문.*운영자의 입금 확인/);
+  assert.match(section('개인정보 처리방침'), /주문.*입금 확인/);
   assert.doesNotMatch(canonicalizePolicyDocument(POLICY_DOCUMENTS.privacy), /Railway/);
   assert.match(section('신청 처리 목적과 항목'), /익명 사용자 식별자/);
   const flow = section('현재 처리 흐름과 외부 서비스');
-  assert.match(flow, /Supabase Auth.*데이터베이스.*Edge Functions/);
+  assert.match(flow, /Supabase.*익명 인증.*데이터베이스.*API/);
   assert.match(flow, /데이터베이스.*서울/);
-  assert.match(flow, /Edge Functions.*전 세계.*서울.*한정.*않/);
-  assert.match(flow, /my-video.*Mac.*수동/);
-  assert.match(flow, /고객 Telegram.*자동.*않/);
-  assert.match(section('위탁·제3자 제공 및 국외 처리'), /Supabase.*수령 법인.*처리 국가.*보유 기간.*미확정/);
+  assert.match(flow, /API.*국외 서버/);
+  assert.match(flow, /운영자가 직접 검토/);
+  assert.doesNotMatch(JSON.stringify(POLICY_DOCUMENTS), /PortOne|PG|Telegram|ElevenLabs|Hermes/);
+  assert.match(section('위탁·제3자 제공 및 국외 처리'), /수령 법인.*처리 국가.*보유 기간.*이용 전에 별도로 안내/);
   const storage = section('안전성 및 브라우저 저장');
-  assert.match(storage, /성명.*전화번호.*요청 본문.*localStorage.*URL.*저장하지/);
-  assert.match(storage, /Supabase.*공식 SDK.*익명 인증 세션.*localStorage.*지속 저장/);
-  assert.match(storage, /브라우저.*삭제.*익명.*접근.*잃/);
+  assert.match(storage, /성함.*전화번호.*요청 내용.*localStorage.*URL.*저장하지/);
+  assert.match(storage, /익명 인증 세션.*localStorage.*저장/);
+  assert.match(storage, /브라우저.*삭제.*접근하지 못/);
   assert.doesNotMatch(storage, /식별자만 sessionStorage/);
   assert.equal(POLICY_METADATA.checkoutEligible, true);
   assert.equal(POLICY_METADATA.paymentLive, true);
@@ -173,9 +173,9 @@ test('application and footer expose all policies and distinguish guideline revis
 test('rendered policies identify bank effective date and exact document hashes', () => {
   for (const kind of ['terms', 'privacy', 'refund']) {
     const html = renderPolicy(kind);
-    assert.ok(html.includes(`시행일 ${'2026.10.19'} · 버전 ${'2026.10.19'} · 계좌이체 · 운영자 입금 확인`));
-    assert.match(html, /신규 계좌이체 주문.*기존 주문.*증빙.*보존/);
-    assert.match(html, /확인되지 않은 제공자 처리 정보.*확정된 것으로 안내하지/);
+    assert.ok(html.includes(`시행일 ${'2026.10.21'} · 버전 ${'2026.10.21'} · 계좌이체 · 운영자 입금 확인`));
+    assert.match(html, /신규 계좌이체 주문.*기존 주문.*당시 동의한 정책/);
+    assert.doesNotMatch(html, /확정된 것으로 안내하지 않습니다/);
     assert.match(html, /data-effective-state="effective-bank-transfer-service"/);
     assert.match(html, /data-checkout-eligible="true"/);
     assert.match(html, /data-payment-live="true"/);

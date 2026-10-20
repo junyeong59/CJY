@@ -1,3 +1,6 @@
+import { FEATURE_VISUALS } from './feature-visuals.js';
+import { bindLandingInteractions } from './landing-interactions.js';
+import { LANDING_VISUALS } from './landing-visuals.js';
 import { renderSiteHeader } from './header.js';
 import { renderPolicy, renderFooter } from "./policies.js";
 import { renderOrderLookup, renderOrderStatus, renderOrderDetails, bindOrder } from "./order.js";
@@ -6,6 +9,8 @@ import { SITE_CONFIG } from "./config.js";
 import { PRICING } from "./commercial.js";
 
 const app = document.querySelector("#app");
+// The router explicitly positions each route; native restoration can race hash navigation.
+if ('scrollRestoration' in window.history) window.history.scrollRestoration = 'manual';
 let revealObserver;
 let cleanupApplication;
 
@@ -444,7 +449,9 @@ function renderApp() {
   const disposeApplication = bindApplication(app);
   const disposeOrder = bindOrder(app, navigateTo);
   const disposePaymentDock = bindPaymentDock(app);
-  cleanupApplication = () => { disposeApplication?.(); disposeOrder?.(); disposePaymentDock?.(); };
+  const disposeProcess = bindProcess(app);
+  const disposeLandingInteractions = bindLandingInteractions(app);
+  cleanupApplication = () => { disposeApplication?.(); disposeOrder?.(); disposePaymentDock?.(); disposeProcess?.(); disposeLandingInteractions?.(); };
 
   bindScrollReveal();
   document.body.dataset.route = normalizePath(window.location.pathname).startsWith("/musicnow/join/")
@@ -453,8 +460,15 @@ function renderApp() {
   const section = window.location.pathname === "/" && ["#top", "#product", "#pricing", "#process"].includes(window.location.hash)
     ? document.getElementById(window.location.hash.slice(1))
     : null;
-  if (section) section.scrollIntoView({ behavior: "instant" });
-  else window.scrollTo({ top: 0, behavior: "instant" });
+  if (section) {
+    // Align once the new layout is committed, accounting for the sticky header.
+    section.scrollIntoView({ behavior: "instant", block: "start" });
+    requestAnimationFrame(() => {
+      if (section.isConnected && document.activeElement === document.body) {
+        section.scrollIntoView({ behavior: "instant", block: "start" });
+      }
+    });
+  } else window.scrollTo({ top: 0, behavior: "instant" });
 }
 
 function bindScrollReveal() {
@@ -463,7 +477,7 @@ function bindScrollReveal() {
   const landing = app.querySelector(".landing");
   if (!landing || window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) return;
 
-  const elements = landing.querySelectorAll(".landing-product > h2, .feature-art, .feature-copy, .landing-pricing > h2, .pricing-group > h3, .price-card, .landing-process > h2, .process-card");
+  const elements = landing.querySelectorAll(".landing-product > h2, .feature-art, .feature-copy, .landing-pricing > h2, .pricing-group > h3, .price-card, .landing-process > h2, .process-card, .landing-audience li, .landing-start > h2, .landing-start > a");
   revealObserver = new IntersectionObserver((entries, observer) => {
     for (const entry of entries) {
       if (!entry.isIntersecting) continue;
@@ -509,27 +523,35 @@ function updateMeta(name, content, attr = "name") {
 
 function renderHome() {
   return `
-    <div class="landing" id="top">
-      ${renderSiteHeader()}
+    <div class="landing landing--figma" id="top">
+      ${renderSiteHeader().replace('/component/CJY.svg', '/assets/landing-figma/97a22fbb-2af1-4e20-91c8-5d377452b376.svg')}
       <main class="landing-main">
         <section class="landing-hero" aria-labelledby="home-title">
-          <h1 id="home-title">당신만을 위한,<br />컨텐츠 제작 AI 에이전트팀.</h1>
-          <a class="hero-apply" href="/apply" data-link>신청하기</a>
+          <div class="hero-copy">
+            <h1 id="home-title">당신만을 위한,<br />컨텐츠 제작 에이전트팀.</h1>
+            <p class="hero-subtitle">브랜드에 맞는 릴스와 게시물, 기획부터 제작까지</p>
+            <a class="hero-apply" href="/apply" data-link>프로젝트 시작하기🚀</a>
+          </div>
+          ${renderExamplesCard()}
         </section>
         <section id="product" class="landing-product" aria-labelledby="product-title" tabindex="-1">
           <h2 id="product-title">어떠한 기능을 할 수 있나요?</h2>
           <article class="feature">
-            <div class="feature-art" aria-hidden="true"></div>
-            <div class="feature-copy"><h3>릴스 제작</h3><p>컨텐츠 제작 전문 AI 팀이 기획부터 게시까지,<br />매번 컨텐츠를 설명하지 않아도 척척 해냅니다.</p></div>
+            <div class="feature-art feature-art--figma" aria-hidden="true">${FEATURE_VISUALS.team}</div>
+            <div class="feature-copy"><h3>릴스 제작 솔루션</h3><p>컨텐츠 제작 전문 AI 팀이 기획부터 게시까지,<br /> 매번 컨텐츠를 설명하지 않아도 척척 해냅니다.</p></div>
           </article>
           <article class="feature feature--reverse">
-            <div class="feature-art" aria-hidden="true"></div>
-            <div class="feature-copy"><h3>고객 맞춤 컨텐츠 제공</h3><p>고객의 니즈에 따른 새로운 컨텐츠를 제작합니다.<br />AI 드라마부터 병원 마케팅까지, 모든 고객의 니즈에 맞게 제작합니다.</p></div>
+            <div class="feature-art feature-art--figma feature-art--custom" aria-hidden="true">${LANDING_VISUALS['feature-custom']}</div>
+            <div class="feature-copy"><h3>고객 맞춤 컨텐츠 제공</h3><p>고객의 니즈에 따른 새로운 컨텐츠를 제작합니다.<br /> AI 드라마부터 병원 마케팅까지, 모든 고객의 니즈에 맞게 제작합니다.</p></div>
           </article>
           <article class="feature">
-            <div class="feature-art" aria-hidden="true"></div>
-            <div class="feature-copy"><h3>일관성 있는, 훌륭한 컨텐츠</h3><p>브랜드 톤에 맞게 일관성 있게 컨텐츠를 제작합니다.<br />양과 질을 동시에 잡는 격이죠.</p></div>
+            <div class="feature-art feature-art--figma feature-art--consistency" aria-hidden="true">${FEATURE_VISUALS.consistency}</div>
+            <div class="feature-copy"><h3>일관성 있는, 훌륭한 컨텐츠</h3><p>브랜드 톤에 맞게 일관성 있게 컨텐츠를 제작합니다.<br /> 양과 질을 동시에 잡는 격이죠.</p></div>
           </article>
+        </section>
+        <section class="landing-audience" aria-labelledby="audience-title">
+          <h2 id="audience-title">이런 분들에게<br />추천합니다</h2>
+          <ul><li>검증된 양식을 이용하고 싶은</li><li>매달 나가는 구독비가 부담스러운</li><li>시간은 없는데 인스타그램 부업을 도전하고 싶은</li><li>컨텐츠를 테스트해보고 싶은데, 요금제가 부담스러운</li></ul>
         </section>
         <section id="pricing" class="landing-pricing" aria-labelledby="pricing-title" tabindex="-1">
           <h2 id="pricing-title">가격표</h2>
@@ -544,37 +566,78 @@ function renderHome() {
           </div></section>
         </section>
         ${renderProcess()}
+        <section class="landing-start" aria-labelledby="start-title"><h2 id="start-title">내 브랜드의 콘텐츠 제작을 시작해보세요</h2><a href="/apply" data-link>신청하기</a></section>
       </main>
     </div>
   `;
 }
 
-function renderProcess() {
-  const steps = [
-    ['brief', '작성한 양식을 통해 원하는 컨텐츠, 스타일 취합'],
-    ['automation', '초기 자동화 파이프라인 생성'],
-    ['approval', '테스트 컨텐츠 전달 및 파이프라인 확정'],
-    ['account', '자동 게시 선택 시 계정 권한 및 게시 일정 협의'],
-    ['upload', '선택한 수량을 협의된 일정에 제작·전달'],
-    ['renewal', '선택 수량 전달 완료 및 추가 구매 안내']
+function renderExamplesCard() {
+  const url = typeof SITE_CONFIG !== 'undefined' ? SITE_CONFIG.contentExamplesUrl : '';
+  const contents = '<img src="/assets/landing-figma/897a0a18-8953-41a3-bbc8-e10c84d9c466.png" alt="" width="319" height="612" decoding="async" /><span>예시 컨텐츠 보러가기 →</span>';
+  return /^https:\/\//i.test(url || '')
+    ? `<a class="hero-examples" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" aria-label="예시 컨텐츠 보러가기 (새 탭)">${contents}</a>`
+    : `<button class="hero-examples" type="button" data-examples-pending aria-describedby="examples-status">${contents}</button><p id="examples-status" class="examples-status" role="status"></p>`;
+}
+
+function getProcessSteps() {
+  return [
+    ['양식 작성', '작성한 양식을 통해 원하는 컨텐츠, 스타일 취합'],
+    ['작업물 초안 전달', '작업물 초안 전달 및 수정사항 컨펌'],
+    ['협의 및 파이프라인 확정', '작업물 스타일 및 게시 일자를 조율해 확정합니다'],
+    ['컨텐츠 전달', '구글 드라이브를 통해 컨텐츠 원본을 전달하고 자동게시를 선택한 경우 업로드까지 진행합니다'],
+    ['기간 종료 후 연장 선택', '기간 이후 연장하거나 프로젝트를 종료합니다']
   ];
-  return `<section id="process" class="landing-process" aria-labelledby="process-title" tabindex="-1">
+}
+
+function renderProcess() {
+  const steps = getProcessSteps();
+  return `<section id="process" class="landing-process process-interactive" aria-labelledby="process-title" tabindex="-1">
     <h2 id="process-title">작업 과정</h2>
-    <ol class="process-grid">${steps.map(([icon, description], index) => {
-      const number = String(index + 1).padStart(2, '0');
-      return `<li class="process-card">
-        <span class="process-number" aria-hidden="true">${number}</span>
-        <img src="/assets/process/step-${number}-${icon}.png" alt="" width="274" height="274" loading="lazy" />
-        <p>${escapeHtml(description)}</p>
-      </li>`;
-    }).join('')}</ol>
+    <div class="process-layout">
+      <div class="process-previews">${steps.map(([title], index) => `<div class="process-preview" id="process-panel-${index}" role="tabpanel" aria-labelledby="process-tab-${index}" tabindex="0" ${index ? 'hidden' : ''}>${LANDING_VISUALS['process-' + (index + 1)]}<span class="visually-hidden">${escapeHtml(title)} 단계의 진행 예시</span></div>`).join('')}</div>
+      <div class="process-tabs" role="tablist" aria-label="작업 과정 단계" aria-orientation="vertical">${steps.map(([title, description], index) => `<button class="process-tab" type="button" id="process-tab-${index}" role="tab" aria-controls="process-panel-${index}" aria-selected="${index === 0}" aria-expanded="false" tabindex="${index ? -1 : 0}"><span class="process-tab-title">${index + 1}. ${escapeHtml(title)}</span><span class="process-tab-description"><span>${escapeHtml(description)}</span></span></button>`).join('')}</div>
+    </div>
   </section>`;
+}
+
+function bindProcess(root) {
+  const section = root.querySelector('.process-interactive');
+  if (!section) return;
+  const tabs = [...section.querySelectorAll('[role="tab"]')];
+  const panels = [...section.querySelectorAll('[role="tabpanel"]')];
+  const select = (index, focus = false) => {
+    tabs.forEach((tab, position) => {
+      tab.setAttribute('aria-selected', String(position === index));
+      tab.setAttribute('aria-expanded', String(position === index));
+      tab.tabIndex = position === index ? 0 : -1;
+      panels[position].hidden = position !== index;
+    });
+    if (focus) tabs[index].focus();
+  };
+  const click = (event) => {
+    const index = tabs.indexOf(event.target.closest('[role="tab"]'));
+    if (index >= 0) select(index);
+  };
+  const keydown = (event) => {
+    const index = tabs.indexOf(event.target.closest('[role="tab"]'));
+    if (index < 0) return;
+    let next;
+    if (event.key === 'ArrowDown') next = (index + 1) % tabs.length;
+    if (event.key === 'ArrowUp') next = (index - 1 + tabs.length) % tabs.length;
+    if (event.key === 'Home') next = 0;
+    if (event.key === 'End') next = tabs.length - 1;
+    if (next !== undefined) { event.preventDefault(); select(next, true); }
+  };
+  section.addEventListener('click', click);
+  section.addEventListener('keydown', keydown);
+  return () => { section.removeEventListener('click', click); section.removeEventListener('keydown', keydown); };
 }
 
 function renderPriceCard(name, features, price, comingSoon = false) {
   const title = ({Standard:'텍스트형',Deluxe:'이미지형',Premium:'영상형'})[name] || name;
   return `<article class="price-card${comingSoon ? ' price-card--special' : ''}">
-    <h4>${comingSoon ? escapeHtml(name).replace(' Start-pack', '<br />Start-pack') : escapeHtml(title)}</h4>
+    <h4>${comingSoon ? escapeHtml(({'AI Influencer Start-pack':'AI 인플루언서|스타트팩','AI Cinema Start-pack':'AI 드라마|스타트팩'})[name] || name).replace('|', '<br />') : escapeHtml(title)}</h4>
     <ul>${features.map(feature => `<li>${escapeHtml(feature)}</li>`).join('')}</ul>
     <div class="price-card-footer">
       ${comingSoon ? `<p>${name === 'AI Influencer Start-pack' ? '일회성 구매 · 부가세 별도' : '가격 협의'} · 준비중</p>` : '<p>건당 요금 · 부가세 별도</p>'}
@@ -737,6 +800,11 @@ function navigateTo(pathname) {
 }
 
 app.addEventListener("click", async (event) => {
+  if (event.target.closest('[data-examples-pending]')) {
+    const status = app.querySelector('#examples-status');
+    if (status) status.textContent = '예시 콘텐츠 링크를 준비 중입니다.';
+    return;
+  }
   if (event.target.closest('[data-product-coming-soon]')) {
     window.alert('아직 준비중인상품입니다');
     return;
