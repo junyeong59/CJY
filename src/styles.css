@@ -1380,7 +1380,7 @@ html:has(.landing) { scroll-behavior: smooth; }
 .application-notice-details summary:focus-visible { outline: 2px solid #80ccff; outline-offset: 4px; }
 .order-page [data-empty-actions] { display: flex; align-items: center; justify-content: flex-end; gap: clamp(24px, 6vw, 100px); margin-top: clamp(160px, 27vw, 390px); }
 .order-page [data-empty-actions][hidden] { display: none; }
-.order-page [data-empty-actions] > a { order: -1; color: white; text-decoration: none; font-size: clamp(18px, 2.2vw, 32px); font-weight: 700; }
+.order-page [data-empty-actions] > a { display: inline-flex; align-items: center; justify-content: center; order: -1; color: white; text-decoration: none; font-size: clamp(18px, 2.2vw, 32px); font-weight: 700; }
 .order-page [data-empty-actions] .order-button { width: 283px; min-height: 70px; font-size: clamp(18px, 2.2vw, 32px); }
 .order-page .order-record-actions { align-items: center; gap: clamp(24px, 5vw, 80px); margin-top: 80px; }
 .order-page .order-record-actions > a:first-child:not(:last-child) { background: transparent; color: white; }
