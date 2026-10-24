@@ -524,7 +524,7 @@ function updateMeta(name, content, attr = "name") {
 function renderHome() {
   return `
     <div class="landing landing--figma" id="top">
-      ${renderSiteHeader().replace('/component/CJY.svg', '/assets/landing-figma/97a22fbb-2af1-4e20-91c8-5d377452b376.svg')}
+      ${renderSiteHeader()}
       <main class="landing-main">
         <section class="landing-hero" aria-labelledby="home-title">
           <div class="hero-copy">
@@ -555,15 +555,19 @@ function renderHome() {
         </section>
         <section id="pricing" class="landing-pricing" aria-labelledby="pricing-title" tabindex="-1">
           <h2 id="pricing-title">가격표</h2>
-          <section class="pricing-group" aria-labelledby="reels-pricing"><h3 id="reels-pricing">릴스(게시물) 솔루션</h3><div class="pricing-grid">
-            ${renderPriceCard('Standard', ['타이포 그래피 위주의 편집', 'TTS 포함', '자막 포함'], PRICING.plans.Standard.toLocaleString('ko-KR') + '₩')}
-            ${renderPriceCard('Deluxe', ['생성형 이미지 위주의 편집', '적절한 타이포 그래피', 'TTS 포함', '자막 포함'], PRICING.plans.Deluxe.toLocaleString('ko-KR') + '₩')}
-            ${renderPriceCard('Premium', ['고퀄리티 영상 위주의 편집', '적절한 생성형 이미지 포함', '적절한 타이포 그래피', 'TTS 포함', '자막 포함'], PRICING.plans.Premium.toLocaleString('ko-KR') + '₩')}
+          <section class="pricing-group" aria-label="릴스 솔루션"><div class="pricing-grid">
+            ${renderPriceCard('Standard', ['타이포그래피 중심 편집', 'AI 음성(TTS)', '자막 포함'])}
+            ${renderPriceCard('Deluxe', ['생성형 이미지 중심 편집', '타이포그래피', 'AI 음성(TTS) · 자막 포함'])}
+            ${renderPriceCard('Premium', ['영상 중심 편집 · 생성형 이미지', '타이포그래피', 'AI 음성(TTS) · 자막 포함'])}
           </div></section>
-          <section class="pricing-group" aria-labelledby="special-pricing"><h3 id="special-pricing">특별 상품</h3><div class="pricing-grid">
-            ${renderPriceCard('AI Influencer Start-pack', ['맞춤형 새로운 컨텐츠', '실제 같은 게시물', '실제 모션을 이용한 릴스 챌린지', 'AI 인플루언서를 위한 초기 세팅'], '999,000₩', true)}
-            ${renderPriceCard('AI Cinema Start-pack', ['맞춤형 AI 드라마', '일관성 있는 캐릭터', '직접 만든 스토리를 드라마로'], '가격 협의', true)}
-          </div></section>
+          <section class="pricing-group" aria-labelledby="special-pricing"><h3 id="special-pricing">특별 상품</h3>
+            <article class="price-card price-card--special cinematic-card">
+              <h4>시네마틱 광고</h4>
+              <p class="cinematic-copy">AI로 광고의 한계를 넘다.</p>
+              <a class="price-label" href="/apply?service=cinematic&plan=Cinematic" data-link>시네마틱 광고 신청하기</a>
+              <p>시네마틱 광고 상품의 가격은 협의 후에 정해집니다.</p>
+            </article>
+          </section>
         </section>
         ${renderProcess()}
         <section class="landing-start" aria-labelledby="start-title"><h2 id="start-title">내 브랜드의 콘텐츠 제작을 시작해보세요</h2><a href="/apply" data-link>신청하기</a></section>
@@ -634,15 +638,15 @@ function bindProcess(root) {
   return () => { section.removeEventListener('click', click); section.removeEventListener('keydown', keydown); };
 }
 
-function renderPriceCard(name, features, price, comingSoon = false) {
-  const title = ({Standard:'텍스트형',Deluxe:'이미지형',Premium:'영상형'})[name] || name;
-  return `<article class="price-card${comingSoon ? ' price-card--special' : ''}">
-    <h4>${comingSoon ? escapeHtml(({'AI Influencer Start-pack':'AI 인플루언서|스타트팩','AI Cinema Start-pack':'AI 드라마|스타트팩'})[name] || name).replace('|', '<br />') : escapeHtml(title)}</h4>
+function renderPriceCard(plan, features) {
+  const title = ({Standard:'텍스트 릴스',Deluxe:'이미지 릴스',Premium:'영상 릴스'})[plan];
+  const description = ({Standard:'간단한 설명에 최적화된',Deluxe:'스토리텔링에 적합한',Premium:'영상으로 생생하게 전달하는'})[plan];
+  return `<article class="price-card">
+    <h4>${title}</h4><p class="price-description">${description}</p>
+    <p class="price-amount">₩${PRICING.plans[plan].toLocaleString('ko-KR')}<span>/건</span></p>
+    <a class="price-label" data-link href="/apply?service=reels&plan=${plan}" aria-label="${title} 1건 구매하기">${title} 구매하기</a>
+    <p class="price-tax-note">부가세 별도</p>
     <ul>${features.map(feature => `<li>${escapeHtml(feature)}</li>`).join('')}</ul>
-    <div class="price-card-footer">
-      ${comingSoon ? `<p>${name === 'AI Influencer Start-pack' ? '일회성 구매 · 부가세 별도' : '가격 협의'} · 준비중</p>` : '<p>건당 요금 · 부가세 별도</p>'}
-      ${comingSoon ? `<button type="button" class="price-label" data-product-coming-soon aria-label="${escapeHtml(name)} ${escapeHtml(price)} · 준비중">${escapeHtml(price)}</button>` : `<a class="price-label" data-link href="/apply?service=reels&plan=${encodeURIComponent(name)}" aria-label="릴스 솔루션 ${escapeHtml(title)} 1건 신청하기">${escapeHtml(price)}/건</a>`}
-    </div>
   </article>`;
 }
 

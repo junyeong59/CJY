@@ -15,20 +15,17 @@ function landing() {
  const section=source.slice(source.indexOf('function renderHome('),source.indexOf('function renderMusicNow('));
  return vm.runInNewContext(section+';renderHome()', {PRICING,LANDING_VISUALS,FEATURE_VISUALS,escapeHtml:x=>String(x),renderSiteHeader:()=>'',renderFooter:()=>''});
 }
-test('pricing cards use shared per-item prices and specials stay one-off coming soon',()=>{
+test('pricing cards show per-item prices and a consultation-only cinematic banner',()=>{
  const html=landing();
- for(const amount of [4900,9900,34900]) assert.match(html,new RegExp(amount.toLocaleString('ko-KR')+'₩'));
+ for(const amount of [4900,9900,34900]) assert.ok(html.includes('₩'+amount.toLocaleString('ko-KR')));
  assert.doesNotMatch(html,/초기 설치비|설치 비용 미포함/);
- for(const [id,title] of [['Standard','텍스트형'],['Deluxe','이미지형'],['Premium','영상형']]){
-  assert.match(html,new RegExp('<h4>'+title+'</h4>'));
-  assert.ok(html.includes('plan='+id));
+ for(const [id,title] of [['Standard','텍스트 릴스'],['Deluxe','이미지 릴스'],['Premium','영상 릴스']]){
+  assert.match(html,new RegExp('<h4>'+title+'</h4>'));assert.ok(html.includes('plan='+id));
  }
  assert.equal((html.match(/\/건/g)||[]).length,3);
- assert.doesNotMatch(html,/월 요금/);
- const specials=[...html.matchAll(/<article class="price-card price-card--special">([^]*?)<\/article>/g)].map(m=>m[1]);
- assert.equal(specials.length,2);
- assert.match(specials[0],/999,000₩/);assert.match(specials[0],/일회성/);assert.match(specials[1],/가격 협의/);
- for(const card of specials){assert.match(card,/data-product-coming-soon/);assert.match(card,/준비중/);assert.doesNotMatch(card,/href=/);}
+ assert.match(html,/시네마틱 광고 상품의 가격은 협의 후에 정해집니다/);
+ assert.match(html,/href="\/apply\?service=cinematic&plan=Cinematic"/);
+ assert.doesNotMatch(html,/AI 인플루언서|AI 드라마.*스타트팩|data-product-coming-soon/);
 });
 test('all application variants remove setup fee row but preserve separate VAT',()=>{
  for(const render of [renderApplication,renderDirectApplication,renderLegacyDirectApplication]){

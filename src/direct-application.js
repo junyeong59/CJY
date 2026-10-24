@@ -37,12 +37,21 @@ export function bindDirectApplication(root){
  let current={},busy=false,ready=false,disposed=false;
  const params=new URLSearchParams(location.search);
  const sync=()=>{const locked=Boolean(current.orderId||(current.receipt&&current.editable!==true));save.disabled=submit.disabled=!ready||busy||locked;};
- const update=()=>{for(const label of form.querySelectorAll('[data-legacy-channel]'))label.hidden=!label.querySelector('input').checked;const plan=field('plan').value,quantity=Number(field('quantity').value),p=calculateFirstMonthPrice(plan,quantity);form.querySelector('#order-service').textContent='릴스 솔루션('+field('plan').selectedOptions[0].textContent+') × '+quantity;form.querySelector('#order-price').textContent=money(p.monthlySupplyWon);form.querySelector('#order-vat').textContent=money(p.vatWon);form.querySelector('#order-total').textContent='총 가격: '+money(p.totalWon);form.querySelector('[data-account]').hidden=field('autoPost').value==='no';};
- field('plan').value=Object.hasOwn(PRICING.plans,params.get('plan'))?params.get('plan'):'Standard';form.addEventListener('change',update);update();
+ const isCinematic=()=>field('plan').value==='Cinematic';
+ const update=()=>{const cinematic=isCinematic();field('service').value=cinematic?'cinematic':'reels';
+  form.querySelector('.order-summary').hidden=cinematic;form.querySelector('#order-total').hidden=cinematic;
+  field('quantity').closest('label').hidden=cinematic;form.querySelector('[data-quantity-note]').hidden=cinematic;
+  field('autoPost').closest('label').hidden=cinematic;form.querySelector('[data-account]').hidden=cinematic||field('autoPost').value==='no';
+  submit.textContent=cinematic?'신청하기':'결제하기';root.querySelector('.apply-page').classList.toggle('apply-page--cinematic',cinematic);
+  form.querySelector('.customer-section .customer-note').textContent=cinematic?'*신청 검토와 연락에 필요한 정보이니 정확하게 작성해주세요.':'*결제 확인 후 솔루션 전달을 위해 반드시 필요한 정보이니 정확하게 작성해주세요.';
+  form.querySelector('.application-notices p').innerHTML=cinematic?'신청 내용을 확인한 후 메시지로 상담을 진행합니다. 가격과 제작 일정은 협의 후 정해집니다.':'결제일 이후 고객 맞춤 파이프라인 확정을 위해 추가적인 협의가 필요하며, 협의는 <strong>메시지로 진행됩니다.</strong>';
+  if(cinematic)return;
+  for(const label of form.querySelectorAll('[data-legacy-channel]'))label.hidden=!label.querySelector('input').checked;const plan=field('plan').value,quantity=Number(field('quantity').value),p=calculateFirstMonthPrice(plan,quantity);form.querySelector('#order-service').textContent='릴스 솔루션('+field('plan').selectedOptions[0].textContent+') × '+quantity;form.querySelector('#order-price').textContent=money(p.monthlySupplyWon);form.querySelector('#order-vat').textContent=money(p.vatWon);form.querySelector('#order-total').textContent='총 가격: '+money(p.totalWon);form.querySelector('[data-account]').hidden=field('autoPost').value==='no';};
+ field('plan').value=params.get('service')==='cinematic'||params.get('plan')==='Cinematic'?'Cinematic':Object.hasOwn(PRICING.plans,params.get('plan'))?params.get('plan'):'Standard';form.addEventListener('change',update);update();
  form.querySelector('.brief-help').addEventListener('click',e=>{const g=form.querySelector('#brief-guide');g.hidden=!g.hidden;e.currentTarget.setAttribute('aria-expanded',String(!g.hidden));});
  for(const n of ['customerName','customerPhone','brief'])field(n).addEventListener('input',()=>field(n).setCustomValidity(''));
  const validate=()=>{const phone=field('customerPhone').value.trim();field('customerPhone').setCustomValidity(/^[+\d][\d ()-]{5,29}$/.test(phone)&&phone.replace(/\D/g,'').length>=7&&phone.replace(/\D/g,'').length<=15?'':'전화번호를 확인해주세요.');field('customerName').setCustomValidity(field('customerName').value.trim()&&new TextEncoder().encode(field('customerName').value.trim()).length<=30?'':'성함은 30바이트 이내로 입력해주세요.');field('brief').setCustomValidity(field('brief').value.trim()?'':'내용을 입력해주세요.');return ['customerName','customerPhone','brief'].every(n=>field(n).reportValidity());};
- const payload=()=>{const p=Object.fromEntries(names.map(n=>[n,field(n).value.trim()]));if(p.autoPost==='no')p.existingAccount='no';return {...p,quantity:Number(field('quantity').value),draftId:current.draftId,policyEvidence:createPolicyConsentEvidence()};};
+ const payload=()=>{const p=Object.fromEntries(names.map(n=>[n,field(n).value.trim()]));if(isCinematic()){p.autoPost='no';p.existingAccount='no';p.channel='manual';}if(p.autoPost==='no')p.existingAccount='no';return {...p,quantity:isCinematic()?1:Number(field('quantity').value),draftId:current.draftId,policyEvidence:createPolicyConsentEvidence()};};
  const show=r=>{
   if(disposed)return;
   if(r.environment&&r.environment!=='test'&&!(r.environment==='live'&&r.paymentMethod==='bank_transfer'))throw Error('environment');
@@ -64,15 +73,22 @@ export function bindDirectApplication(root){
   }
   sync();
  };
- form.addEventListener('submit',async e=>{e.preventDefault();if(!ready||busy||submit.disabled||!validate()||!form.reportValidity())return;busy=true;sync();status.textContent='입금 안내 준비 중…';
-  try{sessionStorage.setItem('cjy-pending-bank-draft',current.draftId);const r=await applyApi('bank-transfer',{...payload(),consentBundle:{version:DIRECT_CONSENT_VERSION,termsRefund:field('termsConsent').checked,privacy:field('privacyConsent').checked}});if(disposed)return;validateBankOrder(r,current.draftId);sessionStorage.removeItem('cjy-pending-bank-draft');if(r.state==='paid'){location.assign('/order');return;}if(r.state!=='pending_payment')throw Error('bank_hold');location.assign('/order');}
-  catch{if(!disposed)status.textContent='주문 결과를 확인하지 못했습니다. 입력과 요청 번호를 유지했습니다. 다시 누르면 같은 요청을 확인합니다. 재입금하지 마세요.';}finally{busy=false;if(!disposed)sync();}
+ form.addEventListener('submit',async e=>{e.preventDefault();if(!ready||busy||submit.disabled||!validate()||!form.reportValidity())return;busy=true;sync();status.textContent=isCinematic()?'신청 접수 중…':'입금 안내 준비 중…';
+  try{if(isCinematic()){
+    sessionStorage.setItem('cjy-pending-cinematic-draft',current.draftId);
+    const r=await applyApi('cinematic-submit',{...payload(),consentBundle:{version:'cjy-cinematic-2026-10-25',termsRefund:field('termsConsent').checked,privacy:field('privacyConsent').checked}});
+    if(disposed)return;
+    if(r.draftId!==current.draftId||!r.receipt||r.application?.service!=='cinematic'||r.state!=='submitted'||r.orderId)throw Error('invalid_cinematic_receipt');
+    sessionStorage.removeItem('cjy-pending-cinematic-draft');
+    location.assign('/order?draftId='+encodeURIComponent(r.draftId));return;
+   }sessionStorage.setItem('cjy-pending-bank-draft',current.draftId);const r=await applyApi('bank-transfer',{...payload(),consentBundle:{version:DIRECT_CONSENT_VERSION,termsRefund:field('termsConsent').checked,privacy:field('privacyConsent').checked}});if(disposed)return;validateBankOrder(r,current.draftId);sessionStorage.removeItem('cjy-pending-bank-draft');if(r.state==='paid'){location.assign('/order');return;}if(r.state!=='pending_payment')throw Error('bank_hold');location.assign('/order');}
+  catch{if(!disposed)status.textContent=isCinematic()?'신청 결과를 확인하지 못했습니다. 같은 요청으로 다시 확인해주세요.':'주문 결과를 확인하지 못했습니다. 입력과 요청 번호를 유지했습니다. 다시 누르면 같은 요청을 확인합니다. 재입금하지 마세요.';}finally{busy=false;if(!disposed)sync();}
  });
  save.addEventListener('click',async()=>{if(!ready||busy||save.disabled)return;if(!field('draftPrivacyConsent').checked){status.textContent='저장용 개인정보 처리 동의를 확인해주세요.';return;}if(!validate())return;busy=true;sync();status.textContent='저장 중…';
   try{const r=await applyApi('save',{...payload(),draftConsent:{version:'cjy-draft-2026-10-02',privacy:true}});if(disposed)return;if(!r.receipt||!r.application)throw Error('invalid_saved_application');show(r);history.replaceState(null,'','/apply?draftId='+encodeURIComponent(r.draftId));status.textContent='접수를 저장했습니다. 결제는 시작되지 않았습니다.';}
   catch{if(!disposed)status.textContent='저장 결과를 확인하지 못했습니다. 입력과 요청 번호를 유지했습니다. 다시 저장하면 서버에서 확인합니다.';}finally{busy=false;if(!disposed)sync();}
  });
- applyApi('status').then(async r=>{const pending=sessionStorage.getItem('cjy-pending-bank-draft'),selected=params.get('draftId')||pending;if(selected&&!uuid.test(selected))throw Error('invalid_selection');const active=r;if(selected||r.receipt){const requested=selected||r.draftId;r=await applyApi('application',{draftId:requested});if(r.draftId!==requested)throw Error('draft_binding');}
+ applyApi('status').then(async r=>{const pending=sessionStorage.getItem('cjy-pending-bank-draft'),pendingCinematic=sessionStorage.getItem('cjy-pending-cinematic-draft'),selected=params.get('draftId')||pendingCinematic||pending;if(selected&&!uuid.test(selected))throw Error('invalid_selection');const active=r;if(!selected&&params.has('service')&&r.receipt){r=await applyApi('new');}if(selected||r.receipt){const requested=selected||r.draftId;r=await applyApi('application',{draftId:requested});if(r.draftId!==requested)throw Error('draft_binding');}
  if(selected&&selected!==active.draftId&&r.receipt&&r.editable===false&&!r.orderId&&active.receipt&&!active.orderId&&active.status==='pending-review'){
   const owned=await applyApi('orders'),old=owned.orders?.find(o=>o.draftId===selected),head=owned.orders?.find(o=>o.draftId===active.draftId);
   if(owned.draftId===active.draftId&&old?.state==='archived'&&!old.orderId&&head?.state==='saved'&&head.editable===true&&!head.orderId){
@@ -80,6 +96,6 @@ export function bindDirectApplication(root){
    if(latest.draftId===active.draftId&&latest.receipt&&latest.application&&latest.editable===true&&!latest.orderId&&latest.status==='pending-review'){r=latest;if(!disposed)history.replaceState(null,'','/apply?draftId='+encodeURIComponent(r.draftId));}
   }
  }
- if(disposed)return;if(r.status==='session-expired')throw Error('session_expired');if(pending===r.draftId&&r.paymentMethod==='bank_transfer'&&r.orderId){validateBankOrder(r,pending);sessionStorage.removeItem('cjy-pending-bank-draft');}if(r.paymentMethod==='bank_transfer'&&r.state==='paid'){validateBankOrder(r,r.draftId);if(!params.get('draftId')){location.assign('/order');return;}}show(r);ready=true;sync();}).catch(()=>{if(!disposed)status.textContent='신청 연결을 확인하지 못했습니다. 세션 만료 또는 접근 오류일 수 있습니다. 새로고침하거나 운영자에게 문의해주세요.';});
+ if(disposed)return;if(pendingCinematic===r.draftId&&r.application?.service==='cinematic'&&r.state==='submitted'&&r.receipt&&!r.orderId){sessionStorage.removeItem('cjy-pending-cinematic-draft');location.assign('/order?draftId='+encodeURIComponent(r.draftId));return;}if(r.status==='session-expired')throw Error('session_expired');if(pending===r.draftId&&r.paymentMethod==='bank_transfer'&&r.orderId){validateBankOrder(r,pending);sessionStorage.removeItem('cjy-pending-bank-draft');}if(r.paymentMethod==='bank_transfer'&&r.state==='paid'){validateBankOrder(r,r.draftId);if(!params.get('draftId')){location.assign('/order');return;}}show(r);ready=true;sync();}).catch(()=>{if(!disposed)status.textContent='신청 연결을 확인하지 못했습니다. 세션 만료 또는 접근 오류일 수 있습니다. 새로고침하거나 운영자에게 문의해주세요.';});
  return ()=>{disposed=true;};
 }

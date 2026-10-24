@@ -47,7 +47,7 @@ export function bindLandingInteractions(root) {
     const scene = typing.parentElement;
     const parent = scene.querySelector('[data-node-id="215:939"]');
     parent.classList.add('request-capsule');
-    typing.style.cssText = 'margin:0;font-size:5.555556cqw;font-weight:600;white-space:nowrap;line-height:1.2';
+    typing.style.cssText = 'margin:0;font-weight:600;line-height:1.2';
     parent.append(typing);
     const label = document.createElement('span');
     label.className = 'visually-hidden';

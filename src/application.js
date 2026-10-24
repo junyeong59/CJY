@@ -26,7 +26,7 @@ export function renderApplication({integrated=false}={}) {
         <h2 class="application-section-title">서비스 신청</h2>
         <label class="form-field">서비스 종류<select name="service"><option value="reels">릴스 솔루션</option><option value="ai-influencer" disabled>AI Influencer Start-pack (준비중)</option><option value="ai-cinema" disabled>AI Cinema Start-pack (준비중)</option></select></label>
         <div data-reels>
-          <label class="form-field">요금제<select name="plan"><option value="Standard">텍스트형</option><option value="Deluxe">이미지형</option><option value="Premium">영상형</option></select></label>
+          <label class="form-field">요금제<select name="plan"><option value="Standard">텍스트 릴스</option><option value="Deluxe">이미지 릴스</option><option value="Premium">영상 릴스</option></select></label>
           <label class="form-field">자동 게시 여부<select name="autoPost"><option value="yes">사용함</option><option value="no">사용하지 않음</option></select></label>
           <div data-account>
             <label class="form-field">기존 계정 사용 여부<select name="existingAccount" aria-describedby="existing-account-note"><option value="no">사용하지 않음</option><option value="yes">사용함</option></select></label>

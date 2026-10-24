@@ -131,8 +131,9 @@ test('hero glass, circular corners, anchors and clipping survive short windows a
   if(viewport.width===1440||viewport.width===390)await page.screenshot({path:path.join(folder,`hero-glass-${viewport.width}.png`)});
   await page.locator('.feature-art--figma').nth(1).scrollIntoViewIfNeeded();
   const capsule=await page.locator('[data-node-id="215:939"]').boundingBox();
-  assert.ok(capsule.x+capsule.width>viewport.width,'Figma capsule intentionally extends past the screen edge');
-  const strips=await page.locator('.feature-art--consistency').evaluate(element=>({panel:element.getBoundingClientRect().width,art:element.querySelector('.figma-scene').getBoundingClientRect().width}));
+  const customPanel=await page.locator('.feature-art--custom').boundingBox();
+  assert.ok(capsule.x+capsule.width>customPanel.x+customPanel.width,'request capsule intentionally extends beyond the outline card');
+  const strips=await page.locator('.feature-art--consistency').evaluate(element=>({panel:element.clientWidth,art:element.querySelector('.figma-scene').getBoundingClientRect().width}));
   assert.ok(Math.abs(strips.panel-strips.art)<1,'edge cards are not cropped in an inner strip');
   // Real navigation/reload must put the heading below the fixed navigation, not under it.
   await page.goto(base+'/#process');await delay(500);

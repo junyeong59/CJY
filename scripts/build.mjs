@@ -55,6 +55,9 @@ for (const module of ['direct-application.js', 'order.js']) {
   const filePath = path.join(dist, 'src', module);
   await writeFile(filePath, (await readFile(filePath, 'utf8')).replace('./bank-transfer.js', `./bank-transfer.js?v=${bankVersion}`));
 }
+const selectionVersion = await assetVersion(path.join(dist, "src", "service-quantity.js"));
+const directPath = path.join(dist, "src", "direct-application.js");
+await writeFile(directPath, (await readFile(directPath, "utf8")).replace('./service-quantity.js', `./service-quantity.js?v=${selectionVersion}`));
 const directVersion = await assetVersion(path.join(dist, "src", "direct-application.js"));
 const applicationSource = await readFile(applicationPath, "utf8");
 await writeFile(applicationPath, applicationSource.replace('./direct-application.js', `./direct-application.js?v=${directVersion}`));

@@ -7,3 +7,6 @@ dist/
 .wrangler/
 .manual-operations-backup/
 /supabase/.temp/
+
+# Local UI verification screenshots
+/output/cinematic-ui/

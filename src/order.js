@@ -2,9 +2,9 @@ import { renderSiteHeader } from './header.js';
 import {applyApi} from './apply-checkout.js';
 import {renderBankDetails,validateBankOrder} from './bank-transfer.js';
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const labels={paid:'결제 완료',pilot_pending:'결제 완료',pending_payment:'결제 확인 중',manual_hold:'결제 확인 보류',saved:'접수 저장 · 결제 시작 전',archived:'이전 접수 · 보관',cancelled:'취소',refunded:'환불 완료',partially_refunded:'부분 환불',disputed:'분쟁 확인 중'};
+const labels={submitted:'신청 완료',paid:'결제 완료',pilot_pending:'결제 완료',pending_payment:'결제 확인 중',manual_hold:'결제 확인 보류',saved:'접수 저장 · 결제 시작 전',archived:'이전 접수 · 보관',cancelled:'취소',refunded:'환불 완료',partially_refunded:'부분 환불',disputed:'분쟁 확인 중'};
 const itemSelection=o=>{
- const a=o.application,q=a?.quantity,title=({Standard:'텍스트형',Deluxe:'이미지형',Premium:'영상형'})[a?.plan];
+ const a=o.application,q=a?.quantity,title=({Standard:'텍스트 릴스',Deluxe:'이미지 릴스',Premium:'영상 릴스'})[a?.plan];
  // No quantity label is inferred for historic monthly orders.
  return title&&Number.isSafeInteger(q)&&q>=1&&q<=30?`<p class="customer-note" data-order-selection>${esc(title)} · ${q}건</p>`:'';
 };
@@ -36,10 +36,11 @@ export function bindOrder(root,navigate) {
  const list=root.querySelector('[data-order-list]');if(!list)return;
  const create=root.querySelector('[data-order-new]'),message=root.querySelector('[data-order-message]');
  let busy=false,disposed=false,ownedOrdersReady=false,current={orders:[]};
- const selectCurrent=result=>{const meaningful=result.orders.filter(o=>o.state!=='archived'&&(o.receipt||o.orderId));return meaningful.find(o=>o.draftId===result.draftId)??meaningful.find(o=>o.orderId&&o.state!=='saved')??meaningful[0];};
+ const requestedDraft=new URLSearchParams(location.search).get('draftId');
+ const selectCurrent=result=>{if(requestedDraft)return result.orders.find(o=>o.draftId===requestedDraft);const meaningful=result.orders.filter(o=>o.state!=='archived'&&(o.receipt||o.orderId));return meaningful.find(o=>o.draftId===result.draftId)??meaningful.find(o=>o.orderId&&o.state!=='saved')??meaningful[0];};
  // The PG query is advisory only. Official persisted Supabase Auth, not URL
  // parameters or browser payment results, authorizes owner-scoped API reads.
- if(location.search)history.replaceState(null,'',location.pathname);
+ if(location.search)history.replaceState(null,'',location.pathname+(/^[a-f0-9-]{36}$/.test(requestedDraft??'')?'?draftId='+encodeURIComponent(requestedDraft):''));
  function show(result){
   if(disposed)return;
   if(result.status==='session-expired')throw Error('session_expired');
@@ -47,12 +48,14 @@ export function bindOrder(root,navigate) {
   if(result.orders.some(o=>o.state==='pending_payment'&&o.paymentMethod==='bank_transfer')){if(result.status==='session-expired')throw Error('session_expired');for(const o of result.orders)if(o.state==='pending_payment'&&o.paymentMethod==='bank_transfer')validateBankOrder(o,o.draftId);}
   ownedOrdersReady=true;
   const selected=selectCurrent(result);current={...result,orders:selected?[selected]:[]};create.hidden=Boolean(selected);root.querySelector('[data-empty-actions]').hidden=Boolean(selected);if(selected)create.remove();else if(!create.isConnected)root.querySelector('[data-empty-actions]').prepend(create);create.textContent='새 주문';create.disabled=!ownedOrdersReady||busy||result.status==='session-expired';
+  const cinematic=selected?.application?.service==='cinematic'&&selected.state==='submitted'&&!selected.orderId;
+  root.querySelector('.order-page').classList.toggle('order-page--cinematic',cinematic);
   const bankPending=selected?.state==='pending_payment'&&selected.paymentMethod==='bank_transfer';
   root.querySelector('.order-page').classList.toggle('order-page--bank-pending',bankPending);
-  root.querySelector('.order-heading h1').textContent=bankPending?'결제 대기중':'주문 현황';
-  root.querySelector('[data-order-description]').hidden=bankPending||!selected||selected.state==='saved';
+  root.querySelector('.order-heading h1').textContent=cinematic?'신청 완료':bankPending?'결제 대기중':'주문 현황';
+  root.querySelector('[data-order-description]').hidden=cinematic||bankPending||!selected||selected.state==='saved';
   root.querySelector('[data-order-identity]').innerHTML=selected&&selected.state!=='saved'?`<p class="order-number">${selected.orderId?'주문 번호':'접수 번호'}: ${esc(selected.orderId??selected.receipt)}</p>`:'';
-  list.innerHTML=current.orders.length?current.orders.map(o=>`<article class="owned-order">${bankPending?'':orderJourney(o)}${renderBankDetails(o,{compact:bankPending})}${itemSelection(o)}<div class="order-record-actions ${o.state==='saved'?'order-record-actions--saved':''}">${o.draftId?`<a class="order-button" data-link data-view-draft="${esc(o.draftId)}" href="/apply?draftId=${encodeURIComponent(o.draftId)}">${o.state==='saved'?'신청하러 가기':'신청 내용 보기'}</a>`:''}${o.state==='saved'?'':'<a class="order-button" href="mailto:cjy.support@gmail.com">문의하기</a>'}</div>${o.state==='pending_payment'&&o.paymentMethod!=='bank_transfer'?`<button type="button" class="order-button" data-verify-draft="${esc(o.draftId)}">결제 상태 확인</button>`:''}</article>`).join(''):'<div class="order-empty-copy"><p>이 브라우저에서 접수한 주문 내역이 없습니다</p><p class="order-empty-hint">기존 주문은 당시 신청한 브라우저로 접속하시거나 문의하기를 이용해주세요.</p></div>';
+  list.innerHTML=current.orders.length?current.orders.map(o=>`<article class="owned-order">${cinematic?'<p class="cinematic-confirmation">신청이 완료되었습니다.</p>':bankPending?'':orderJourney(o)}${renderBankDetails(o,{compact:bankPending})}${itemSelection(o)}<div class="order-record-actions ${o.state==='saved'?'order-record-actions--saved':''}">${o.draftId?`<a class="order-button" data-link data-view-draft="${esc(o.draftId)}" href="/apply?draftId=${encodeURIComponent(o.draftId)}">${o.state==='saved'?'신청하러 가기':'신청 내용 보기'}</a>`:''}${o.state==='saved'?'':'<a class="order-button" href="mailto:cjy.support@gmail.com">문의하기</a>'}</div>${o.state==='pending_payment'&&o.paymentMethod!=='bank_transfer'?`<button type="button" class="order-button" data-verify-draft="${esc(o.draftId)}">결제 상태 확인</button>`:''}</article>`).join(''):'<div class="order-empty-copy"><p>이 브라우저에서 접수한 주문 내역이 없습니다</p><p class="order-empty-hint">기존 주문은 당시 신청한 브라우저로 접속하시거나 문의하기를 이용해주세요.</p></div>';
  }
  async function load(reconcile=false){
   if(busy||disposed)return;busy=true;ownedOrdersReady=false;create.disabled=true;message.textContent='';
