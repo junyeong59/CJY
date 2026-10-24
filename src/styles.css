@@ -2085,3 +2085,11 @@ html:has(.landing) { scroll-behavior: smooth; }
   text-align: center;
   word-break: keep-all;
 }
+
+/* Equal content slots keep the action row at the same page coordinates. */
+:is(.order-page--bank-pending, .order-page--cinematic) .order-result-body {
+  min-height: clamp(280px, 32dvh, 340px);
+}
+@media (max-width: 600px) {
+  :is(.order-page--bank-pending, .order-page--cinematic) .order-number { min-height: 3em; }
+}
