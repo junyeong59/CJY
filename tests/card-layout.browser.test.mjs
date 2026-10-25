@@ -16,16 +16,21 @@ test('pricing proportions, tax placement and request illustration stay within th
  await mkdir('output/cinematic-ui',{recursive:true});
  for(const width of [320,390,800,1440]){
   await page.setViewportSize({width,height:1000});
+  await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
   const cards=page.locator('.price-card:not(.cinematic-card)');
+  const bounds=await cards.evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height};}));
+  assert.ok(bounds.every(r=>Math.abs(r.y-bounds[0].y)<1));
+  assert.ok(bounds.every(r=>Math.abs(r.w/r.h-401/552)<.015));
+  const cinematicTop=await page.locator('.cinematic-card').evaluate(n=>n.getBoundingClientRect().top);assert.ok(cinematicTop>bounds[0].y+bounds[0].h);
   assert.equal(await cards.evaluateAll(nodes=>nodes.every(n=>n.scrollHeight<=n.clientHeight&&n.scrollWidth<=n.clientWidth)),true,`card overflow ${width}`);
   for(const card of await cards.all()){
    const metrics=await card.evaluate(n=>{
     const rect=s=>n.querySelector(s).getBoundingClientRect();
     const tax=rect('.price-tax-note'),button=rect('.price-label'),desc=rect('.price-description'),price=rect('.price-amount');
-    return {gap:tax.top-button.bottom,priceGap:price.top-desc.bottom,alignment:getComputedStyle(n.querySelector('.price-tax-note')).textAlign};
+    return {gap:tax.top-button.bottom,priceGap:price.top-desc.bottom,contentWidth:n.clientWidth-parseFloat(getComputedStyle(n).paddingLeft)-parseFloat(getComputedStyle(n).paddingRight),alignment:getComputedStyle(n.querySelector('.price-tax-note')).textAlign};
    });
    assert.ok(metrics.gap>=0&&metrics.gap<=10,`${width}: tax/button gap ${metrics.gap}`);
-   assert.equal(metrics.alignment,'center');assert.ok(metrics.priceGap>=27);
+   assert.equal(metrics.alignment,'center');assert.ok(metrics.priceGap>=Math.min(27,metrics.contentWidth*.07)-1,JSON.stringify({width,...metrics}));
 
   }
   const panel=page.locator('.feature-art--custom');

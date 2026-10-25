@@ -2093,3 +2093,45 @@ html:has(.landing) { scroll-behavior: smooth; }
 @media (max-width: 600px) {
   :is(.order-page--bank-pending, .order-page--cinematic) .order-number { min-height: 3em; }
 }
+/* Show the three reel options together, preserving the desktop composition. */
+@media (max-width: 1000px) {
+  #top.landing--figma .pricing-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    max-width: none;
+    gap: clamp(6px, 1.67vw, 18px);
+  }
+  #top.landing--figma .price-card:not(.cinematic-card) {
+    min-height: 0;
+    aspect-ratio: 401 / 552;
+    padding: clamp(6px, 1.85vw, 18px);
+    border-radius: clamp(7px, 2vw, 20px);
+  }
+  #top.landing--figma .price-card:not(.cinematic-card) h4 { font-size: 8cqw; }
+  #top.landing--figma .price-card .price-description { margin-top: 1.35cqw; font-size: 5cqw; }
+  #top.landing--figma .price-card .price-amount { margin-top: 10cqw; font-size: 11.8cqw; }
+  #top.landing--figma .price-card .price-amount > span { font-size: 5cqw; }
+  #top.landing--figma .price-card .price-tax-note { margin-top: 2.7cqw; font-size: 4cqw; }
+  #top.landing--figma .price-card:not(.cinematic-card) .price-label {
+    min-height: 15.5cqw;
+    margin-top: 5.4cqw;
+    padding: 3.4cqw 2.7cqw;
+    font-size: 5cqw;
+    white-space: nowrap;
+  }
+  #top.landing--figma .price-card:not(.cinematic-card) ul { margin-top: 8cqw; font-size: 5cqw; }
+  #top.landing--figma .price-card:not(.cinematic-card) li { padding-left: 8cqw; }
+}
+@media (max-width: 600px) {
+  #top.landing--figma .landing-pricing { padding-inline: 12px; }
+  #top.landing--figma .pricing-group + .pricing-group { margin-top: 32px; }
+  #top.landing--figma .cinematic-card {
+    min-height: 0;
+    aspect-ratio: 1321 / 552;
+    padding: 20px 12px;
+    border-radius: 10px;
+  }
+  #top.landing--figma .cinematic-card h4 { font-size: 5.3vw; }
+  #top.landing--figma .cinematic-card .cinematic-copy { font-size: 2.65vw; margin-top: 1.35vw; }
+  #top.landing--figma .cinematic-card .price-label { width: 30vw; min-height: 0; padding: 1.2vw 1vw; margin-top: 3vw; font-size: 1.65vw; }
+  #top.landing--figma .cinematic-card > p:not(.cinematic-copy) { margin-top: 1vw; font-size: 1.2vw; }
+}
