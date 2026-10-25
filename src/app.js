@@ -1,7 +1,7 @@
 import { FEATURE_VISUALS } from './feature-visuals.js';
 import { bindLandingInteractions } from './landing-interactions.js';
 import { LANDING_VISUALS } from './landing-visuals.js';
-import { renderSiteHeader } from './header.js';
+import { renderSiteHeader, bindSiteHeader } from './header.js';
 import { renderPolicy, renderFooter } from "./policies.js";
 import { renderOrderLookup, renderOrderStatus, renderOrderDetails, bindOrder } from "./order.js";
 import { renderApplication, bindApplication } from "./application.js";
@@ -15,6 +15,10 @@ let revealObserver;
 let cleanupApplication;
 
 const pages = {
+  "/cinematic": {
+    title: "시네마틱 광고 | CJY",
+    render: renderCinematic
+  },
   "/terms": { title: "이용약관 | CJY", render: () => renderPolicy("terms") },
   "/privacy": { title: "개인정보처리방침 | CJY", render: () => renderPolicy("privacy") },
   "/refund": { title: "환불 정책 | CJY", render: () => renderPolicy("refund") },
@@ -435,6 +439,26 @@ function getCurrentRoute() {
   };
 }
 
+function renderCinematic() {
+  return `<div class="landing landing--figma landing-cinematic" id="top">
+    ${renderSiteHeader()}
+    <main class="landing-main cinematic-main">
+      <section class="landing-hero cinematic-hero" aria-labelledby="cinematic-title">
+        <div class="hero-copy">
+          <h1 id="cinematic-title">저렴한 가격<br />최고의 품질</h1>
+          <p class="hero-subtitle">최고의 기획 인력과 초고급 AI 모델과의 만남</p>
+          <a class="hero-apply" href="/apply?service=cinematic&plan=Cinematic" data-link>시네마틱 광고 신청하기</a>
+        </div>
+        <div class="cinematic-video-card">
+          <button class="cinematic-play" type="button" aria-label="시네마틱 광고 영상 준비 중">
+            <img class="cinematic-play-icon" src="/assets/cinematic/play-icon.svg" alt="" width="30.3015" height="36.6864" />
+          </button>
+        </div>
+      </section>
+    </main>
+  </div>`;
+}
+
 function renderApp() {
   const route = getCurrentRoute();
   document.title = route.title;
@@ -443,7 +467,7 @@ function renderApp() {
   updateMeta("og:url", `${SITE_CONFIG.siteUrl}${normalizePath(window.location.pathname)}`, "property");
   cleanupApplication?.();
   app.innerHTML = route.render();
-  if (["/", "/apply", "/order", "/order/status", "/order/details", "/terms", "/privacy", "/refund"].includes(normalizePath(window.location.pathname))) {
+  if (["/", "/cinematic", "/apply", "/order", "/order/status", "/order/details", "/terms", "/privacy", "/refund"].includes(normalizePath(window.location.pathname))) {
     app.querySelector(".landing")?.insertAdjacentHTML("beforeend", renderFooter());
   }
   const disposeApplication = bindApplication(app);
@@ -451,7 +475,8 @@ function renderApp() {
   const disposePaymentDock = bindPaymentDock(app);
   const disposeProcess = bindProcess(app);
   const disposeLandingInteractions = bindLandingInteractions(app);
-  cleanupApplication = () => { disposeApplication?.(); disposeOrder?.(); disposePaymentDock?.(); disposeProcess?.(); disposeLandingInteractions?.(); };
+  const disposeHeader = bindSiteHeader(app);
+  cleanupApplication = () => { disposeApplication?.(); disposeOrder?.(); disposePaymentDock?.(); disposeProcess?.(); disposeLandingInteractions?.(); disposeHeader(); };
 
   bindScrollReveal();
   document.body.dataset.route = normalizePath(window.location.pathname).startsWith("/musicnow/join/")
@@ -529,20 +554,20 @@ function renderHome() {
         <section class="landing-hero" aria-labelledby="home-title">
           <div class="hero-copy">
             <h1 id="home-title">당신만을 위한,<br />컨텐츠 제작 에이전트팀.</h1>
-            <p class="hero-subtitle">브랜드에 맞는 릴스와 게시물, 기획부터 제작까지</p>
+            <p class="hero-subtitle">브랜드에 맞는 컨텐츠, 기획부터 제작까지</p>
             <a class="hero-apply" href="/apply" data-link>프로젝트 시작하기🚀</a>
           </div>
           ${renderExamplesCard()}
         </section>
         <section id="product" class="landing-product" aria-labelledby="product-title" tabindex="-1">
-          <h2 id="product-title">어떠한 기능을 할 수 있나요?</h2>
+          <h2 id="product-title">상품 소개</h2>
           <article class="feature">
             <div class="feature-art feature-art--figma" aria-hidden="true">${FEATURE_VISUALS.team}</div>
-            <div class="feature-copy"><h3>릴스 제작 솔루션</h3><p>컨텐츠 제작 전문 AI 팀이 기획부터 게시까지,<br /> 매번 컨텐츠를 설명하지 않아도 척척 해냅니다.</p></div>
+            <div class="feature-copy"><h3>컨텐츠 제작 솔루션</h3><p>컨텐츠 제작 전문 AI 팀이 기획부터 게시까지,<br /> 매번 컨텐츠를 설명하지 않아도 척척 해냅니다.</p></div>
           </article>
           <article class="feature feature--reverse">
             <div class="feature-art feature-art--figma feature-art--custom" aria-hidden="true">${LANDING_VISUALS['feature-custom']}</div>
-            <div class="feature-copy"><h3>고객 맞춤 컨텐츠 제공</h3><p>고객의 니즈에 따른 새로운 컨텐츠를 제작합니다.<br /> AI 드라마부터 병원 마케팅까지, 모든 고객의 니즈에 맞게 제작합니다.</p></div>
+            <div class="feature-copy"><h3>고객 맞춤 컨텐츠 제공</h3><p>고객의 니즈에 따른 새로운 컨텐츠를 제작합니다.<br /> 바이럴 컨텐츠부터 병원 마케팅까지, 모든 고객의 니즈에 맞게 제작합니다.</p></div>
           </article>
           <article class="feature">
             <div class="feature-art feature-art--figma feature-art--consistency" aria-hidden="true">${FEATURE_VISUALS.consistency}</div>
@@ -560,14 +585,6 @@ function renderHome() {
             ${renderPriceCard('Deluxe', ['생성형 이미지 중심 편집', '타이포그래피', 'AI 음성(TTS) · 자막 포함'])}
             ${renderPriceCard('Premium', ['영상 중심 편집 · 생성형 이미지', '타이포그래피', 'AI 음성(TTS) · 자막 포함'])}
           </div></section>
-          <section class="pricing-group" aria-labelledby="special-pricing"><h3 id="special-pricing">특별 상품</h3>
-            <article class="price-card price-card--special cinematic-card">
-              <h4>시네마틱 광고</h4>
-              <p class="cinematic-copy">AI로 광고의 한계를 넘다.</p>
-              <a class="price-label" href="/apply?service=cinematic&plan=Cinematic" data-link>시네마틱 광고 신청하기</a>
-              <p>시네마틱 광고 상품의 가격은 협의 후에 정해집니다.</p>
-            </article>
-          </section>
         </section>
         ${renderProcess()}
         <section class="landing-start" aria-labelledby="start-title"><h2 id="start-title">내 브랜드의 콘텐츠 제작을 시작해보세요</h2><a href="/apply" data-link>신청하기</a></section>
