@@ -195,7 +195,7 @@ Object.assign(BANK_POLICY_REPLACEMENTS.privacy, {
     "씨제이와이(CJY)(이하 “운영자”)는 릴스 솔루션의 신청, 주문, 입금 확인, 상담 및 서비스 제공에 필요한 개인정보를 다음과 같이 처리합니다."
   ],
   "신청 처리 목적과 항목": [
-    "서비스 신청 검토와 상담을 위해 성함, 전화번호, 서비스·요금제와 수량, 자동 게시 희망 여부, 기존 계정 사용 여부, 콘텐츠 스타일과 요청 사항, 전달 채널 및 동의 내역을 처리합니다.",
+    "서비스 신청 검토와 상담을 위해 성함, 전화번호, 서비스·요금제와 수량, 콘텐츠 스타일과 요청 사항, 전달 채널 및 동의 내역을 처리합니다.",
     "신청 접수와 주문 접근 권한 확인, 중복 접수 방지 및 보안을 위해 접수번호, 접수 시각, 무작위 요청 식별자, 익명 사용자 식별자와 접속·오류 기록을 처리할 수 있습니다."
   ],
   "결제 처리 목적과 항목": [
@@ -263,14 +263,14 @@ Object.assign(BANK_POLICY_REPLACEMENTS.terms, {
   ],
   "결제·설치와 권한 경계": [
     "입금이 확인되면 주문이 확정되며 서비스 준비를 시작합니다. 입금 확인 전에는 준비 작업을 시작하지 않습니다.",
-    "콘텐츠 제작은 상담을 통해 제작 기준을 확정하고, 고객 자료의 사용 권한과 제작 동의를 확인한 뒤 진행합니다. 결제만으로 제작이나 게시가 시작되지는 않습니다. 완성된 콘텐츠는 고객이 선택하고 승인한 채널로 전달합니다. 자동 게시는 별도로 신청하고 계정 접근 권한과 게시를 승인한 경우에만 진행합니다."
+    "콘텐츠 제작은 상담을 통해 제작 기준을 확정하고, 고객 자료의 사용 권한과 제작 동의를 확인한 뒤 진행합니다. 결제만으로 제작이 시작되지는 않습니다. 완성된 콘텐츠는 고객이 선택하고 승인한 채널로 전달합니다."
   ],
   "상담·시작일과 제공 수량": [
     "초기 상담에서는 콘텐츠의 스타일과 제작 기준을 정합니다. 고객은 초기 상담 전체에서 제작 기준의 수정을 최대 2회 요청할 수 있습니다. 이는 개별 콘텐츠마다 2회의 수정을 제공한다는 의미는 아닙니다.",
-    "주문 시 선택한 수량의 콘텐츠를 제작하며, 제작·전달 일정은 제작 기준이 확정된 뒤 고객과 협의합니다. 자동 게시를 신청한 경우 게시 일정도 별도로 협의하고 승인을 받습니다. 기존 계약의 기간과 콘텐츠 수량은 계약 당시의 조건을 따릅니다."
+    "주문 시 선택한 수량의 콘텐츠를 제작하며, 제작·전달 일정은 제작 기준이 확정된 뒤 고객과 협의합니다. 기존 계약의 기간과 콘텐츠 수량은 계약 당시의 조건을 따릅니다."
   ],
   "고객 자료와 외부 서비스": [
-    "고객은 제작을 위해 제공하는 자료와 계정을 사용할 권한이 있어야 합니다. 제공한 자료는 고객과 합의한 제작 범위에서 사용하며, 콘텐츠의 전달과 게시는 고객이 승인한 채널에서만 진행합니다."
+    "고객은 제작을 위해 제공하는 자료를 사용할 권한이 있어야 합니다. 제공한 자료는 고객과 합의한 제작 범위에서 사용하며, 콘텐츠는 고객이 승인한 채널로 전달합니다."
   ],
   "취소·환불과 법정 권리": [
     "취소와 환불은 환불 정책에 따릅니다. 관계 법령에서 보장하는 청약철회, 계약 해제·해지, 환급 및 손해배상 등의 권리는 이 약관보다 우선합니다."
@@ -294,7 +294,7 @@ const TERMS_SECTION_LABELS = {
 };
 
 export const POLICY_DOCUMENTS = Object.freeze(Object.fromEntries(Object.entries(HISTORICAL_PG_POLICY_DOCUMENTS).map(([kind, doc]) => [kind, Object.freeze({...doc, sections:Object.freeze(doc.sections.map(([heading,...body]) => Object.freeze([kind === 'terms' ? (TERMS_SECTION_LABELS[heading] ?? heading) : heading, ...(BANK_POLICY_REPLACEMENTS[kind][heading] ?? body)])))})])));
-export const POLICY_METADATA = Object.freeze({versionDate:POLICY_VERSION_DATE,effectiveState:POLICY_EFFECTIVE_STATE,checkoutEligible:true,paymentLive:true,documents:Object.freeze({terms:{versionDate:POLICY_VERSION_DATE,canonicalSha256:'5375731a78d9411ccd4d8d12cc28626a7fbbbec3dd5cbda8b6c31d9759f792dd'},privacy:{versionDate:POLICY_VERSION_DATE,canonicalSha256:'8a08fead29e1d23169337065997539cb636af322901e156a32592b26470bbd7e'},refund:{versionDate:POLICY_VERSION_DATE,canonicalSha256:'37be29125d2d86bd324fb7bba2e14dc283af0c9d84f896e56a9230e499d95857'}})});
+export const POLICY_METADATA = Object.freeze({versionDate:POLICY_VERSION_DATE,effectiveState:POLICY_EFFECTIVE_STATE,checkoutEligible:true,paymentLive:true,documents:Object.freeze({terms:{versionDate:POLICY_VERSION_DATE,canonicalSha256:'89aff5188df243debba8664ac91d4d927a372da9e15f54e4a702679e281e0d4a'},privacy:{versionDate:POLICY_VERSION_DATE,canonicalSha256:'3258cbf718714dd10604e0515e43d5457b02825bc9703a1ae6a82b43b1cc43a3'},refund:{versionDate:POLICY_VERSION_DATE,canonicalSha256:'37be29125d2d86bd324fb7bba2e14dc283af0c9d84f896e56a9230e499d95857'}})});
 
 const CONSENT_DOCUMENT_ORDER = Object.freeze(['terms', 'privacy', 'refund']);
 

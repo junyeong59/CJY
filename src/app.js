@@ -563,7 +563,7 @@ function renderHome() {
           <h2 id="product-title">상품 소개</h2>
           <article class="feature">
             <div class="feature-art feature-art--figma" aria-hidden="true">${FEATURE_VISUALS.team}</div>
-            <div class="feature-copy"><h3>컨텐츠 제작 솔루션</h3><p>컨텐츠 제작 전문 AI 팀이 기획부터 게시까지,<br /> 매번 컨텐츠를 설명하지 않아도 척척 해냅니다.</p></div>
+            <div class="feature-copy"><h3>컨텐츠 제작 솔루션</h3><p>컨텐츠 제작 전문 AI 팀이 기획부터 제작까지,<br /> 매번 컨텐츠를 설명하지 않아도 척척 해냅니다.</p></div>
           </article>
           <article class="feature feature--reverse">
             <div class="feature-art feature-art--figma feature-art--custom" aria-hidden="true">${LANDING_VISUALS['feature-custom']}</div>
@@ -605,8 +605,8 @@ function getProcessSteps() {
   return [
     ['양식 작성', '작성한 양식을 통해 원하는 컨텐츠, 스타일 취합'],
     ['작업물 초안 전달', '작업물 초안 전달 및 수정사항 컨펌'],
-    ['협의 및 파이프라인 확정', '작업물 스타일 및 게시 일자를 조율해 확정합니다'],
-    ['컨텐츠 전달', '구글 드라이브를 통해 컨텐츠 원본을 전달하고 자동게시를 선택한 경우 업로드까지 진행합니다'],
+    ['협의 및 파이프라인 확정', '작업물 스타일 및 전달 일자를 조율해 확정합니다'],
+    ['컨텐츠 전달', '구글 드라이브를 통해 컨텐츠 원본을 전달합니다'],
     ['기간 종료 후 연장 선택', '기간 이후 연장하거나 프로젝트를 종료합니다']
   ];
 }
