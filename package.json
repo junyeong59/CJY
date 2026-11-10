@@ -1,17 +1,9 @@
 {
-  "name": "cjy-site",
-  "version": "0.1.0",
+  "name": "cjy-onmap-policies",
   "private": true,
-  "type": "module",
+  "version": "1.0.0",
   "scripts": {
-    "dev": "node scripts/serve.mjs",
     "build": "node scripts/build.mjs",
-    "og": "python3 scripts/generate-og.py"
-  },
-  "dependencies": {
-    "@supabase/supabase-js": "2.117.3"
-  },
-  "devDependencies": {
-    "esbuild": "0.28.2"
+    "dev": "python3 -m http.server 4173 --bind 127.0.0.1"
   }
 }

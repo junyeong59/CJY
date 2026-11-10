@@ -1,56 +1,35 @@
-# CJY Site
+# CJY · OnMap 정책 문서
 
-Static developer website for `cjy.app`, based on the CJY PAGE Figma frames.
+Figma 127:181을 기준으로 검은 배경, 흰색 제목과 본문을 사용하는 반응형 정적 페이지입니다. 외부 폰트·분석·쿠키·자바스크립트 의존성이 없으며 문서 본문은 HTML에 포함되어 있습니다.
 
-## Routes
+- `/` 또는 `/privacy/`: 개인정보 처리방침
+- `/terms/`: 이용약관
+- `/community/`: 커뮤니티 가이드라인
+- 운영자: CJY
+- 문의: cjy.support@gmail.com
+- 이용 대상: 만 14세 이상
 
-- `/` — the public landing page, based on the CJY Figma frame. Product and Pricing use same-page anchors (`/#product`, `/#pricing`), not separate routes.
+## 확인
 
-Music Now routes remain available through direct links, without links from the main or 404 page:
+`npm run dev` → http://127.0.0.1:4173
 
-- `/musicnow`
-- `/musicnow/privacy`
-- `/musicnow/terms`
-- `/musicnow/support`
-- `/musicnow/join/:code`
+`npm run build` → `dist/` 정적 파일. 루트의 HTML과 CSS만 호스팅해도 됩니다. 기존 삭제된 사이트를 복구하거나 `.backups` / `.git`을 수정하지 않았습니다. 새로 작성한 파일 외에 기존 Git 삭제 상태가 많이 남아 있으므로 전체를 무조건 스테이징하지 마세요.
 
-`/portfolio` and `/contact` (including trailing slashes) redirect to `/` in the client router. Unknown routes retain the 404 page.
+## 문서 상태
 
-## Commands
+현재는 **검토용 초안**이며 자동 배포·앱 링크 연결은 하지 않았습니다. 작성일 2026-11-10, 시행일 미정. 검색엔진 noindex를 넣었지만 이것은 접근 통제가 아닙니다.
 
-```sh
-npm run dev
-npm run build
-npm run og
-```
+실제 코드로 확인한 계정·사진·영상·촬영 위치·친구/차단·반응·푸시·신고 처리를 반영했습니다. 연락처 원문은 서버에 저장하지 않지만 전화번호 해시는 익명 정보가 아니며, 계정 간 친구 관계는 별도로 보관됩니다. 게시물 삭제 후 동기화용 식별자, 계정 삭제 후 타인의 신고에 남는 대상 식별자도 구분했습니다.
 
-`npm run og` regenerates `public/assets/musicnow-invite-og.png` at 1200x630.
+## 공개 전 확인값
 
-## Local KG이니시스 V2 PG review (not production checkout)
+- Supabase 로그/백업 보관 기간, 서버 함수·CDN·지원의 실제 처리 국가와 하위 업체.
+- Twilio Verify 등 인증·알림·지도·문의 제공자의 계약상 수령인·연락처·국가·보관 기간. 외부 제공자 링크만으로 국외 이전 고지가 완성되지 않습니다.
+- 국외 이전의 항목·시점/방법·목적·기간·법적 근거·거부 절차 및 필요한 동의.
+- 신고·문의의 구체적인 보관 기한과 실제 파기 운영. 현재 신고 자동 만료 없음.
+- 만 14세 이상 정책에 맞는 가입·동의 절차. 이번 작업은 문서 작성이며 앱 UI를 변경하지 않았습니다.
+- 실제 웹 호스팅 업체·접속 로그 정책 및 문서 시행일.
 
-See [`sandbox/review/README.md`](sandbox/review/README.md) for the default-off localhost-only review surface, required TEST-channel provenance, single-button checkout/cancel/redirect behavior, and verification limits. Start the disabled-until-configured preview with `PORTONE_REVIEW_UI=1 node scripts/serve-portone-review.mjs`, then open `http://127.0.0.1:4175/review/apply`. This is excluded from the public build and never submits an intake request. Actual PG-window verification is blocked until a genuine KG이니시스 V2 TEST store/channel is supplied; mock SDK tests and a real CDN load are not PG-window evidence. Do not enter card details or authorize a transaction.
+확정 후 개인정보 처리방침의 미확정 설명, 각 페이지의 초안/시행일 안내와 noindex를 갱신하세요. 과거 삭제된 사이트의 거래·결제 관련 약관이나 보관 기간은 OnMap 문서에 그대로 재사용하지 않았습니다.
 
-## Deploy Notes
-
-- Replace `appStoreUrl`, `instagramUrl`, and contact emails in `src/config.js`.
-- Update `public/.well-known/apple-app-site-association` with the Team ID and bundle ID when Universal Links are ready.
-- Review the privacy policy and terms text before App Store submission.
-
-## Service application
-
-`/apply` opens the daily reels service form. Price links use `service=reels` and preselect `plan=Standard|Deluxe|Premium`. The service adds a setup supply amount of 100,000 KRW; monthly supply amounts are Standard 149,000 / Deluxe 599,000 / Premium 999,000 KRW, with 10% VAT. Exact first-month VAT-inclusive totals are 273,900 / 768,900 / 1,208,900 KRW. The 2026-09-23 commercial, payment, and refund conditions are final for PG review, while privacy disclosures remain incomplete. `checkoutEligible` and `paymentLive` are both false; payment activation is blocked until the actual processor recipient/entity, processing country/location, and retention disclosures are confirmed and published. This evidence remains the latest application-consent version and must not be described as launch-ready. The single **신청 접수하기** button therefore still submits an intake request (not a payment) as JSON to the existing Railway `customer-gateway` at `https://customer-gateway-staging.up.railway.app/api/applications`. The server stores a separate **pending-review** application and returns a random receipt. Submission never registers a customer, authorizes paid production, starts a worker, posts content or sends bot messages. Prices are controlled by the server, not the browser.
-
-Deployment order is fail-closed: migration 013 and backend acceptance of the exact current consent evidence must be applied and verified before any frontend deployment using that evidence. A push to GitHub `main` triggers the public cjy.app deployment and must be treated as a release; verify the deployed frontend bytes after rollout. The form explains review/contact data storage and requires consent. Keep the receipt: `/order` remains an explicitly marked demo, not a real application lookup. No applicant data is stored in localStorage or URLs. An opaque idempotency key alone is retained in sessionStorage for safe retries/navigation; where storage is unavailable, retries are protected for the current page lifetime. A changed application after a successful or uncertain submission receives a conflict rather than silently creating a duplicate. Close the tab for a deliberately separate new application after resolving the previous submission.
-
-API errors, rate limits and network failures are displayed without echoing server/request details. Network retries retain the request key. The API conservatively allows 5 new requests per socket identity/hour and 100 globally; Railway proxy users may share a socket bucket. Allowed local development origins are exactly `http://127.0.0.1:4173` and `http://localhost:4173`.
-
-Browser regression tests use isolated headless Chrome with Playwright (no personal browser profile or production requests):
-
-```sh
-PLAYWRIGHT_MODULE=/path/to/playwright/index.mjs CHROME_PATH=/path/to/chrome node --test tests/application.browser.test.mjs
-npm run build
-```
-
-On this Mac Playwright is already installed under `/Users/choi/.hermes/hermes-agent/node_modules/playwright/index.mjs`, with Chrome at `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`.
-
-Deployment: source/build readiness is not proof the public `cjy.app` frontend has updated. GitHub origin `junyeong59/CJY` auto-deploys `main` to cjy.app; a push is a release and requires the backend-first gate and live frontend verification above. No Vercel project creation or unrelated MusicNow changes are included.
+근거와 앱 선언의 상세 대응표: OnMap 프로젝트 `Docs/PRIVACY_DATA_AUDIT.md`.

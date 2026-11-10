@@ -1,0 +1,22 @@
+:root { color-scheme: dark; font-family: Inter, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; background: #000; color: #fff; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+main { width: min(100%, 1440px); margin-inline: auto; padding: clamp(44px, 7vw, 100px) clamp(22px, 4.4vw, 64px) 56px; }
+h1 { font-size: clamp(36px, 3.4vw, 48px); line-height: 1.15; margin: 0 0 clamp(42px, 5vw, 68px); letter-spacing: -.035em; }
+h2 { font-size: clamp(23px, 2.25vw, 32px); line-height: 1.4; margin: 0 0 8px; letter-spacing: -.025em; }
+p, li, dd, dt { font-size: clamp(17px, 1.7vw, 24px); line-height: 1.75; letter-spacing: -.015em; overflow-wrap: anywhere; }
+p { margin: 0 0 12px; }
+section + section { margin-top: clamp(30px, 3.2vw, 46px); }
+ul { padding-left: 1.2em; margin: 8px 0; }
+li + li { margin-top: 8px; }
+a { color: inherit; text-underline-offset: .22em; text-decoration-thickness: 1px; }
+a:hover { color: #bfbfbf; }
+a:focus-visible { outline: 2px solid #fff; outline-offset: 6px; border-radius: 2px; }
+.meta { font-size: 14px; color: #aaa; margin-top: 20px; }
+footer { margin-top: clamp(52px, 6vw, 90px); border-top: 1px solid #282828; padding-top: 24px; }
+nav { display: flex; flex-wrap: wrap; gap: 16px 24px; }
+nav a { display: inline-flex; align-items: center; min-height: 44px; font-size: 15px; }
+nav a[aria-current="page"] { font-weight: 700; text-decoration: none; }
+.skip { position: absolute; left: 16px; top: -80px; padding: 12px; background: #fff; color: #000; }
+.skip:focus { top: 12px; }
+@media print { :root { color-scheme: light; background: white; color: black; } main { padding: 0; } footer, .skip { display: none; } h1 { font-size: 26pt; } h2 { font-size: 16pt; } p, li { font-size: 11pt; } section { break-inside: avoid; } }
